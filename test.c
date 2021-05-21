@@ -1,4 +1,4 @@
-#include "../libft/libft.h"
+#include "libft/libft.h"
 #include <stdio.h>
 
 char	*ft_slash(char *str, int *i)
@@ -88,52 +88,108 @@ void ft_parcer(char *str)
 	printf("str_e = %s\n", str);
 }
 
-int check_inside_s_quote(char *str, int *i)
+int check_inside_s_quote(char *str, size_t *i)
 {
-	while(str && str[*i] != '\'')
-	{
-		if (str[*i] == ';' || str[*i] == '|')
-			return (0);
-		*i++;
-	}
+	*i = *i + 1;
+	while(str[*i] && str[*i] != '\'')
+		*i = *i +1;
 	if (str[*i] == '\'')
 		return (1);
 	return (0);
 }
 
-int check_inside_d_quote(char *str, int *i)
+int check_inside_d_quote(char *str, size_t *i)
 {
+	*i = *i + 1;
+	while(str[*i])
+	{
+		if (str[*i] == '\"' && str[*i] != '\\')
+			break;
+		*i = *i + 1;
+	}
+	if (str[*i] == '\"')
+		return (1);
+	return (0);
+}
 
+size_t skip_spaces(char *str)
+{
+	size_t i;
+
+	i = 0;
+	while (str[i] && (str[i] == ' ' || str[i] == '\t'))
+		i++;
+	return (i);
+}
+
+int check_tokens(char *str, size_t *i, char token)
+{
+	size_t first;
+	int diff;
+
+	first = *i;
+	*i = *i + 1
+	while (str[*i] == ' ' || str[*i] == '\t')
+		*i = *i + 1;
+	diff = *i - first;
+	if (diff > 1)
+	{
+		if (str[*i] == token)  //check combination of different tokens
+			return (-1);
+	}
+	else
+	{
+		if (token == '|' || token == '>')
+			return (1);
+		else
+			return (-1);
+	}
+	return (0);
 }
 
 int ft_preparcer(char *str)
 {
-	int i;
-	int	s_quote;
-	int d_quote;
+	size_t i;
+	// int	s_quote;
+	// int d_quote;
 	size_t len;
+	size_t start;
 
 	len = ft_strlen(str);
 
-	i = -1;
-	s_quote = 0;
-	d_quote = 0;
-	if (str[0] == ';' || str[0] == '|' || str[len - 1] == '\\')
-		return (0);
+	i = skip_spaces(str);
+	strat = i;
+	if (str[i] == ';' || str[i] == '|' || str[len - 1] == '|' || str[len - 1] == '\\')
+		return (-1);
+	i--;
 	while (str[++i])
 	{
-		if (str[i] == '\'')
-			if (!check_inside_s_quote)
+		if (str[i] == '\'' && (i == start || str[i - 1] != '\\'))
+		{
+			if (!check_inside_s_quote(str, &i))
 				return (-1); // \' is not closed
-		else if (str[i] == '\"')
-			if (!check_inside_d_quote)
+		}
+		else if (str[i] == '\"' && (i == start || str[i - 1] != '\\'))
+		{
+			if (!check_inside_d_quote(str, &i))
 				return (-1); // \" is not closed
+		}
 		else if (str[i] == '\\' && (str[i + 1] == '\'' || str[i + 1] == '\"'))
 			i = i + 2;
+
+		else if (str[i] == ';' || str[i] == '|' || str[i] == '<' || str[i] == '>')
+		{
+			if (!check_tokens(str, &i, str[i])) //correction needed 
+				return (-1); 
+		}
+		// else if ((str[i] == ';' && str[i + 1] == ';') || (str[i] == '|' && str[i + 1] == '|' && str[i - 1] == '|'))
+		// 	return (-1); // to many tokens
+		// else if ((str[i] == '<' && str[i + 1] == '<') || (str[i] == '>' && str[i + 1] == '>' && str[i - 1] == '>'))
+		// 	return (-1);
 	}
 
-	if ((s_quote % 2) || (d_quote % 2))
-		return (0);
+	// if ((s_quote % 2) || (d_quote % 2))
+	// 	return (0);
 	return (1);
 }
 
@@ -141,11 +197,11 @@ int ft_preparcer(char *str)
 int main(int argc, char **argv, char **env)
 {
 	
-	char *str = "'comma\\'nndsdsn''che\"ck'_r\"___\"est'_ofthe_l\"ine";
+	char *str = "echo \"user\" ; 'cat -e' ||";
 	printf("str_i = %s\n", str);
-	// if (ft_preparcer(str))
+	if (ft_preparcer(str) > 0)
 		ft_parcer(str);
-	// else
-	// 	printf("%s\n", "wrong amount of quotes");
+	else
+		printf("%s\n", "preparcer error");
 	return 0;
 }
