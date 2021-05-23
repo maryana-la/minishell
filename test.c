@@ -128,7 +128,7 @@ int check_tokens(char *str, size_t *i, char token)
 	int diff;
 
 	first = *i;
-	*i = *i + 1
+	*i = *i + 1;
 	while (str[*i] == ' ' || str[*i] == '\t')
 		*i = *i + 1;
 	diff = *i - first;
@@ -144,6 +144,7 @@ int check_tokens(char *str, size_t *i, char token)
 		else
 			return (-1);
 	}
+	*i = *i - 1;
 	return (0);
 }
 
@@ -158,7 +159,7 @@ int ft_preparcer(char *str)
 	len = ft_strlen(str);
 
 	i = skip_spaces(str);
-	strat = i;
+	start = i;
 	if (str[i] == ';' || str[i] == '|' || str[len - 1] == '|' || str[len - 1] == '\\')
 		return (-1);
 	i--;
@@ -179,7 +180,7 @@ int ft_preparcer(char *str)
 
 		else if (str[i] == ';' || str[i] == '|' || str[i] == '<' || str[i] == '>')
 		{
-			if (!check_tokens(str, &i, str[i])) //correction needed 
+			if (check_tokens(str, &i, str[i]) < 0) //correction needed 
 				return (-1); 
 		}
 		// else if ((str[i] == ';' && str[i + 1] == ';') || (str[i] == '|' && str[i + 1] == '|' && str[i - 1] == '|'))
@@ -197,7 +198,7 @@ int ft_preparcer(char *str)
 int main(int argc, char **argv, char **env)
 {
 	
-	char *str = "echo \"user\" ; 'cat -e' ||";
+	char *str = "echo \"user\" ; 'cat -e'";
 	printf("str_i = %s\n", str);
 	if (ft_preparcer(str) > 0)
 		ft_parcer(str);
