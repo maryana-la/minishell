@@ -39,11 +39,7 @@ char *ft_dollar(char *str, int *i, t_all *all)
 	while(str[++*i])
 		if(check_set(str[*i], " \t\'\"\\$;|><"))
 			break;
-		// if (str[*i] == ' ' || str[*i] == '\t' | str[*i] == '\'' || str[*i] == '\"' || str[*i] == '$' )
-		// 	break;
 	end_of_var = *i;
-	// while (str[*i] == ' ' || str[*i] == '\t')
-	// 	*i = *i + 1;
 
 	var = ft_substr(str, pos_of_dollar + 1, (end_of_var - pos_of_dollar -1));
 	printf("var = %s\n", var);
@@ -100,14 +96,11 @@ char *ft_double_quote(char *str, int *i, t_all *all)
 	{
 		if (str[*i] == '\\' && (str[*i + 1] == '$' || str[*i + 1] == '\'' || str[*i + 1] == '\"' || str[*i + 1] == '\\'))
 			str = ft_slash(str, i);
-		// if (str[*i] == '\'')
-		// 	str = ft_s_quote(str, i);
 		if (str[*i] == '$')
 			str = ft_dollar(str, i, all);
 		if (str[*i] == '\"')
 			break ;
 	}
-
 	tmp = ft_substr(str, 0, j); // printf("tmp = %s\n", tmp);
 	tmp1 = ft_substr(str, j + 1, *i - j - 1); // printf("tmp1 = %s\n", tmp1);
 	tmp2 = ft_strdup(str + *i + 1); // ft_strdup(&str[i+1]) // tmp2 = ft_substr(str, i + 1, (ft_strlen(str) - i - 1)); // printf("tmp2 = %s\n", tmp2);
