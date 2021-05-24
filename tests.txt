@@ -41,16 +41,17 @@ ls ; pwd ||| c
  ls
 ; ls - error
 
-ls        | |                cat -e  - error
-ls        ||                cat -e - ok
+ls        | |     cat -e  - error
+ls        ||      cat -e - ok
 echo trter >> pwd - ok
 echo trter > > pwd - error
 
 
 echo trter << pwd - error
 echo trter < < pwd - error
-ls          ;;          pwd - error
-ls          ; ;         pwd - error
+ls       ;;        pwd - error
+ls       ; ;       pwd - error
+ls >>> pwd - error
 
 ls >< pwd - error
 ls >>| pwd - error
