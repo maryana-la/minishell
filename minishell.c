@@ -1,4 +1,4 @@
-#include <stdio.h>
+//#include <stdio.h>
 #include <unistd.h>
 #include "../libft/libft.h"
 
@@ -64,32 +64,22 @@ void export_command(t_all *all)
 			write(1, all->envp[i], ft_strlen(all->envp[i]));
 			write(1, "\n", 1);
 		}
-		exit;
+		exit(0);
 	}
 	else
 	{
 		int flag = 0;
 		int j = 0;
 		i = -1;
-//		splited[0] = "ewrwer";
-//		splited[1] = "ewrwer";
-
 		while (all->command[1][++i])
 		{
-			if (all->command[1][i] != '=' && flag == 0)
-				{
-					splited[0][i] = all->command[1][i];
-				}
-			else if (all->command[1][i] == '=' && flag == 0)
-				flag = 1;
-			else
-			{
-				splited[1][j] = all->command[1][i];
-				j++;
-			}
+			if (all->command[1][i] == '=')
+				break;
 		}
-
+		splited[0] = ft_substr(all->command[1], 0, i);
+		splited[1] = ft_substr(all->command[1], i + 1, ft_strlen(all->command[1])-i+1);
 
 		setenv(splited[0], splited[1], 0);
+		pause();
 	}
 }
