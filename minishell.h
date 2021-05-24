@@ -12,6 +12,7 @@ typedef struct s_env
 
 typedef struct s_all
 {
-	t_list	*command;
 	t_env	*env_list;
+	t_env	*env_secret;
+	char	**envp;
 }				t_all;

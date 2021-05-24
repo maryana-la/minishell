@@ -1,7 +1,7 @@
 
 #include "minishell.h"
 
-char	*ft_slash(char *str, int *i)
+char *ft_slash(char *str, int *i)
 {
 	char *tmp;
 	char *tmp2;
@@ -12,6 +12,58 @@ char	*ft_slash(char *str, int *i)
 	// ++*i;
 	*i = *i + 2;
 	return(tmp);
+}
+
+int check_set(char c, char *set)
+{
+	int i;
+
+	i = -1;
+	while (set[++i] != '\0')
+		if (set[i] == c)
+			return (1);
+	return 0;
+}
+
+char *ft_dollar(char *str, int *i, t_all *all)
+{
+	char	*var;
+	int		pos_of_dollar;
+	int		end_of_var;
+	t_env	*tmp;
+	char	*tmp1;
+	char	*tmp2;
+	char	*value;
+
+	pos_of_dollar = *i;
+	while(str[++*i])
+		if(check_set(str[*i], " \t\'\"\\$;|><"))
+			break;
+		// if (str[*i] == ' ' || str[*i] == '\t' | str[*i] == '\'' || str[*i] == '\"' || str[*i] == '$' )
+		// 	break;
+	end_of_var = *i;
+	// while (str[*i] == ' ' || str[*i] == '\t')
+	// 	*i = *i + 1;
+
+	var = ft_substr(str, pos_of_dollar + 1, (end_of_var - pos_of_dollar -1));
+	printf("var = %s\n", var);
+	
+	tmp = all->env_list;
+	while (all->env_list && tmp->next != NULL)
+	{
+		if (!ft_strncmp(tmp->key, var, (ft_strlen(var) + 1)))
+			break;
+		tmp = tmp->next;
+	}
+	if (ft_strncmp(tmp->key, var, (ft_strlen(var) + 1)))
+		value = "\0";	
+	else
+		value = ft_strdup(tmp->value);
+	tmp1 = ft_substr(str, 0, pos_of_dollar); // cut till $
+	tmp2 = ft_substr(str, *i, (ft_strlen(str) - *i + 1)); // cut after variable
+	tmp1 = ft_strjoin(tmp1, value);
+	tmp1 = ft_strjoin(tmp1, tmp2);
+	return (tmp1);
 }
 
 char *ft_s_quote(char *str, int *i)
@@ -35,7 +87,7 @@ char *ft_s_quote(char *str, int *i)
 	return (tmp);
 }
 
-char *ft_double_quote(char *str, int *i)
+char *ft_double_quote(char *str, int *i, t_all *all)
 {
 	int j;
 	char *tmp;
@@ -50,6 +102,8 @@ char *ft_double_quote(char *str, int *i)
 			str = ft_slash(str, i);
 		// if (str[*i] == '\'')
 		// 	str = ft_s_quote(str, i);
+		if (str[*i] == '$')
+			str = ft_dollar(str, i, all);
 		if (str[*i] == '\"')
 			break ;
 	}
@@ -62,7 +116,7 @@ char *ft_double_quote(char *str, int *i)
 	return (tmp);
 }
 
-void ft_parcer(char *str)
+void ft_parcer(char *str, char **env, t_all *all)
 {
 	int i;
 
@@ -81,7 +135,10 @@ void ft_parcer(char *str)
 		 	str = ft_slash(str, &i);
 			printf("tmp\\  = %s\n", str);}
 		if (str[i] == '\"'){
-			str = ft_double_quote(str, &i);
+			str = ft_double_quote(str, &i, all);
+			printf("tmp\"  = %s\n", str);}
+		if (str[i] == '$'){
+			str = ft_dollar(str, &i, all);
 			printf("tmp\"  = %s\n", str);}
 		i++;
 	}
@@ -152,7 +209,8 @@ int check_tokens(char *str, int *i, char token)
 	}
 	if (token == '>')
 	{
-		if (str[*i] == '<' || (str[*i] == '>' && str[*i + 1] == '>') || (str[*i] == '|' && diff > 1) || (str[*i] == '>' && str[*i + 1] == '|') || str[*i] == ';')
+		if (str[*i] == '<' || (str[*i] == '>' && str[*i + 1] == '>') || (str[*i] == '|' && diff > 1) ||
+			(str[*i] == '>' && str[*i + 1] == '|') || str[*i] == ';')
 			return (-1);
 		if (str[*i] == '>' || (str[*i] == '|' && diff == 1))
 			return (1);
@@ -206,6 +264,9 @@ int ft_preparcer(char *str)
 	return (1);
 }
 
+/*
+** env init with lists:
+*/
 int env_init(t_all *all, char **env)
 {
 	t_env	*new;
@@ -224,14 +285,15 @@ int env_init(t_all *all, char **env)
 	list->key = ft_substr(env[0], 0, i);
 	list->value = ft_substr(env[0], i + 1, (ft_strlen(env[0]) - i + 1));
 	list->next = NULL;
+	all->env_list = list;
 
 	i = 0;
 	while(env && env[++i])
 	{
 		j = -1;
 		while(env[i][++j] != '\0')
-		if (env[i][j] == '=')
-			break;
+			if (env[i][j] == '=')
+				break;
 		new = malloc(sizeof(t_env));
 		if (!new)
 			return (0);
@@ -252,11 +314,11 @@ int main(int argc, char **argv, char **env)
 	char **test;
 
 	env_init(&all, env);
-	char *str = "echo \"user\" cat >>";
+	char *str = "echo \"asdd\'$USER $PATH\'we\"";
 
 	printf("str_i = %s\n", str);
 	if (ft_preparcer(str) > 0)
-		ft_parcer(str);
+		ft_parcer(str, env, &all);
 	else
 		printf("%s\n", "preparcer error");
 	return 0;
