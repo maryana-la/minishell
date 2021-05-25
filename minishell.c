@@ -80,6 +80,5 @@ void export_command(t_all *all)
 		splited[1] = ft_substr(all->command[1], i + 1, ft_strlen(all->command[1])-i+1);
 
 		setenv(splited[0], splited[1], 0);
-		pause();
 	}
 }
