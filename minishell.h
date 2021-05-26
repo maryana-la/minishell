@@ -15,4 +15,6 @@ typedef struct s_all
 	t_env	*env_list;
 	t_env	*env_secret;
 	char	**envp;
+	char	**args;
+	int		arg_len;
 }				t_all;
