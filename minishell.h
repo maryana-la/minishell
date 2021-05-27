@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdio.h>
 #include <string.h>
+#include <fcntl.h>
 
 typedef struct s_env
 {
@@ -36,10 +37,11 @@ char *ft_slash(char *str, int *i);
 int check_set(char c, char *set);
 void skip_spaces(char *str, int *i);
 char *ft_dollar(char *str, int *i, t_all *all);
-char *ft_s_quote(char *str, int *i);
-char *ft_double_quote(char *str, int *i, t_all *all);
+// char *ft_s_quote(char *str, int *i, int *tmp);
+void ft_s_quote(char *str, char **arg, int *i, int *j_tmp);
+char *ft_double_quote(char *str, int *i, int *tmp);
 int	find_enf_of_arg(char *str, int i, t_all *all);
-char *replace_env_with_value(char *str, t_all *all);
+char	*replace_env_and_slash_with_value(char *str, t_all *all);
 void ft_parcer(char *str, t_all *all);
 int env_init(t_all *all, char **env);
 void init_all(t_all *all);

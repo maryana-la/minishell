@@ -1,2 +1,2 @@
 all:
-	gcc -g test.c libft/libft.a
+	gcc -g main.c preparcer.c libft/libft.a

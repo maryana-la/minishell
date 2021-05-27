@@ -48,11 +48,33 @@ char *ft_dollar(char *str, int *i, t_all *all)
 			break;
 	end_of_var = *i;
 
-	var = ft_substr(str, pos_of_dollar + 1, (end_of_var - pos_of_dollar -1)); //cut variable
-	printf("var = %s\n", var);
-	
+	if (end_of_var - pos_of_dollar == 1)
+		return(str);
+
+//cut variable
+	var = ft_substr(str, pos_of_dollar + 1, (end_of_var - pos_of_dollar -1));
+	// printf("var = %s\n", var);
+
+	if (ft_isdigit(var[0]) != 0) // check all ascii symbols
+	{
+		if(ft_strlen(var) == 1)
+		{	
+			tmp1 = ft_substr(str, 0, pos_of_dollar);
+			tmp2 = ft_substr(str, *i, (ft_strlen(str) - *i + 1));
+			tmp1 = ft_strjoin(tmp1, tmp2);
+			return (tmp1);
+		}
+		else
+		{
+			tmp1 = ft_substr(str, 0, pos_of_dollar);
+			tmp2 = ft_substr(str, pos_of_dollar + 2, (ft_strlen(str) - pos_of_dollar - 1));
+			tmp1 = ft_strjoin(tmp1, tmp2);
+			return (tmp1);
+		}
+	}
+//find variable in the lists
 	tmp = all->env_list;
-	while (all->env_list && tmp->next != NULL) //find variable in the lists
+	while (all->env_list && tmp->next != NULL)
 	{
 		if (!ft_strncmp(tmp->key, var, (ft_strlen(var) + 1)))
 			break;
@@ -70,28 +92,34 @@ char *ft_dollar(char *str, int *i, t_all *all)
 	return (tmp1);
 }
 
-char *ft_s_quote(char *str, int *i)
+void ft_s_quote(char *str, char **arg, int *i, int *j_tmp)
 {
-	int j;
-	char *tmp;
-	char *tmp1;
-	char *tmp2;
+	// int j;
+	// char *tmp;
+	// char *tmp1;
+	// char *tmp2;
 
-	j = *i;
+	// j = *i;
 	while (str[++*i])
 	{	if (str[*i] == '\'')
 			break;
+		else
+		{
+			*arg[*j_tmp] = str[*i];
+			(*j_tmp)++;
+		}
 	}
-	tmp = ft_substr(str, 0, j); // printf("tmp = %s\n", tmp);
-	tmp1 = ft_substr(str, j + 1, *i - j - 1); // printf("tmp1 = %s\n", tmp1);
-	tmp2 = ft_strdup(str + *i + 1); // ft_strdup(&str[i+1]) // tmp2 = ft_substr(str, i + 1, (ft_strlen(str) - i - 1)); // printf("tmp2 = %s\n", tmp2);
-	tmp = ft_strjoin(tmp, tmp1); // printf("tmp = %s\n", tmp);
-	tmp = ft_strjoin(tmp, tmp2); // printf("tmp2 = %s\n", tmp);
-	*i = *i - 2;
-	return (tmp);
+	// tmp = ft_substr(str, 0, j); // printf("tmp = %s\n", tmp); - before '
+	// tmp1 = ft_substr(str, j + 1, *i - j - 1); // printf("tmp1 = %s\n", tmp1); - cut inside ' ' 
+	// tmp2 = ft_strdup(str + *i + 1); // ft_strdup(&str[i+1]) - cut after ' ' 
+	// tmp2 = ft_substr(str, i + 1, (ft_strlen(str) - i - 1)); // printf("tmp2 = %s\n", tmp2);
+	// tmp1 = ft_strjoin(tmp1, tmp2); // printf("tmp = %s\n", tmp);
+	// *i = *i - 2;
+	// *j_tmp += ft_strlen(tmp1); 
+	// return (tmp1);
 }
 
-char *ft_double_quote(char *str, int *i, t_all *all)
+char *ft_double_quote(char *str, int *i, int *j_tmp)
 {
 	int j;
 	char *tmp;
@@ -109,58 +137,24 @@ char *ft_double_quote(char *str, int *i, t_all *all)
 		if (str[*i] == '\"')
 			break ;
 	}
-	tmp = ft_substr(str, 0, j); // printf("tmp = %s\n", tmp);
-	tmp1 = ft_substr(str, j + 1, *i - j - 1); // printf("tmp1 = %s\n", tmp1);
-	tmp2 = ft_strdup(str + *i + 1); // ft_strdup(&str[i+1]) // tmp2 = ft_substr(str, i + 1, (ft_strlen(str) - i - 1)); // printf("tmp2 = %s\n", tmp2);
-	tmp = ft_strjoin(tmp, tmp1); // printf("tmp = %s\n", tmp);
-	tmp = ft_strjoin(tmp, tmp2); // printf("tmp2 = %s\n", tmp);
-	return (tmp);
+	// tmp = ft_substr(str, 0, j); // printf("tmp = %s\n", tmp); - cut before "
+	tmp1 = ft_substr(str, j + 1, *i - j - 1); // printf("tmp1 = %s\n", tmp1); - cut inside " " 
+	// tmp2 = ft_strdup(str + *i + 1); // ft_strdup(&str[i+1]) - cut after "
+	// tmp2 = ft_substr(str, i + 1, (ft_strlen(str) - i - 1)); // printf("tmp2 = %s\n", tmp2);
+	// tmp = ft_strjoin(tmp, tmp1); // printf("tmp = %s\n", tmp);
+	// tmp = ft_strjoin(tmp, tmp2); // printf("tmp2 = %s\n", tmp);
+	*j_tmp += ft_strlen(tmp1);
+	return (tmp1);
 }
 
-int	find_enf_of_arg(char *str, int i, t_all *all)
-{
-	int begin;
-	int len;
-
-	begin = i;
-	len = 0;
-	while (check_set(str[i], " \t|;<>") == 0)
-	{
-		if (str[i] == '\'')
-			str = ft_s_quote(str, &i);
-		else if (str[i] == '\\')
-		 	str = ft_slash(str, &i);
-		else if (str[i] == '\"')
-			str = ft_double_quote(str, &i, all);
-		else if (str[i] == '$')
-			str = ft_dollar(str, &i, all);
-		else
-			i++;
-		// if (str[i] == '\'')
-		// 	while (str[++i] != '\'')
-		// 		len++;
-		// else if (str[i] == '\"')
-		// {
-
-		// }
-		// else if (str[i] == '$')
-		// {
-
-		// }
-		// i++;
-		// len++;
-	}
-	len = i - begin;
-	return(len);
-}
-
-char	*replace_env_with_value(char *str, t_all *all)
+char	*replace_env_and_slash_with_value(char *str, t_all *all)
 {
 	int flag;
 	int i;
 
 	flag = 0;
-	i = 0;
+	i = -1;
+// заменяем переменные только до следующей команды
 	while(str[++i] && !(check_set(str[i], "|;><")))
 	{
 		if(str[i] == '\'')
@@ -170,43 +164,113 @@ char	*replace_env_with_value(char *str, t_all *all)
 			else
 				flag = 0;
 		}
-		else if(str[i] == '$' && (flag == 0))
+		// else if (str[i] == '\\' && flag == 0)
+		//  	str = ft_slash(str, &i);
+		else if(str[i] == '$' && str[i - 1] != '\\' && flag == 0)
 			str = ft_dollar(str, &i, all);
 	}
 	return(str);
 }
 
+int get_arg_len(char *str, int i)
+{
+	int len;
+	int pos;
+
+	pos = i;
+	len = 0;
+	while(str[i] && !check_set(str[i], " \t|;<>"))
+	{
+		if (str[i] == '\'' || str[i] == '\"')
+		{
+			while (str[++i] != '\'')
+				len++;
+			i++;
+		}
+		else
+		{
+			i++;
+			len++;
+		}
+	}
+	return (len);
+}
+
 void ft_parcer(char *str, t_all *all)
 {
 	int i;
-	
-	str = replace_env_with_value(str, all); // заменяем в строке переменные окружения
+	int j;
+	int len;
+	char *tmp;
+	char *from_quote;
+
+	str = replace_env_and_slash_with_value(str, all); // заменяем в строке переменные окружения
+	printf("%s\n", str);
 	i = 0;
-	while (str[i])
+
+	while(str[i] && !(check_set(str[i], "|;><")))
 	{
-		if (str[i] == '\'')
-			str = ft_s_quote(str, &i);
-		else if (str[i] == '\\')
-		 	str = ft_slash(str, &i);
-		else if (str[i] == '\"')
-			str = ft_double_quote(str, &i, all);
-		// else if (str[i] == '$')
-		// 	str = ft_dollar(str, &i, all);
+		skip_spaces(str, &i);
+		len = get_arg_len(str, i);
+		printf("%d\n", len);
+		tmp = malloc(sizeof(char) * (len + 1));
+		ft_bzero(tmp, len);
+		j = 0;
+		while (str[i] && !check_set(str[i], " \t|;<>"))
+		{
+			if (str[i] == '\'')
+			{
+				while (str[++i] && str[i] != '\'')
+				{
+					tmp[j] = str[i];
+					j++;
+				}
+			}
+			else if (str[i] == '\"')
+				tmp = ft_strjoin(tmp, ft_double_quote(str, &i, &j));
+			else if (str[i] == '\\')
+				tmp[j] = str[++i];
+			else
+				tmp[j] = str[i];
+			i++;
+			j++;
+		}
+		tmp[j] = '\0';
+		printf("%s\n", tmp);
+		free(tmp);
 		i++;
 	}
 	printf("str_e = %s\n", str);
+
+
+//old version from video parcer
+	// {
+	// if (str[i] == '\'')
+	// 	str = ft_s_quote(str, &i);
+	// else if (str[i] == '\"')
+	// 	str = ft_double_quote(str, &i, all);
+	// i++;
+	// }
 }
 
 int env_init(t_all *all, char **env) // env init with lists:
 {
 	t_env	*new;
 	t_env	*list;
+	t_env	*tmp;
 	int i = -1;
 	int j;
+	int shlvl_tmp;
+	int fd;
+
+	fd = open("proba.txt", O_RDWR);
+
 
 	list = malloc(sizeof(t_env));
 	if (!list)
 		return(0);
+
+// init first list
 	while(env[0][++i])
 	{
 		if (env[0][i] == '=')
@@ -217,6 +281,7 @@ int env_init(t_all *all, char **env) // env init with lists:
 	list->next = NULL;
 	all->env_list = list;
 
+// get all the envs
 	i = 0;
 	while(env && env[++i])
 	{
@@ -232,7 +297,27 @@ int env_init(t_all *all, char **env) // env init with lists:
 		new->next = NULL;
 		list->next = new;
 		list = new;
-		// printf("%s = %s\n", list->key, list->value);
+	}
+
+// to inc SHLVL
+	tmp = all->env_list;
+	while (all->env_list && tmp->next) //find variable in the lists
+	{
+		if (ft_strncmp(tmp->key, "SHLVL", 6) == 0)
+		{
+			shlvl_tmp = ft_atoi(tmp->value) + 1;
+			tmp->value = ft_itoa(shlvl_tmp);
+			break;
+		}
+		tmp = tmp->next;
+	}
+
+/* just to print */
+	tmp = all->env_list; 
+	while (all->env_list && tmp->next)
+	{
+		// printf("%s = %s\n", tmp->key, tmp->value);
+		tmp = tmp->next;
 	}
 	return (0);
 }
@@ -250,7 +335,7 @@ int main(int argc, char **argv, char **env)
 
 	init_all(&all);
 	env_init(&all, env);
-	char *str = "echo $USER'pwd$PATH'$PAGER$LSCOLORSq$;l$XPC_FLAGSs";
+	char *str = "echo $ SHLVL'pwd $PATH'$PAGER$LSCOLORS$;l$XPC_FLAGS\'ffrsvdd\'";
 
 	printf("str_i = %s\n", str);
 	if (ft_preparcer(str) > 0)

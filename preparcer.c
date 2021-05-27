@@ -78,7 +78,7 @@ int ft_preparcer(char *str)
 	int start;
 
 	len = (int)ft_strlen(str) - 1;
-
+    i = 0;
 	skip_spaces(str, &i);
 	start = i;
 	if (str[i] == ';' || str[i] == '|' || str[len] == '\\' || str[len] == '|' || str[len] == '>' || str[len] == '<')
