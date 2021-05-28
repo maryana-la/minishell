@@ -181,12 +181,26 @@ int get_arg_len(char *str, int i)
 	len = 0;
 	while(str[i] && !check_set(str[i], " \t|;<>"))
 	{
-		if (str[i] == '\'' || str[i] == '\"')
+		if (str[i] == '\'')
 		{
-			while (str[++i] != '\'')
+			i++;
+		    while (str[i] != '\'')
+            {
 				len++;
+                i++;
+            }
 			i++;
 		}
+        else if (str[i] == '\"')
+        {
+            i++;
+            while (str[i] != '\"')
+            {
+                len++;
+                i++;
+            }
+            i++;
+        }
 		else
 		{
 			i++;
@@ -194,6 +208,48 @@ int get_arg_len(char *str, int i)
 		}
 	}
 	return (len);
+}
+void ft_put_str_to_struct(char *arg, t_all *all)
+{
+	int i;
+	char **tmp;
+
+	i = 0;
+	if (all->args == 0)
+    {
+        all->args = malloc(sizeof(char *) * 1);
+        all->args[0] = arg;
+        all->args[1] = 0;
+        i = -1;
+        while (all->args[++i] != 0)
+            printf("%s\n", all->args[i]);
+    }
+	else if (all->args)
+	{
+		while (all->args[i] != 0)
+			i++;
+		tmp = malloc(sizeof(char *) * (i + 1));
+		i = 0;
+		while (all->args[i] != 0)
+		{
+			tmp[i] = ft_strdup(all->args[i]);
+			i++;
+		}
+		tmp[i] = arg;
+		tmp[++i] = 0;
+
+		i = 0;
+//		while (all->args[i] != 0)
+//		{
+//			free(all->args[i]);
+//			i++;
+//		}
+		free(all->args);
+		all->args = tmp;
+		i = -1;
+		while (all->args[++i] != 0)
+			printf("%s\n", all->args[i]);
+	}
 }
 
 void ft_parcer(char *str, t_all *all)
@@ -214,7 +270,7 @@ void ft_parcer(char *str, t_all *all)
 		len = get_arg_len(str, i);
 		printf("%d\n", len);
 		tmp = malloc(sizeof(char) * (len + 1));
-		ft_bzero(tmp, len);
+//		ft_bzero(tmp, len);
 		j = 0;
 		while (str[i] && !check_set(str[i], " \t|;<>"))
 		{
@@ -225,9 +281,20 @@ void ft_parcer(char *str, t_all *all)
 					tmp[j] = str[i];
 					j++;
 				}
+				j--;
 			}
 			else if (str[i] == '\"')
-				tmp = ft_strjoin(tmp, ft_double_quote(str, &i, &j));
+            {
+                while (str[++i] && str[i] != '\"')
+                {
+                    if (str[i] == '\\' && (str[i + 1] == '$' || str[i + 1] == '\'' || str[i + 1] == '\"' || str[i + 1] == '\\'))
+                        tmp[j] = str[++i];
+                    else
+                        tmp[j] = str[i];
+                    j++;
+                }
+                j--;
+            }
 			else if (str[i] == '\\')
 				tmp[j] = str[++i];
 			else
@@ -236,8 +303,8 @@ void ft_parcer(char *str, t_all *all)
 			j++;
 		}
 		tmp[j] = '\0';
-		printf("%s\n", tmp);
-		free(tmp);
+		ft_put_str_to_struct(tmp, all);
+		// printf("%s\n", tmp);
 		i++;
 	}
 	printf("str_e = %s\n", str);
@@ -335,7 +402,7 @@ int main(int argc, char **argv, char **env)
 
 	init_all(&all);
 	env_init(&all, env);
-	char *str = "echo $ SHLVL'pwd $PATH'$PAGER$LSCOLORS$;l$XPC_FLAGS\'ffrsvdd\'";
+	char *str = "echo $SHLVL'pwd $PATH' \"$PAGER$LSCOLORS\"$;l$XPC_FLAGS\'ffrsvdd\'";
 
 	printf("str_i = %s\n", str);
 	if (ft_preparcer(str) > 0)
