@@ -367,8 +367,9 @@ int env_init(t_all *all, char **env) // env init with lists:
 	}
 
 // to inc SHLVL
+	shlvl_tmp = 0;
 	tmp = all->env_list;
-	while (all->env_list && tmp->next) //find variable in the lists
+	while (all->env_list && tmp) //find variable in the lists
 	{
 		if (ft_strncmp(tmp->key, "SHLVL", 6) == 0)
 		{
@@ -377,13 +378,22 @@ int env_init(t_all *all, char **env) // env init with lists:
 			break;
 		}
 		tmp = tmp->next;
+		if(!tmp->next)
+		{
+			new = malloc(sizeof(t_env));
+			new->key = ft_strdup("SHLVL");
+			new->value = ft_strdup("1");
+			new->next = NULL;
+			tmp->next = new;
+			break;
+		}
 	}
 
 /* just to print */
 	tmp = all->env_list; 
-	while (all->env_list && tmp->next)
+	while (all->env_list && tmp)
 	{
-		// printf("%s = %s\n", tmp->key, tmp->value);
+		printf("%s=%s\n", tmp->key, tmp->value);
 		tmp = tmp->next;
 	}
 	return (0);
