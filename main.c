@@ -137,17 +137,12 @@ char *ft_double_quote(char *str, int *i, int *j_tmp)
 		if (str[*i] == '\"')
 			break ;
 	}
-	// tmp = ft_substr(str, 0, j); // printf("tmp = %s\n", tmp); - cut before "
 	tmp1 = ft_substr(str, j + 1, *i - j - 1); // printf("tmp1 = %s\n", tmp1); - cut inside " " 
-	// tmp2 = ft_strdup(str + *i + 1); // ft_strdup(&str[i+1]) - cut after "
-	// tmp2 = ft_substr(str, i + 1, (ft_strlen(str) - i - 1)); // printf("tmp2 = %s\n", tmp2);
-	// tmp = ft_strjoin(tmp, tmp1); // printf("tmp = %s\n", tmp);
-	// tmp = ft_strjoin(tmp, tmp2); // printf("tmp2 = %s\n", tmp);
 	*j_tmp += ft_strlen(tmp1);
 	return (tmp1);
 }
 
-char	*replace_env_and_slash_with_value(char *str, t_all *all)
+char	*replace_env_with_value(char *str, t_all *all)
 {
 	int flag;
 	int i;
@@ -209,20 +204,44 @@ int get_arg_len(char *str, int i)
 	}
 	return (len);
 }
+
+char *check_lower_case(char *str)
+{
+	int i;
+	char *dest;
+
+	i = 0;
+	dest = malloc(sizeof(char) * ft_strlen(str));
+	while (str[i] != 0)
+	{
+		dest[i] = ft_tolower(str[i]);
+		i++;
+	}
+	if (!ft_strncmp(dest, "echo", 5) || !ft_strncmp(dest, "pwd", 4) || !ft_strncmp(dest, "env", 4))
+	{
+		free(str);
+		return(dest);
+	}
+	free(dest);
+	return(str);
+}
+
 void ft_put_str_to_struct(char *arg, t_all *all)
 {
 	int i;
 	char **tmp;
 
 	i = 0;
+
 	if (all->args == 0)
     {
-        all->args = malloc(sizeof(char *) * 1);
+		arg = check_lower_case(arg);
+		all->args = malloc(sizeof(char *) * 1);
         all->args[0] = arg;
         all->args[1] = 0;
         i = -1;
-        while (all->args[++i] != 0)
-            printf("%s\n", all->args[i]);
+        // while (all->args[++i] != 0)
+        //     printf("%s\n", all->args[i]);
     }
 	else if (all->args)
 	{
@@ -239,11 +258,6 @@ void ft_put_str_to_struct(char *arg, t_all *all)
 		tmp[++i] = 0;
 
 		i = 0;
-//		while (all->args[i] != 0)
-//		{
-//			free(all->args[i]);
-//			i++;
-//		}
 		free(all->args);
 		all->args = tmp;
 		i = -1;
@@ -260,7 +274,7 @@ void ft_parcer(char *str, t_all *all)
 	char *tmp;
 	char *from_quote;
 
-	str = replace_env_and_slash_with_value(str, all); // заменяем в строке переменные окружения
+	str = replace_env_with_value(str, all); // заменяем в строке переменные окружения
 	printf("%s\n", str);
 	i = 0;
 
@@ -307,17 +321,6 @@ void ft_parcer(char *str, t_all *all)
 		// printf("%s\n", tmp);
 		i++;
 	}
-	printf("str_e = %s\n", str);
-
-
-//old version from video parcer
-	// {
-	// if (str[i] == '\'')
-	// 	str = ft_s_quote(str, &i);
-	// else if (str[i] == '\"')
-	// 	str = ft_double_quote(str, &i, all);
-	// i++;
-	// }
 }
 
 int env_init(t_all *all, char **env) // env init with lists:
@@ -378,7 +381,7 @@ int env_init(t_all *all, char **env) // env init with lists:
 			break;
 		}
 		tmp = tmp->next;
-		if(!tmp->next)
+		if(!tmp->next) // if no SHVLV - set it to 1
 		{
 			new = malloc(sizeof(t_env));
 			new->key = ft_strdup("SHLVL");
@@ -412,7 +415,7 @@ int main(int argc, char **argv, char **env)
 
 	init_all(&all);
 	env_init(&all, env);
-	char *str = "echo $SHLVL'pwd $PATH' \"$PAGER$LSCOLORS\"$;l$XPC_FLAGS\'ffrsvdd\'";
+	char *str = "ECHO $SHLVL'pwd $PATH' \"$PAGER$LSCOLORS\"$;l$XPC_FLAGS\'ffrsvdd\'";
 
 	printf("str_i = %s\n", str);
 	if (ft_preparcer(str) > 0)
