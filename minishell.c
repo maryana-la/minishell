@@ -47,8 +47,7 @@ void print_env_list(t_env *for_print, int declare)
 {
 	int i = -1;
 
-	while (for_print[++i].key)
-//	&& ft_strncmp((for_print[i].key), "\0", ft_strlen(for_print[i].key)))
+	while (for_print[++i].key && ft_strncmp((for_print[i].key), "\0", ft_strlen(for_print[i].key)))
 	{
 		if (declare)
 			write (1, "declare -x ", 11);
@@ -115,7 +114,6 @@ void sort_envs(t_all *all)
 		all->env_sorted[i] = all->env_vars[i];
 
 	t_env *tmp;
-	i = all->env_counter - 1;
 	while (++z < all->env_counter - 1)
 	{
 		i = all->env_counter - 1;
@@ -134,17 +132,4 @@ void sort_envs(t_all *all)
 			}
 		}
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
