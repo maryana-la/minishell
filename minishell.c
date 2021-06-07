@@ -8,13 +8,13 @@ int main(int argc, char **argv, char **envp)
 	t_all all;
 	env_init(&all, envp);
 	all.args[0] = "export";
-	all.args[1] = "temp=567";
-//	all.args[1] = NULL;
+//	all.args[1] = "temp=567";
+	all.args[1] = NULL;
 
 	if (!ft_strncmp(all.args[0], "pwd", ft_strlen(all.args[0])))
 		pwd_command(&all);
 	else if (!ft_strncmp(all.args[0], "env", ft_strlen(all.args[0])))
-		print_env_list(&all, 0);
+		print_env_list(all.env_vars, 0);
 	else if (!ft_strncmp(all.args[0], "export", ft_strlen(all.args[0])))
 		export_command(&all);
 }
@@ -27,7 +27,7 @@ void env_init(t_all *all, char **env)
 	int j;
 
 	while (env[++i]);
-	all->env_vars = malloc(sizeof(t_env) * (i + 1));
+	all->env_vars = malloc(sizeof(t_env) * i);
 	if (!all->env_vars)
 		return;
 	i = -1;
@@ -43,17 +43,18 @@ void env_init(t_all *all, char **env)
 	all->env_counter = i;
 }
 
-void print_env_list(t_all *all, int declare)
+void print_env_list(t_env *for_print, int declare)
 {
 	int i = -1;
 
-	while (all->env_vars[++i].key && ft_strncmp((all->env_vars[i].key), "\0", ft_strlen(all->env_vars[i].key)))
+	while (for_print[++i].key)
+//	&& ft_strncmp((for_print[i].key), "\0", ft_strlen(for_print[i].key)))
 	{
 		if (declare)
-			write (1, "declare -x ", 10);
-		write(1, all->env_vars[i].key, ft_strlen(all->env_vars[i].key));
+			write (1, "declare -x ", 11);
+		write(1, for_print[i].key, ft_strlen(for_print[i].key));
 		write(1, "=", 1);
-		write(1, all->env_vars[i].value, ft_strlen(all->env_vars[i].value));
+		write(1, for_print[i].value, ft_strlen(for_print[i].value));
 		write(1, "\n",1);
 	}
 }
@@ -73,13 +74,13 @@ void export_command(t_all *all)
 	if (!all->args[1])
 	{
 		sort_envs(all);
-		print_env_list(all, 1);
+		print_env_list(all->env_sorted, 1);
 	}
 	else
 	{
 		add_new_variable(all);
-		sort_envs(all);
-		print_env_list(all, 1);
+//		sort_envs(all);
+//		print_env_list(all, 1);
 	}
 }
 
@@ -107,9 +108,7 @@ void sort_envs(t_all *all)
 {
 	int i = -1;
 	int z = -1;
-	int j = 0;
-
-
+	int j = -1;
 
 	all->env_sorted = malloc(sizeof (t_env) * (all->env_counter + 1));
 	while (all->env_vars[++i].key)
@@ -119,17 +118,19 @@ void sort_envs(t_all *all)
 	i = all->env_counter - 1;
 	while (++z < all->env_counter - 1)
 	{
-		while (--i > z)
+		i = all->env_counter - 1;
+		while (--i > z - 1)
 		{
-			if (all->env_vars[i].key[j] > all->env_vars[i+1].key[j])
+			j = -1;
+			while (all->env_sorted[i].key[++j] == all->env_sorted[i+1].key[j]);
+			if (all->env_sorted[i].key[j] > all->env_sorted[i+1].key[j])
 			{
-//				tmp = realloc(tmp, sizeof(all->env_vars[i]));
-				tmp->key = all->env_vars[i].key;
-				tmp->value = all->env_vars[i].value;
-				all->env_vars[i].key = all->env_vars[i+1].key;
-				all->env_vars[i].value = all->env_vars[i+1].value;
-				all->env_vars[i+1].key = tmp->key;
-				all->env_vars[i+1].value = tmp->value;
+				tmp->key = all->env_sorted[i].key;
+				tmp->value = all->env_sorted[i].value;
+				all->env_sorted[i].key = all->env_sorted[i + 1].key;
+				all->env_sorted[i].value = all->env_sorted[i + 1].value;
+				all->env_sorted[i + 1].key = tmp->key;
+				all->env_sorted[i + 1].value = tmp->value;
 			}
 		}
 	}

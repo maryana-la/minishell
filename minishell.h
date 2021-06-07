@@ -24,7 +24,7 @@ typedef struct s_all
 void	pwd_command (t_all *all);
 void 	export_command(t_all *all);
 void 	env_init(t_all *all, char **env);
-void print_env_list(t_all *all, int declare);
+void print_env_list(t_env *for_print, int declare);
 void	add_new_variable(t_all *all);
 void	sort_envs(t_all *all);
 
