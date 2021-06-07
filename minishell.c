@@ -3,25 +3,20 @@
 #include "../libft/libft.h"
 #include "minishell.h"
 
-
-
 int main(int argc, char **argv, char **envp)
 {
 	t_all all;
 	env_init(&all, envp);
-
-
 	all.args[0] = "export";
-//	all.args[1] = "temp=567";
+	all.args[1] = "temp=567";
 //	all.args[1] = NULL;
 
 	if (!ft_strncmp(all.args[0], "pwd", ft_strlen(all.args[0])))
 		pwd_command(&all);
 	else if (!ft_strncmp(all.args[0], "env", ft_strlen(all.args[0])))
-		print_env_list(&all);
+		print_env_list(&all, 0);
 	else if (!ft_strncmp(all.args[0], "export", ft_strlen(all.args[0])))
 		export_command(&all);
-
 }
 
 void env_init(t_all *all, char **env)
@@ -32,7 +27,6 @@ void env_init(t_all *all, char **env)
 	int j;
 
 	while (env[++i]);
-
 	all->env_vars = malloc(sizeof(t_env) * (i + 1));
 	if (!all->env_vars)
 		return;
@@ -49,18 +43,19 @@ void env_init(t_all *all, char **env)
 	all->env_counter = i;
 }
 
-void print_env_list(t_all *all)
+void print_env_list(t_all *all, int declare)
 {
 	int i = -1;
 
 	while (all->env_vars[++i].key && ft_strncmp((all->env_vars[i].key), "\0", ft_strlen(all->env_vars[i].key)))
 	{
+		if (declare)
+			write (1, "declare -x ", 10);
 		write(1, all->env_vars[i].key, ft_strlen(all->env_vars[i].key));
 		write(1, "=", 1);
 		write(1, all->env_vars[i].value, ft_strlen(all->env_vars[i].value));
 		write(1, "\n",1);
 	}
-
 }
 
 
@@ -77,20 +72,14 @@ void export_command(t_all *all)
 
 	if (!all->args[1])
 	{
-		while (all->env_vars[++i].key)
-		{
-			write(1, "declare -x ", 11);
-			write(1, all->env_vars[i].key, ft_strlen(all->env_vars[i].key));
-			write(1, "=", 1);
-			write(1, all->env_vars[i].value, ft_strlen(all->env_vars[i].value));
-			write(1, "\n", 1);
-		}
-		exit(0);
+		sort_envs(all);
+		print_env_list(all, 1);
 	}
 	else
 	{
 		add_new_variable(all);
-		print_env_list(all);
+		sort_envs(all);
+		print_env_list(all, 1);
 	}
 }
 
@@ -112,4 +101,49 @@ void	add_new_variable(t_all *all)
 	tmp[i].value = ft_substr(all->args[1], j + 1, ft_strlen(all->args[1])-j+1);
 	free(all->env_vars);
 	all->env_vars = tmp;
+}
+
+void sort_envs(t_all *all)
+{
+	int i = -1;
+	int z = -1;
+	int j = 0;
+
+
+
+	all->env_sorted = malloc(sizeof (t_env) * (all->env_counter + 1));
+	while (all->env_vars[++i].key)
+		all->env_sorted[i] = all->env_vars[i];
+
+	t_env *tmp;
+	i = all->env_counter - 1;
+	while (++z < all->env_counter - 1)
+	{
+		while (--i > z)
+		{
+			if (all->env_vars[i].key[j] > all->env_vars[i+1].key[j])
+			{
+//				tmp = realloc(tmp, sizeof(all->env_vars[i]));
+				tmp->key = all->env_vars[i].key;
+				tmp->value = all->env_vars[i].value;
+				all->env_vars[i].key = all->env_vars[i+1].key;
+				all->env_vars[i].value = all->env_vars[i+1].value;
+				all->env_vars[i+1].key = tmp->key;
+				all->env_vars[i+1].value = tmp->value;
+			}
+		}
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
