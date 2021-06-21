@@ -1,12 +1,12 @@
-#ifndef MINISHELL_MINISHELL_H
-#define MINISHELL_MINISHELL_H
+#ifndef MINISHELL_H
+#define MINISHELL_H
 
 typedef struct s_env
 {
 	char		*key;
 	char		*value;
-	int			key_len;
-	int			value_len;
+	size_t 		key_len;
+	size_t		value_len;
 }				t_env;
 
 typedef struct s_all

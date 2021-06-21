@@ -21,13 +21,11 @@ int main(int argc, char **argv, char **envp)
 
 void env_init(t_all *all, char **env)
 {
-	t_env	*new;
-	t_env	*allenv_vars;
 	int i = -1;
 	int j;
 
 	while (env[++i]);
-	all->env_vars = malloc(sizeof(t_env) * i);
+	all->env_vars = malloc(sizeof(t_env) * (i + 1));
 	if (!all->env_vars)
 		return;
 	i = -1;
@@ -38,9 +36,13 @@ void env_init(t_all *all, char **env)
 			if (env[i][j] == '=')
 				break;
 		all->env_vars[i].key = ft_substr(env[i], 0, j);
+		all->env_vars[i].key_len = ft_strlen(all->env_vars[i].key);
 		all->env_vars[i].value = ft_substr(env[i], j + 1, (ft_strlen(env[i]) - j + 1));
+		all->env_vars[i].value_len = ft_strlen(all->env_vars[i].value);
 	}
 	all->env_counter = i;
+	all->env_vars[i].key = "\0";
+	all->env_vars[i].value = "\0";
 }
 
 void print_env_list(t_env *for_print, int declare)
@@ -113,22 +115,26 @@ void sort_envs(t_all *all)
 	while (all->env_vars[++i].key)
 		all->env_sorted[i] = all->env_vars[i];
 
-	t_env *tmp;
+	t_env tmp;
 	while (++z < all->env_counter - 1)
 	{
 		i = all->env_counter - 1;
 		while (--i > z - 1)
 		{
-			j = -1;
-			while (all->env_sorted[i].key[++j] == all->env_sorted[i+1].key[j]);
+			j = 0;
+			while (all->env_sorted[i].key[j] == all->env_sorted[i+1].key[j])
+				j++;
 			if (all->env_sorted[i].key[j] > all->env_sorted[i+1].key[j])
 			{
-				tmp->key = all->env_sorted[i].key;
-				tmp->value = all->env_sorted[i].value;
+//				tmp = all->env_sorted[i];
+//				all->env_sorted[i] = all->env_sorted[i + 1];
+//				all->env_sorted[i + 1] = tmp;
+				tmp.key = all->env_sorted[i].key;
+				tmp.value = all->env_sorted[i].value;
 				all->env_sorted[i].key = all->env_sorted[i + 1].key;
 				all->env_sorted[i].value = all->env_sorted[i + 1].value;
-				all->env_sorted[i + 1].key = tmp->key;
-				all->env_sorted[i + 1].value = tmp->value;
+				all->env_sorted[i + 1].key = tmp.key;
+				all->env_sorted[i + 1].value = tmp.value;
 			}
 		}
 	}
