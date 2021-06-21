@@ -8,12 +8,15 @@ typedef struct s_env
 {
 	char		*key;
 	char		*value;
-	struct s_env *next;
+	size_t 		key_len;
+	size_t		value_len;
+	// struct s_env *next;
 }				t_env;
 
 typedef struct s_all
 {
-	t_env	*env_list;
+	t_env	*env_vars;
+	int		env_counter;
 	t_env	*env_secret;
 	char	**envp;
 	char	**args;

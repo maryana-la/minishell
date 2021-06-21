@@ -35,7 +35,6 @@ char *ft_dollar(char *str, int *i, t_all *all)
 	char	*var;
 	int		pos_of_dollar;
 	int		end_of_var;
-	t_env	*tmp;
 	char	*tmp1;
 	char	*tmp2;
 	char	*value;
@@ -72,18 +71,17 @@ char *ft_dollar(char *str, int *i, t_all *all)
 			return (tmp1);
 		}
 	}
+
 //find variable in the lists
-	tmp = all->env_list;
-	while (all->env_list && tmp->next != NULL)
-	{
-		if (!ft_strncmp(tmp->key, var, (ft_strlen(var) + 1)))
+	
+	int j = -1;
+	while (all->env_vars[++j].key) //find variable in the lists
+		if (ft_strncmp(all->env_vars[j].key, var, (ft_strlen(var) + 1)) == 0)
 			break;
-		tmp = tmp->next;
-	}
-	if (ft_strncmp(tmp->key, var, (ft_strlen(var) + 1)))//если долистал до конца, но переменная не найдена
-		value = "\0";	
-	else
-		value = ft_strdup(tmp->value);
+    if (all->env_vars[j].key) //если долистал до конца или вылетел из цикла
+		value = ft_strdup(all->env_vars[j].value);
+    else
+        value = "\0";
 	tmp1 = ft_substr(str, 0, pos_of_dollar); // cut till $
 	tmp2 = ft_substr(str, *i, (ft_strlen(str) - *i + 1)); // cut after variable
 	tmp1 = ft_strjoin(tmp1, value);
@@ -328,77 +326,99 @@ int env_init(t_all *all, char **env) // env init with lists:
 	t_env	*new;
 	t_env	*list;
 	t_env	*tmp;
+	int shlvl_tmp;
+
+
 	int i = -1;
 	int j;
-	int shlvl_tmp;
-	int fd;
 
-	fd = open("proba.txt", O_RDWR);
-
-
-	list = malloc(sizeof(t_env));
-	if (!list)
-		return(0);
-
-// init first list
-	while(env[0][++i])
-	{
-		if (env[0][i] == '=')
-			break;
-	}
-	list->key = ft_substr(env[0], 0, i);
-	list->value = ft_substr(env[0], i + 1, (ft_strlen(env[0]) - i + 1));
-	list->next = NULL;
-	all->env_list = list;
-
-// get all the envs
-	i = 0;
-	while(env && env[++i])
+	while (env[++i]);
+	all->env_vars = malloc(sizeof(t_env) * (i + 1));
+	if (!all->env_vars)
+		return 0;
+	i = -1;
+	while(env[++i])
 	{
 		j = -1;
 		while(env[i][++j] != '\0')
 			if (env[i][j] == '=')
 				break;
-		new = malloc(sizeof(t_env));
-		if (!new)
-			return (0);
-		new->key = ft_substr(env[i], 0, j);
-		new->value = ft_substr(env[i], j + 1, (ft_strlen(env[i]) - j + 1));
-		new->next = NULL;
-		list->next = new;
-		list = new;
+		all->env_vars[i].key = ft_substr(env[i], 0, j);
+		all->env_vars[i].key_len = ft_strlen(all->env_vars[i].key);
+		all->env_vars[i].value = ft_substr(env[i], j + 1, (ft_strlen(env[i]) - j + 1));
+		all->env_vars[i].value_len = ft_strlen(all->env_vars[i].value);
 	}
+	all->env_counter = i;
+	all->env_vars[i].key = NULL;
+	all->env_vars[i].value = NULL;
+
+	list = malloc(sizeof(t_env));
+	if (!list)
+		return(0);
+
+// // init first list
+// 	while(env[0][++i])
+// 	{
+// 		if (env[0][i] == '=')
+// 			break;
+// 	}
+// 	list->key = ft_substr(env[0], 0, i);
+// 	list->value = ft_substr(env[0], i + 1, (ft_strlen(env[0]) - i + 1));
+// 	list->next = NULL;
+// 	all->env_list = list;
+
+// // get all the envs
+// 	i = 0;
+// 	while(env && env[++i])
+// 	{
+// 		j = -1;
+// 		while(env[i][++j] != '\0')
+// 			if (env[i][j] == '=')
+// 				break;
+// 		new = malloc(sizeof(t_env));
+// 		if (!new)
+// 			return (0);
+// 		new->key = ft_substr(env[i], 0, j);
+// 		new->value = ft_substr(env[i], j + 1, (ft_strlen(env[i]) - j + 1));
+// 		new->next = NULL;
+// 		list->next = new;
+// 		list = new;
+// 	}
 
 // to inc SHLVL
 	shlvl_tmp = 0;
-	tmp = all->env_list;
-	while (all->env_list && tmp) //find variable in the lists
+	i = -1;
+	while (all->env_vars[++i].key) //find variable in the lists
 	{
-		if (ft_strncmp(tmp->key, "SHLVL", 6) == 0)
+		if (ft_strncmp(all->env_vars[i].key, "SHLVL", 6) == 0)
 		{
 			shlvl_tmp = ft_atoi(tmp->value) + 1;
-			tmp->value = ft_itoa(shlvl_tmp);
+            all->env_vars[i].value = ft_itoa(shlvl_tmp);
 			break;
 		}
-		tmp = tmp->next;
-		if(!tmp->next) // if no SHVLV - set it to 1
-		{
-			new = malloc(sizeof(t_env));
-			new->key = ft_strdup("SHLVL");
-			new->value = ft_strdup("1");
-			new->next = NULL;
-			tmp->next = new;
-			break;
-		}
+	}
+	if(i == all->env_counter) // if no SHVLV - set it to 1
+	{
+		int i = -1;
+		t_env *tmp;
+
+		tmp = malloc(sizeof (t_env) * (all->env_counter + 1));
+		while (all->env_vars[++i].key)
+			tmp[i] = all->env_vars[i];
+		tmp[i].key = "SHLVL";
+		tmp[i].value = "1";
+		tmp[i + 1].key = NULL;
+        tmp[i + 1].value = NULL;
+        free(all->env_vars);
+		all->env_vars = tmp;
 	}
 
+
+
 /* just to print */
-	tmp = all->env_list; 
-	while (all->env_list && tmp)
-	{
-		printf("%s=%s\n", tmp->key, tmp->value);
-		tmp = tmp->next;
-	}
+	i = -1;
+	while (all->env_vars[++i].key)
+		printf("%s=%s\n", all->env_vars[i].key, all->env_vars[i].value);
 	return (0);
 }
 
