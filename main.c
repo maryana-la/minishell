@@ -258,9 +258,9 @@ void ft_put_str_to_struct(char *arg, t_all *all)
 		i = 0;
 		free(all->args);
 		all->args = tmp;
-		i = -1;
-		while (all->args[++i] != 0)
-			printf("%s\n", all->args[i]);
+//		i = -1;
+//		while (all->args[++i] != 0)
+//			printf("%s\n", all->args[i]);
 	}
 }
 
@@ -280,7 +280,7 @@ void ft_parcer(char *str, t_all *all)
 	{
 		skip_spaces(str, &i);
 		len = get_arg_len(str, i);
-		printf("%d\n", len);
+//		printf("%d\n", len);
 		tmp = malloc(sizeof(char) * (len + 1));
 //		ft_bzero(tmp, len);
 		j = 0;
@@ -356,35 +356,6 @@ int env_init(t_all *all, char **env) // env init with lists:
 	if (!list)
 		return(0);
 
-// // init first list
-// 	while(env[0][++i])
-// 	{
-// 		if (env[0][i] == '=')
-// 			break;
-// 	}
-// 	list->key = ft_substr(env[0], 0, i);
-// 	list->value = ft_substr(env[0], i + 1, (ft_strlen(env[0]) - i + 1));
-// 	list->next = NULL;
-// 	all->env_list = list;
-
-// // get all the envs
-// 	i = 0;
-// 	while(env && env[++i])
-// 	{
-// 		j = -1;
-// 		while(env[i][++j] != '\0')
-// 			if (env[i][j] == '=')
-// 				break;
-// 		new = malloc(sizeof(t_env));
-// 		if (!new)
-// 			return (0);
-// 		new->key = ft_substr(env[i], 0, j);
-// 		new->value = ft_substr(env[i], j + 1, (ft_strlen(env[i]) - j + 1));
-// 		new->next = NULL;
-// 		list->next = new;
-// 		list = new;
-// 	}
-
 // to inc SHLVL
 	shlvl_tmp = 0;
 	i = -1;
@@ -392,7 +363,7 @@ int env_init(t_all *all, char **env) // env init with lists:
 	{
 		if (ft_strncmp(all->env_vars[i].key, "SHLVL", 6) == 0)
 		{
-			shlvl_tmp = ft_atoi(tmp->value) + 1;
+			shlvl_tmp = ft_atoi(all->env_vars[i].value) + 1;
             all->env_vars[i].value = ft_itoa(shlvl_tmp);
 			break;
 		}
@@ -416,15 +387,36 @@ int env_init(t_all *all, char **env) // env init with lists:
 
 
 /* just to print */
-	i = -1;
-	while (all->env_vars[++i].key)
-		printf("%s=%s\n", all->env_vars[i].key, all->env_vars[i].value);
+//	i = -1;
+//	while (all->env_vars[++i].key)
+//		printf("%s=%s\n", all->env_vars[i].key, all->env_vars[i].value);
 	return (0);
 }
 
 void init_all(t_all *all)
 {
 	all->args = 0;
+}
+
+int takeInput(char* str)
+{
+    char* buf;
+
+    buf = readline("\n>>> ");
+    if (ft_strlen(buf) != 0) {
+        add_history(buf);
+        strcpy(str, buf);
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
+void printDir()
+{
+	char cwd[1024];
+	getcwd(cwd, sizeof(cwd));
+	printf("\nDir: %s", cwd);
 }
 
 int main(int argc, char **argv, char **env)
@@ -435,12 +427,24 @@ int main(int argc, char **argv, char **env)
 
 	init_all(&all);
 	env_init(&all, env);
-	char *str = "ECHO $SHLVL'pwd $PATH' \"$PAGER$LSCOLORS\"$;l$XPC_FLAGS\'ffrsvdd\'";
 
-	printf("str_i = %s\n", str);
-	if (ft_preparcer(str) > 0)
-		ft_parcer(str, &all);
-	else
-		printf("%s\n", "preparcer error");
-	return 0;
+//	char *str = "ECHO $SHLVL'pwd $PATH' \"$PAGER$LSCOLORS\"$;l$XPC_FLAGS\'ffrsvdd\'";
+
+    char str[1000];
+    while (1)
+    {
+		// print shell line
+		printDir();
+		// take input
+		if (takeInput(str))
+			continue;
+		//	printf("str_i = %s\n", str);
+		if (ft_preparcer(str) > 0)
+			ft_parcer(str, &all);
+		else
+			printf("%s\n", "preparcer error");
+	}
+    	return 0;
 }
+
+

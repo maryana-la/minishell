@@ -4,7 +4,7 @@ int check_inside_s_quote(char *str, int *i)
 {
 	*i = *i + 1;
 	while(str[*i] && str[*i] != '\'')
-		*i = *i +1;
+		*i = *i + 1;
 	if (str[*i] == '\'')
 		return (1);
 	return (0);
@@ -15,7 +15,7 @@ int check_inside_d_quote(char *str, int *i)
 	*i = *i + 1;
 	while(str[*i])
 	{
-		if (str[*i] == '\"' && str[*i] != '\\')
+		if (str[*i] == '\"' && str[*i - 1] != '\\')
 			break;
 		*i = *i + 1;
 	}
@@ -88,12 +88,12 @@ int ft_preparcer(char *str)
 	{
 		if (str[i] == '\'' && (i == start || str[i - 1] != '\\'))
 		{
-			if (!check_inside_s_quote(str, &i))
+			if (check_inside_s_quote(str, &i) == 0)
 				return (-1); // \' is not closed
 		}
 		else if (str[i] == '\"' && (i == start || str[i - 1] != '\\'))
 		{
-			if (!check_inside_d_quote(str, &i))
+			if (check_inside_d_quote(str, &i) == 0)
 				return (-1); // \" is not closed
 		}
 		else if (str[i] == '\\' && (str[i + 1] == '\'' || str[i + 1] == '\"'))
