@@ -1,49 +1,42 @@
-#include <stdio.h>
-#include <unistd.h>
-#include "../libft/libft.h"
+
 #include "minishell.h"
 
-int main(int argc, char **argv, char **envp)
+void start_commands(t_all *all)
 {
-	t_all all;
-	env_init(&all, envp);
-	all.args[0] = "export";
-//	all.args[1] = "temp=567";
-	all.args[1] = NULL;
 
-	if (!ft_strncmp(all.args[0], "pwd", ft_strlen(all.args[0])))
-		pwd_command(&all);
-	else if (!ft_strncmp(all.args[0], "env", ft_strlen(all.args[0])))
-		print_env_list(all.env_vars, 0);
-	else if (!ft_strncmp(all.args[0], "export", ft_strlen(all.args[0])))
-		export_command(&all);
+	if (!ft_strncmp(all->args[0], "pwd", ft_strlen(all->args[0])))
+		pwd_command(all);
+	else if (!ft_strncmp(all->args[0], "env", ft_strlen(all->args[0])))
+		print_env_list(all->env_vars, 0);
+	else if (!ft_strncmp(all->args[0], "export", ft_strlen(all->args[0])))
+		export_command(all);
 }
 
-void env_init(t_all *all, char **env)
-{
-	int i = -1;
-	int j;
-
-	while (env[++i]);
-	all->env_vars = malloc(sizeof(t_env) * (i + 1));
-	if (!all->env_vars)
-		return;
-	i = -1;
-	while(env[++i])
-	{
-		j = -1;
-		while(env[i][++j] != '\0')
-			if (env[i][j] == '=')
-				break;
-		all->env_vars[i].key = ft_substr(env[i], 0, j);
-		all->env_vars[i].key_len = ft_strlen(all->env_vars[i].key);
-		all->env_vars[i].value = ft_substr(env[i], j + 1, (ft_strlen(env[i]) - j + 1));
-		all->env_vars[i].value_len = ft_strlen(all->env_vars[i].value);
-	}
-	all->env_counter = i;
-	all->env_vars[i].key = "\0";
-	all->env_vars[i].value = "\0";
-}
+//void env_init(t_all *all, char **env)
+//{
+//	int i = -1;
+//	int j;
+//
+//	while (env[++i]);
+//	all->env_vars = malloc(sizeof(t_env) * (i + 1));
+//	if (!all->env_vars)
+//		return;
+//	i = -1;
+//	while(env[++i])
+//	{
+//		j = -1;
+//		while(env[i][++j] != '\0')
+//			if (env[i][j] == '=')
+//				break;
+//		all->env_vars[i].key = ft_substr(env[i], 0, j);
+//		all->env_vars[i].key_len = ft_strlen(all->env_vars[i].key);
+//		all->env_vars[i].value = ft_substr(env[i], j + 1, (ft_strlen(env[i]) - j + 1));
+//		all->env_vars[i].value_len = ft_strlen(all->env_vars[i].value);
+//	}
+//	all->env_counter = i;
+//	all->env_vars[i].key = "\0";
+//	all->env_vars[i].value = "\0";
+//}
 
 void print_env_list(t_env *for_print, int declare)
 {
@@ -103,6 +96,7 @@ void	add_new_variable(t_all *all)
 	tmp[i].value = ft_substr(all->args[1], j + 1, ft_strlen(all->args[1])-j+1);
 	free(all->env_vars);
 	all->env_vars = tmp;
+	all->env_counter++;
 }
 
 void sort_envs(t_all *all)
