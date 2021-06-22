@@ -50,4 +50,5 @@ char	*replace_env_with_value(char *str, t_all *all);
 void ft_parcer(char *str, t_all *all);
 int env_init(t_all *all, char **env);
 void init_all(t_all *all);
+void start_commands(t_all *all);
 

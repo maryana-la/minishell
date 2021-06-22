@@ -319,6 +319,7 @@ void ft_parcer(char *str, t_all *all)
 		// printf("%s\n", tmp);
 		i++;
 	}
+	start_commands(all);
 }
 
 int env_init(t_all *all, char **env) // env init with lists:
@@ -403,7 +404,7 @@ int takeInput(char* str)
     char* buf;
 
     buf = readline("\n>>> ");
-    if (ft_strlen(buf) != 0) {
+    if (strlen(buf) != 0) {
         add_history(buf);
         strcpy(str, buf);
         return 0;
