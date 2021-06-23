@@ -62,5 +62,6 @@ void 	export_command(t_all *all);
 void print_env_list(t_env *for_print, int declare);
 void	add_new_variable(t_all *all);
 void	sort_envs(t_all *all);
+void unset_command(t_all *all);
 
 #endif //MINISHELL_MINISHELL_H

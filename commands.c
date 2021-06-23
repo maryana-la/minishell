@@ -10,6 +10,8 @@ void start_commands(t_all *all)
 		print_env_list(all->env_vars, 0);
 	else if (!ft_strncmp(all->args[0], "export", ft_strlen(all->args[0])))
 		export_command(all);
+	else if (!ft_strncmp(all->args[0], "unset", ft_strlen(all->args[0])))
+		unset_command(all);
 }
 
 //void env_init(t_all *all, char **env)
@@ -98,6 +100,27 @@ void	add_new_variable(t_all *all)
 	all->env_vars = tmp;
 	all->env_counter++;
 }
+
+void unset_command(t_all *all)
+{
+	int i;
+	int j = 0;
+
+	while (all->args[++j])
+	{
+		i = -1;
+
+		while (!ft_strncmp(all->env_vars[++i].key, all->args[j], ft_strlen(all->args[j]) + 1));
+		while (i < all->env_counter)
+		{
+			all->env_vars[i] = all->env_vars[i+1];
+			i++;
+		}
+		--all->env_counter;
+	}
+}
+
+
 
 void sort_envs(t_all *all)
 {
