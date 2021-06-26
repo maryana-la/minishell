@@ -328,8 +328,6 @@ void ft_parcer(char *str, t_all *all)
 
 int env_init(t_all *all, char **env) // env init with lists:
 {
-	t_env	*new;
-	t_env	*list;
 	t_env	*tmp;
 	int shlvl_tmp;
 
@@ -354,12 +352,9 @@ int env_init(t_all *all, char **env) // env init with lists:
 		all->env_vars[i].value_len = ft_strlen(all->env_vars[i].value);
 	}
 	all->env_counter = i;
+//	all->env_vars[i] = NULL;
 	all->env_vars[i].key = NULL;
 	all->env_vars[i].value = NULL;
-
-	list = malloc(sizeof(t_env));
-	if (!list)
-		return(0);
 
 // to inc SHLVL
 	shlvl_tmp = 0;
@@ -375,13 +370,14 @@ int env_init(t_all *all, char **env) // env init with lists:
 	}
 	if(i == all->env_counter) // if no SHVLV - set it to 1
 	{
-		int i = -1;
+		i = -1;
 		t_env *tmp;
 
 		tmp = malloc(sizeof (t_env) * (all->env_counter + 1));
 		while (all->env_vars[++i].key)
 			tmp[i] = all->env_vars[i];
 		tmp[i].key = "SHLVL";
+
 		tmp[i].value = "1";
 		tmp[i + 1].key = NULL;
         tmp[i + 1].value = NULL;

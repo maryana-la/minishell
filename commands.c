@@ -12,6 +12,13 @@ void start_commands(t_all *all)
 		export_command(all);
 	else if (!ft_strncmp(all->args[0], "unset", ft_strlen(all->args[0])))
 		unset_command(all);
+	else if (!ft_strncmp(all->args[0], "cd", ft_strlen(all->args[0])))
+		cd_command(all);
+}
+
+void cd_command(t_all *all)
+{
+	chdir(all->args[1]);
 }
 
 //void env_init(t_all *all, char **env)
@@ -116,8 +123,11 @@ void unset_command(t_all *all)
 			all->env_vars[i] = all->env_vars[i+1];
 			i++;
 		}
-		--all->env_counter;
+		if (i != all->env_counter - 1)
+			--all->env_counter;
+	//todo зафришить удаленную переменную
 	}
+
 }
 
 
@@ -143,15 +153,15 @@ void sort_envs(t_all *all)
 				j++;
 			if (all->env_sorted[i].key[j] > all->env_sorted[i+1].key[j])
 			{
-//				tmp = all->env_sorted[i];
-//				all->env_sorted[i] = all->env_sorted[i + 1];
-//				all->env_sorted[i + 1] = tmp;
-				tmp.key = all->env_sorted[i].key;
-				tmp.value = all->env_sorted[i].value;
-				all->env_sorted[i].key = all->env_sorted[i + 1].key;
-				all->env_sorted[i].value = all->env_sorted[i + 1].value;
-				all->env_sorted[i + 1].key = tmp.key;
-				all->env_sorted[i + 1].value = tmp.value;
+				tmp = all->env_sorted[i];
+				all->env_sorted[i] = all->env_sorted[i + 1];
+				all->env_sorted[i + 1] = tmp;
+//				tmp.key = all->env_sorted[i].key;
+//				tmp.value = all->env_sorted[i].value;
+//				all->env_sorted[i].key = all->env_sorted[i + 1].key;
+//				all->env_sorted[i].value = all->env_sorted[i + 1].value;
+//				all->env_sorted[i + 1].key = tmp.key;
+//				all->env_sorted[i + 1].value = tmp.value;
 			}
 		}
 	}
