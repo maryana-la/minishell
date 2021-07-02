@@ -233,7 +233,7 @@ void ft_put_str_to_struct(char *arg, t_all *all)
 	if (all->args == 0)
     {
 		arg = check_lower_case(arg);
-		all->args = malloc(sizeof(char *) * 1);
+		all->args = malloc(sizeof(char *) * 2);
         all->args[0] = arg;
         all->args[1] = 0;
 //        i = -1;
@@ -245,7 +245,7 @@ void ft_put_str_to_struct(char *arg, t_all *all)
 		i=0;
 		while (all->args[i] != NULL)
 			i++;
-		tmp = malloc(sizeof(char *) * (i + 1));
+		tmp = malloc(sizeof(char *) * (i + 2));
 		i = 0;
 		while (all->args[i] != 0)
 		{
@@ -372,12 +372,13 @@ int env_init(t_all *all, char **env) // env init with lists:
 		i = -1;
 		t_env *tmp;
 
-		tmp = malloc(sizeof (t_env) * (all->env_counter + 1));
+		tmp = malloc(sizeof (t_env) * (all->env_counter + 2));
 		while (all->env_vars[++i].key)
 			tmp[i] = all->env_vars[i];
 		tmp[i].key = "SHLVL";
-
 		tmp[i].value = "1";
+		tmp[i].key_len = ft_strlen(tmp[i].key);
+		tmp[i].value_len = ft_strlen(tmp[i].value);
 		tmp[i + 1].key = NULL;
         tmp[i + 1].value = NULL;
         free(all->env_vars);

@@ -2,21 +2,22 @@
 
 void print_echo(t_all *all)
 {
-	execve("/usr/bin/echo", all->args, (char **)all->env_vars);
+//	execve("/usr/bin/echo", all->args, (char **)all->env_vars);
+	printf("echo ok");
 }
 
 void start_commands(t_all *all)
 {
 
-	if (!ft_strncmp(all->args[0], "pwd", ft_strlen(all->args[0])))
+	if (!ft_strncmp(all->args[0], "pwd", 4))
 		pwd_command(all);
-	else if (!ft_strncmp(all->args[0], "env", ft_strlen(all->args[0])))
-		print_env_list(all->env_vars, 0);
-	else if (!ft_strncmp(all->args[0], "export", ft_strlen(all->args[0])))
+	else if (!ft_strncmp(all->args[0], "env", 4))
+		print_env_list(all->env_vars, 0, all->env_counter);
+	else if (!ft_strncmp(all->args[0], "export", 7))
 		export_command(all);
-	else if (!ft_strncmp(all->args[0], "unset", ft_strlen(all->args[0])))
+	else if (!ft_strncmp(all->args[0], "unset", 6))
 		unset_command(all);
-	else if (!ft_strncmp(all->args[0], "cd", ft_strlen(all->args[0])))
+	else if (!ft_strncmp(all->args[0], "cd", 3))
 		cd_command(all);
 	else if (!ft_strncmp(all->args[0], "echo", 5))
 		print_echo(all);
@@ -53,11 +54,11 @@ void cd_command(t_all *all)
 //	all->env_vars[i].value = "\0";
 //}
 
-void print_env_list(t_env *for_print, int declare)
+void print_env_list(t_env *for_print, int declare, int num_of_vars)
 {
-	int i = -1;
+	int i = 0;
 
-	while (for_print[++i].key && ft_strncmp((for_print[i].key), "\0", ft_strlen(for_print[i].key)))
+	while (i < num_of_vars && for_print[i].key && for_print[i].key[0] != '\0')
 	{
 		if (declare)
 			write (1, "declare -x ", 11);
@@ -65,6 +66,7 @@ void print_env_list(t_env *for_print, int declare)
 		write(1, "=", 1);
 		write(1, for_print[i].value, ft_strlen(for_print[i].value));
 		write(1, "\n",1);
+		i++;
 	}
 }
 
@@ -83,7 +85,7 @@ void export_command(t_all *all)
 	if (!all->args[1])
 	{
 		sort_envs(all);
-		print_env_list(all->env_sorted, 1);
+		print_env_list(all->env_sorted, 1, all->env_counter);
 	}
 	else
 	{
@@ -99,7 +101,7 @@ void	add_new_variable(t_all *all)
 	int j = -1;
 	t_env *tmp;
 
-	tmp = malloc(sizeof (t_env) * (all->env_counter + 1));
+	tmp = malloc(sizeof (t_env) * (all->env_counter + 2));
 	while (all->env_vars[++i].key)
 		tmp[i] = all->env_vars[i];
 	while (all->args[1][++j])
@@ -109,6 +111,10 @@ void	add_new_variable(t_all *all)
 	}
 	tmp[i].key = ft_substr(all->args[1], 0, j);
 	tmp[i].value = ft_substr(all->args[1], j + 1, ft_strlen(all->args[1])-j+1);
+	tmp[i].key_len = ft_strlen(tmp[i].key);
+	tmp[i].value_len = ft_strlen(tmp[i].value);
+	tmp[i + 1].key = NULL;
+	tmp[i + 1].value = NULL;
 	free(all->env_vars);
 	all->env_vars = tmp;
 	all->env_counter++;
@@ -149,7 +155,7 @@ void sort_envs(t_all *all)
 		all->env_sorted[i] = all->env_vars[i];
 
 	t_env tmp;
-	while (++z < all->env_counter - 1)
+	while (++z < all->env_counter - 2)
 	{
 		i = all->env_counter - 1;
 		while (--i > z - 1)

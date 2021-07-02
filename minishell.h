@@ -1,14 +1,14 @@
 #ifndef MINISHELL_H
-# define MINISHELL_H
+#define MINISHELL_H
 
-# include <stdio.h>
-# include <unistd.h>
-# include "libft/libft.h"
-# include <string.h>
-# include <fcntl.h>
-# include <readline/readline.h>
-# include <readline/history.h>
-//#include <editline/readline.h>
+#include <stdio.h>
+#include <unistd.h>
+#include "../libft/libft.h"
+#include <string.h>
+#include <fcntl.h>
+#include <readline/readline.h>
+#include <readline/history.h>
+#include <editline/readline.h>
 
 
 typedef struct s_env
@@ -60,7 +60,7 @@ void start_commands(t_all *all);
 void	pwd_command (t_all *all);
 void 	export_command(t_all *all);
 //void 	env_init(t_all *all, char **env);
-void print_env_list(t_env *for_print, int declare);
+void print_env_list(t_env *for_print, int declare, int num_of_vars);
 void	add_new_variable(t_all *all);
 void	sort_envs(t_all *all);
 void unset_command(t_all *all);
