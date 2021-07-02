@@ -1,14 +1,14 @@
 #ifndef MINISHELL_H
-#define MINISHELL_H
+# define MINISHELL_H
 
-#include <stdio.h>
-#include <unistd.h>
-#include "../libft/libft.h"
-#include <string.h>
-#include <fcntl.h>
-#include <readline/readline.h>
-#include <readline/history.h>
-#include <editline/readline.h>
+# include <stdio.h>
+# include <unistd.h>
+# include "libft/libft.h"
+# include <string.h>
+# include <fcntl.h>
+# include <readline/readline.h>
+# include <readline/history.h>
+//#include <editline/readline.h>
 
 
 typedef struct s_env

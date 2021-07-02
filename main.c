@@ -1,4 +1,3 @@
-
 #include "minishell.h"
 
 char *ft_slash(char *str, int *i)

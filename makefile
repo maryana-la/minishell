@@ -1,5 +1,5 @@
 all:
-	gcc -g ../libft/libft.a commands.c main.c preparser.c  -ominishell -ledit
+	gcc -g commands.c main.c preparser.c libft/libft.a -lreadline -ominishell
 
 clean:
 	rm -rf minishell.o

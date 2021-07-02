@@ -1,5 +1,9 @@
-
 #include "minishell.h"
+
+void print_echo(t_all *all)
+{
+	execve("/usr/bin/echo", all->args, (char **)all->env_vars);
+}
 
 void start_commands(t_all *all)
 {
@@ -14,6 +18,8 @@ void start_commands(t_all *all)
 		unset_command(all);
 	else if (!ft_strncmp(all->args[0], "cd", ft_strlen(all->args[0])))
 		cd_command(all);
+	else if (!ft_strncmp(all->args[0], "echo", 5))
+		print_echo(all);
 }
 
 void cd_command(t_all *all)
