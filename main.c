@@ -411,7 +411,7 @@ int takeInput(char** str)
 {
     char* buf;
 
-    buf = readline("\n>>> ");
+    buf = readline(">>> ");
     if (strlen(buf) != 0)
     {
         add_history(buf);

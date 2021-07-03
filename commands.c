@@ -3,18 +3,46 @@
 void print_echo(t_all *all)
 {
 	int i;
+	int flag;
+	int j;
 
 	i = 0;
+	flag = 0;
 
 	while (all->args[++i])
 	{
+		if (!ft_strncmp (all->args[i], "-n", 2) && !flag)
+		{
+			j=0;
+			while (all->args[i][++j] == 'n');
+			if (j != ft_strlen(all->args[i]))
+			{
+				flag = 1;
+				if (all->args[i+1])
+					printf("%s ", all->args[i]);
+				else
+					printf("%s", all->args[i]);
+				continue;
+
+			}
+
+
+			if (ft_strncmp (all->args[i + 1], "-n", 2))
+			{
+				flag = 1;
+				continue;
+			}
+			continue;
+		}
 
 		if (all->args[i+1])
 			printf("%s ", all->args[i]);
 		else
 			printf("%s", all->args[i]);
-	}
 
+	}
+//	if (!flag)
+		printf("\n");
 
 }
 
