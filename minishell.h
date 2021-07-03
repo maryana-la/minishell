@@ -65,5 +65,6 @@ void	add_new_variable(t_all *all);
 void	sort_envs(t_all *all);
 void unset_command(t_all *all);
 void cd_command(t_all *all);
+void rl_replace_line();
 
 #endif //MINISHELL_MINISHELL_H

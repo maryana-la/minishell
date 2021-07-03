@@ -2,8 +2,20 @@
 
 void print_echo(t_all *all)
 {
-//	execve("/usr/bin/echo", all->args, (char **)all->env_vars);
-	printf("echo ok");
+	int i;
+
+	i = 0;
+
+	while (all->args[++i])
+	{
+
+		if (all->args[i+1])
+			printf("%s ", all->args[i]);
+		else
+			printf("%s", all->args[i]);
+	}
+
+
 }
 
 void start_commands(t_all *all)
