@@ -8,7 +8,6 @@ void print_echo(t_all *all)
 
 	i = 0;
 	flag = 0;
-
 	while (all->args[++i])
 	{
 		if (!ft_strncmp (all->args[i], "-n", 2) && !flag)
@@ -23,10 +22,7 @@ void print_echo(t_all *all)
 				else
 					printf("%s", all->args[i]);
 				continue;
-
 			}
-
-
 			if (ft_strncmp (all->args[i + 1], "-n", 2))
 			{
 				flag = 1;
@@ -34,14 +30,12 @@ void print_echo(t_all *all)
 			}
 			continue;
 		}
-
 		if (all->args[i+1])
 			printf("%s ", all->args[i]);
 		else
 			printf("%s", all->args[i]);
-
 	}
-//	if (!flag)
+	if (!flag)
 		printf("\n");
 
 }
