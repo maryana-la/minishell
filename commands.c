@@ -1,6 +1,26 @@
 #include "minishell.h"
 
-void print_echo(t_all *all)
+
+
+void start_commands(t_all *all)
+{
+	if (!ft_strncmp(all->args[0], "pwd", 4))
+		pwd_command(all);
+	else if (!ft_strncmp(all->args[0], "env", 4))
+		print_env_list(all->env_vars, 0, all->env_counter);
+	else if (!ft_strncmp(all->args[0], "export", 7))
+		export_command(all);
+	else if (!ft_strncmp(all->args[0], "unset", 6))
+		unset_command(all);
+	else if (!ft_strncmp(all->args[0], "cd", 3))
+		cd_command(all);
+	else if (!ft_strncmp(all->args[0], "echo", 5))
+		echo_command(all);
+	else
+		cmd_exec(all);
+}
+
+void echo_command(t_all *all)
 {
 	int i;
 	int flag;
@@ -37,48 +57,11 @@ void print_echo(t_all *all)
 	}
 	if (!flag)
 		printf("\n");
-
 }
-
-void start_commands(t_all *all)
-{
-
-	if (!ft_strncmp(all->args[0], "pwd", 4))
-		pwd_command(all);
-	else if (!ft_strncmp(all->args[0], "env", 4))
-		print_env_list(all->env_vars, 0, all->env_counter);
-	else if (!ft_strncmp(all->args[0], "export", 7))
-		export_command(all);
-	else if (!ft_strncmp(all->args[0], "unset", 6))
-		unset_command(all);
-	else if (!ft_strncmp(all->args[0], "cd", 3))
-		cd_command(all);
-	else if (!ft_strncmp(all->args[0], "echo", 5))
-		print_echo(all);
-	else
-		cmd_exec(all);
-}
-
 
 void cd_command(t_all *all)
 {
 	chdir(all->args[1]);
-}
-
-void print_env_list(t_env *for_print, int declare, int num_of_vars)
-{
-	int i = 0;
-
-	while (i < num_of_vars && for_print[i].key && for_print[i].key[0] != '\0')
-	{
-		if (declare)
-			write (1, "declare -x ", 11);
-		write(1, for_print[i].key, ft_strlen(for_print[i].key));
-		write(1, "=", 1);
-		write(1, for_print[i].value, ft_strlen(for_print[i].value));
-		write(1, "\n",1);
-		i++;
-	}
 }
 
 void pwd_command (t_all *all)
@@ -87,39 +70,76 @@ void pwd_command (t_all *all)
 	write(1, all->cwd, ft_strlen(all->cwd));
 }
 
-void export_command(t_all *all)
-{
-	int i = -1;
+void export_command(t_all *all) {
+	int i = 0;
 
 	if (!all->args[1])
 	{
 		sort_envs(all);
 		print_env_list(all->env_sorted, 1, all->env_counter);
+		return;
 	}
-	else
+
+	while (all->args[++i])
 	{
-		add_new_variable(all);
-//		sort_envs(all);
-//		print_env_list(all, 1);
+		add_new_variable(all, i);
 	}
 }
 
-void	add_new_variable(t_all *all)
+void add_new_variable(t_all *all, int arg_pos)
 {
 	int i = -1;
 	int j = -1;
 	t_env *tmp;
+	char *temp_key;
+	char *temp_value;
+	int ravno = 0;
 
+	if (!ft_isalpha(all->args[arg_pos][0]))
+	{
+		printf("minishell: export: `%s': not a valid identifier\n", all->args[arg_pos]);
+		return;
+	}
+
+	while (all->args[arg_pos][++j])
+	{
+		if (all->args[arg_pos][j] == '=')
+		{
+			ravno = 1;
+			break;
+		}
+	}
+	temp_key = ft_substr(all->args[arg_pos], 0, j);
+	temp_value = ft_substr(all->args[arg_pos], j + 1, ft_strlen(all->args[1])-j+1);
+//	if (temp_value[0] == '\0' && ravno)
+
+
+	i=-1;
+	while(++i < all->env_counter && ft_strcmp(all->env_vars[i].key, temp_key));
+
+	if (i != all->env_counter && temp_value[0] == '\0' && !ravno)
+		return;
+
+	if (i != all->env_counter)
+	{
+		all->env_vars[i].value = temp_value;
+		return;
+	}
+
+	i=-1;
+	j=-1;
 	tmp = malloc(sizeof (t_env) * (all->env_counter + 2));
 	while (all->env_vars[++i].key)
 		tmp[i] = all->env_vars[i];
-	while (all->args[1][++j])
+	while (all->args[arg_pos][++j])
 	{
-		if (all->args[1][j] == '=')
+		if (all->args[arg_pos][j] == '=')
 			break;
 	}
-	tmp[i].key = ft_substr(all->args[1], 0, j);
-	tmp[i].value = ft_substr(all->args[1], j + 1, ft_strlen(all->args[1])-j+1);
+	tmp[i].key = ft_substr(all->args[arg_pos], 0, j);
+	tmp[i].value = ft_substr(all->args[arg_pos], j + 1, ft_strlen(all->args[1])-j+1);
+	if (tmp[i].value[0] == '\0' && !ravno)
+		tmp[i].value = ft_strdup("nullvalue");
 	tmp[i].key_len = ft_strlen(tmp[i].key);
 	tmp[i].value_len = ft_strlen(tmp[i].value);
 	tmp[i + 1].key = NULL;
@@ -127,28 +147,6 @@ void	add_new_variable(t_all *all)
 	free(all->env_vars);
 	all->env_vars = tmp;
 	all->env_counter++;
-}
-
-void unset_command(t_all *all)
-{
-	int i;
-	int j = 0;
-
-	while (all->args[++j])
-	{
-		i = -1;
-
-		while (!ft_strncmp(all->env_vars[++i].key, all->args[j], ft_strlen(all->args[j]) + 1));
-		while (i < all->env_counter)
-		{
-			all->env_vars[i] = all->env_vars[i+1];
-			i++;
-		}
-		if (i != all->env_counter - 1)
-			--all->env_counter;
-		//todo зафришить удаленную переменную
-	}
-
 }
 
 void sort_envs(t_all *all)
@@ -178,4 +176,60 @@ void sort_envs(t_all *all)
 			}
 		}
 	}
+}
+
+void print_env_list(t_env *for_print, int declare, int num_of_vars)
+{
+	int i = 0;
+
+	while (i < num_of_vars && for_print[i].key && for_print[i].key[0] != '\0')
+	{
+		if (declare)
+		{
+			write (1, "declare -x ", 11);
+			write(1, for_print[i].key, ft_strlen(for_print[i].key));
+			if (ft_strcmp(for_print[i].value, "nullvalue"))
+			{
+				write(1, "=", 1);
+				write(1, "\"", 1);
+				write(1, for_print[i].value, ft_strlen(for_print[i].value));
+				write(1, "\"", 1);
+			}
+			write(1, "\n",1);
+		}
+		else
+		{
+			if (ft_strcmp(for_print[i].value, "nullvalue"))
+			{
+				write(1, for_print[i].key, ft_strlen(for_print[i].key));
+				write(1, "=", 1);
+				write(1, for_print[i].value, ft_strlen(for_print[i].value));
+				write(1, "\n", 1);
+			}
+		}
+		i++;
+	}
+}
+
+
+void unset_command(t_all *all)
+{
+	int i;
+	int j = 0;
+
+	while (all->args[++j])
+	{
+		i = -1;
+
+		while (!ft_strncmp(all->env_vars[++i].key, all->args[j], ft_strlen(all->args[j]) + 1));
+		while (i < all->env_counter)
+		{
+			all->env_vars[i] = all->env_vars[i+1];
+			i++;
+		}
+		if (i != all->env_counter - 1)
+			--all->env_counter;
+		//todo зафришить удаленную переменную
+	}
+
 }

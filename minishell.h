@@ -69,10 +69,11 @@ void	pwd_command (t_all *all);
 void 	export_command(t_all *all);
 //void 	env_init(t_all *all, char **env);
 void print_env_list(t_env *for_print, int declare, int num_of_vars);
-void	add_new_variable(t_all *all);
+void add_new_variable(t_all *all, int arg_pos);
 void	sort_envs(t_all *all);
 void unset_command(t_all *all);
 void cd_command(t_all *all);
 void rl_replace_line();
+void echo_command(t_all *all);
 
 #endif //MINISHELL_MINISHELL_H
