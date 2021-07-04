@@ -55,38 +55,15 @@ void start_commands(t_all *all)
 		cd_command(all);
 	else if (!ft_strncmp(all->args[0], "echo", 5))
 		print_echo(all);
+	else
+		cmd_exec(all);
 }
+
 
 void cd_command(t_all *all)
 {
 	chdir(all->args[1]);
 }
-
-//void env_init(t_all *all, char **env)
-//{
-//	int i = -1;
-//	int j;
-//
-//	while (env[++i]);
-//	all->env_vars = malloc(sizeof(t_env) * (i + 1));
-//	if (!all->env_vars)
-//		return;
-//	i = -1;
-//	while(env[++i])
-//	{
-//		j = -1;
-//		while(env[i][++j] != '\0')
-//			if (env[i][j] == '=')
-//				break;
-//		all->env_vars[i].key = ft_substr(env[i], 0, j);
-//		all->env_vars[i].key_len = ft_strlen(all->env_vars[i].key);
-//		all->env_vars[i].value = ft_substr(env[i], j + 1, (ft_strlen(env[i]) - j + 1));
-//		all->env_vars[i].value_len = ft_strlen(all->env_vars[i].value);
-//	}
-//	all->env_counter = i;
-//	all->env_vars[i].key = "\0";
-//	all->env_vars[i].value = "\0";
-//}
 
 void print_env_list(t_env *for_print, int declare, int num_of_vars)
 {
@@ -104,13 +81,11 @@ void print_env_list(t_env *for_print, int declare, int num_of_vars)
 	}
 }
 
-
-
 void pwd_command (t_all *all)
-	{
-		getcwd(all->cwd, sizeof(all->cwd));
-		write(1, all->cwd, ft_strlen(all->cwd));
-	}
+{
+	getcwd(all->cwd, sizeof(all->cwd));
+	write(1, all->cwd, ft_strlen(all->cwd));
+}
 
 void export_command(t_all *all)
 {
@@ -171,12 +146,10 @@ void unset_command(t_all *all)
 		}
 		if (i != all->env_counter - 1)
 			--all->env_counter;
-	//todo зафришить удаленную переменную
+		//todo зафришить удаленную переменную
 	}
 
 }
-
-
 
 void sort_envs(t_all *all)
 {
@@ -202,12 +175,6 @@ void sort_envs(t_all *all)
 				tmp = all->env_sorted[i];
 				all->env_sorted[i] = all->env_sorted[i + 1];
 				all->env_sorted[i + 1] = tmp;
-//				tmp.key = all->env_sorted[i].key;
-//				tmp.value = all->env_sorted[i].value;
-//				all->env_sorted[i].key = all->env_sorted[i + 1].key;
-//				all->env_sorted[i].value = all->env_sorted[i + 1].value;
-//				all->env_sorted[i + 1].key = tmp.key;
-//				all->env_sorted[i + 1].value = tmp.value;
 			}
 		}
 	}

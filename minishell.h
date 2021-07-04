@@ -32,7 +32,7 @@ typedef struct s_all
 
 
 //Maryana`s func start
-int ft_preparcer(char *str);
+int ft_preparser(char *str);
 int check_inside_s_quote(char *str, int *i);
 int check_inside_d_quote(char *str, int *i);
 int check_tokens(char *str, int *i, char token);
@@ -50,10 +50,18 @@ void ft_s_quote(char *str, char **arg, int *i, int *j_tmp);
 char *ft_double_quote(char *str, int *i, int *tmp);
 int	find_enf_of_arg(char *str, int i, t_all *all);
 char	*replace_env_with_value(char *str, t_all *all);
-void ft_parcer(char *str, t_all *all);
+void ft_parser(char *str, t_all *all);
 int env_init(t_all *all, char **env);
 void init_all(t_all *all);
 void start_commands(t_all *all);
+
+/*
+ *  execve_com.c
+ */
+
+void cmd_exec(t_all *all);
+char *get_data_path(t_all *all);
+void envs_list_to_array(t_all *all);
 
 //Maryana`s func end
 
