@@ -1,4 +1,3 @@
-
 #include "minishell.h"
 
 char *ft_slash(char *str, int *i)
@@ -234,29 +233,33 @@ void ft_put_str_to_struct(char *arg, t_all *all)
 	if (all->args == 0)
     {
 		arg = check_lower_case(arg);
-		all->args = malloc(sizeof(char *) * 1);
+		all->args = malloc(sizeof(char *) * 2);
         all->args[0] = arg;
         all->args[1] = 0;
-        i = -1;
+//        i = -1;
         // while (all->args[++i] != 0)
         //     printf("%s\n", all->args[i]);
     }
 	else if (all->args)
 	{
-		while (all->args[i] != 0)
+		i=0;
+		while (all->args[i] != NULL)
 			i++;
-		tmp = malloc(sizeof(char *) * (i + 1));
+		tmp = malloc(sizeof(char *) * (i + 2));
 		i = 0;
 		while (all->args[i] != 0)
 		{
 			tmp[i] = ft_strdup(all->args[i]);
 			i++;
 		}
-		tmp[i] = arg;
-		tmp[++i] = 0;
+		tmp[i] = ft_strdup(arg);
+		tmp[i + 1] = 0;
 
-		i = 0;
 		free(all->args);
+		if (arg) {
+			free(arg);
+			arg = 0;
+		}
 		all->args = tmp;
 //		i = -1;
 //		while (all->args[++i] != 0)
@@ -264,7 +267,7 @@ void ft_put_str_to_struct(char *arg, t_all *all)
 	}
 }
 
-void ft_parcer(char *str, t_all *all)
+void ft_parser(char *str, t_all *all)
 {
 	int i;
 	int j;
@@ -273,7 +276,7 @@ void ft_parcer(char *str, t_all *all)
 	char *from_quote;
 
 	str = replace_env_with_value(str, all); // заменяем в строке переменные окружения
-	printf("%s\n", str);
+//	printf("%s\n", str);
 	i = 0;
 
 	while(str[i] && !(check_set(str[i], "|;><")))
@@ -317,15 +320,13 @@ void ft_parcer(char *str, t_all *all)
 		tmp[j] = '\0';
 		ft_put_str_to_struct(tmp, all);
 		// printf("%s\n", tmp);
-		i++;
+//		i++;
 	}
 	start_commands(all);
 }
 
 int env_init(t_all *all, char **env) // env init with lists:
 {
-	t_env	*new;
-	t_env	*list;
 	t_env	*tmp;
 	int shlvl_tmp;
 
@@ -350,12 +351,9 @@ int env_init(t_all *all, char **env) // env init with lists:
 		all->env_vars[i].value_len = ft_strlen(all->env_vars[i].value);
 	}
 	all->env_counter = i;
+//	all->env_vars[i] = NULL;
 	all->env_vars[i].key = NULL;
 	all->env_vars[i].value = NULL;
-
-	list = malloc(sizeof(t_env));
-	if (!list)
-		return(0);
 
 // to inc SHLVL
 	shlvl_tmp = 0;
@@ -371,18 +369,21 @@ int env_init(t_all *all, char **env) // env init with lists:
 	}
 	if(i == all->env_counter) // if no SHVLV - set it to 1
 	{
-		int i = -1;
+		i = -1;
 		t_env *tmp;
 
-		tmp = malloc(sizeof (t_env) * (all->env_counter + 1));
+		tmp = malloc(sizeof (t_env) * (all->env_counter + 2));
 		while (all->env_vars[++i].key)
 			tmp[i] = all->env_vars[i];
 		tmp[i].key = "SHLVL";
 		tmp[i].value = "1";
+		tmp[i].key_len = ft_strlen(tmp[i].key);
+		tmp[i].value_len = ft_strlen(tmp[i].value);
 		tmp[i + 1].key = NULL;
         tmp[i + 1].value = NULL;
         free(all->env_vars);
 		all->env_vars = tmp;
+		all->env_counter++;
 	}
 
 
@@ -396,21 +397,31 @@ int env_init(t_all *all, char **env) // env init with lists:
 
 void init_all(t_all *all)
 {
-	all->args = 0;
+	int i;
+
+	i = -1;
+	if (all->args)
+		while (all->args[++i])
+			if (all->args[i])
+				all->args[i] = NULL;
+	all->args = NULL;
 }
 
-int takeInput(char* str)
+int takeInput(char** str)
 {
     char* buf;
 
     buf = readline("\n>>> ");
-    if (strlen(buf) != 0) {
+    if (strlen(buf) != 0)
+    {
         add_history(buf);
-        strcpy(str, buf);
+        *str = ft_strdup(buf);
+        if (buf)
+        	free(buf);
         return 0;
-    } else {
-        return 1;
     }
+    else
+        return 1;
 }
 
 void printDir()
@@ -431,20 +442,26 @@ int main(int argc, char **argv, char **env)
 
 //	char *str = "ECHO $SHLVL'pwd $PATH' \"$PAGER$LSCOLORS\"$;l$XPC_FLAGS\'ffrsvdd\'";
 
-    char str[1000];
+    char *str;
     while (1)
     {
+		init_all(&all);
 		// print shell line
-		printDir();
+//		printDir();
 		// take input
-		if (takeInput(str))
+		if (takeInput(&str))
 			continue;
 		//	printf("str_i = %s\n", str);
-		if (ft_preparcer(str) > 0)
-			ft_parcer(str, &all);
+		if (ft_preparser(str) > 0)
+			ft_parser(str, &all);
 		else
 			printf("%s\n", "preparcer error");
-	}
+
+		if (str) {
+			free(str);
+			str = NULL;
+		}
+    }
     	return 0;
 }
 
