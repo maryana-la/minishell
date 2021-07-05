@@ -264,11 +264,81 @@ void ft_parser(char *str, t_all *all)
 	start_commands(all);
 }
 
+//
+//
+//int env_init(t_all *all, char **env) // env init with lists:
+//{
+//	t_env	*tmp;
+//	int shlvl_tmp;
+//
+//
+//	int i = -1;
+//	int j;
+//
+//	while (env[++i]);
+//	all->env_vars = malloc(sizeof(t_env) * (i + 1));
+//	if (!all->env_vars)
+//		return 0;
+//	i = -1;
+//	while(env[++i])
+//	{
+//		j = -1;
+//		while(env[i][++j] != '\0')
+//			if (env[i][j] == '=')
+//				break;
+//		all->env_vars[i].key = ft_substr(env[i], 0, j);
+//		all->env_vars[i].key_len = ft_strlen(all->env_vars[i].key);
+//		all->env_vars[i].value = ft_substr(env[i], j + 1, (ft_strlen(env[i]) - j + 1));
+//		all->env_vars[i].value_len = ft_strlen(all->env_vars[i].value);
+//	}
+//	all->env_counter = i;
+////	all->env_vars[i] = NULL;
+//	all->env_vars[i].key = NULL;
+//	all->env_vars[i].value = NULL;
+//
+//// to inc SHLVL
+//	shlvl_tmp = 0;
+//	i = -1;
+//	while (all->env_vars[++i].key) //find variable in the lists
+//	{
+//		if (ft_strncmp(all->env_vars[i].key, "SHLVL", 6) == 0)
+//		{
+//			shlvl_tmp = ft_atoi(all->env_vars[i].value) + 1;
+//			all->env_vars[i].value = ft_itoa(shlvl_tmp);
+//			break;
+//		}
+//	}
+//	if(i == all->env_counter) // if no SHVLV - set it to 1
+//	{
+//		i = -1;
+//		t_env *tmp;
+//
+//		tmp = malloc(sizeof (t_env) * (all->env_counter + 2));
+//		while (all->env_vars[++i].key)
+//			tmp[i] = all->env_vars[i];
+//		tmp[i].key = "SHLVL";
+//		tmp[i].value = "1";
+//		tmp[i].key_len = ft_strlen(tmp[i].key);
+//		tmp[i].value_len = ft_strlen(tmp[i].value);
+//		tmp[i + 1].key = NULL;
+//		tmp[i + 1].value = NULL;
+//		free(all->env_vars);
+//		all->env_vars = tmp;
+//		all->env_counter++;
+//	}
+//	return (0);
+//}
+
+
 int env_init(t_all *all, char **env) // env init with lists:
 {
 	t_env	*tmp;
-	int shlvl_tmp;
+	int shlvl_tmp = 0;
+	int pwd_flag = 0;
+	int oldpwd_flag = 0;
+	int shlvl_flag = 0;
 
+	shlvl_tmp = 0;
 
 	int i = -1;
 	int j;
@@ -280,33 +350,51 @@ int env_init(t_all *all, char **env) // env init with lists:
 	i = -1;
 	while(env[++i])
 	{
-		j = -1;
-		while(env[i][++j] != '\0')
-			if (env[i][j] == '=')
-				break;
-		all->env_vars[i].key = ft_substr(env[i], 0, j);
-		all->env_vars[i].key_len = ft_strlen(all->env_vars[i].key);
-		all->env_vars[i].value = ft_substr(env[i], j + 1, (ft_strlen(env[i]) - j + 1));
-		all->env_vars[i].value_len = ft_strlen(all->env_vars[i].value);
+		if (ft_strncmp(env[i], "PWD=", 4) == 0)
+		{
+			all->env_vars[i].key = ft_strdup("PWD");
+			all->env_vars[i].key_len = ft_strlen(all->env_vars[i].key);
+			all->env_vars[i].value = getcwd(NULL, -1);
+			all->env_vars[i].value_len = ft_strlen(all->env_vars[i].value);
+			pwd_flag = 1;
+		}
+		else if (ft_strncmp(env[i], "OLDPWD=", 7) == 0)
+		{
+			all->env_vars[i].key = ft_strdup("OLDPWD");
+			all->env_vars[i].key_len = ft_strlen(all->env_vars[i].key);
+			all->env_vars[i].value = ft_strdup("nullvalue");
+			all->env_vars[i].value_len = 0;
+			oldpwd_flag = 1;
+		}
+		else if (ft_strncmp(env[i], "SHLVL=", 6) == 0)
+		{
+			all->env_vars[i].key = ft_strdup("SHLVL");
+			all->env_vars[i].key_len = ft_strlen(all->env_vars[i].key);
+			all->env_vars[i].value = ft_substr(env[i], 6, (ft_strlen(env[i]) - j + 1));
+			shlvl_tmp = ft_atoi(all->env_vars[i].value) + 1;
+			all->env_vars[i].value = ft_itoa(shlvl_tmp);
+			all->env_vars[i].value_len = ft_strlen(all->env_vars[i].value);
+			shlvl_flag = 1;
+		}
+		else
+		{
+			j = -1;
+			while (env[i][++j] != '\0')
+				if (env[i][j] == '=')
+					break;
+			all->env_vars[i].key = ft_substr(env[i], 0, j);
+			all->env_vars[i].key_len = ft_strlen(all->env_vars[i].key);
+			all->env_vars[i].value = ft_substr(env[i], j + 1, (ft_strlen(env[i]) - j + 1));
+			all->env_vars[i].value_len = ft_strlen(all->env_vars[i].value);
+		}
 	}
 	all->env_counter = i;
-//	all->env_vars[i] = NULL;
 	all->env_vars[i].key = NULL;
 	all->env_vars[i].value = NULL;
 
 // to inc SHLVL
-	shlvl_tmp = 0;
-	i = -1;
-	while (all->env_vars[++i].key) //find variable in the lists
-	{
-		if (ft_strncmp(all->env_vars[i].key, "SHLVL", 6) == 0)
-		{
-			shlvl_tmp = ft_atoi(all->env_vars[i].value) + 1;
-			all->env_vars[i].value = ft_itoa(shlvl_tmp);
-			break;
-		}
-	}
-	if(i == all->env_counter) // if no SHVLV - set it to 1
+
+	if(shlvl_flag == 0) // if no SHVLV - set it to 1
 	{
 		i = -1;
 		t_env *tmp;
@@ -318,6 +406,42 @@ int env_init(t_all *all, char **env) // env init with lists:
 		tmp[i].value = "1";
 		tmp[i].key_len = ft_strlen(tmp[i].key);
 		tmp[i].value_len = ft_strlen(tmp[i].value);
+		tmp[i + 1].key = NULL;
+		tmp[i + 1].value = NULL;
+		free(all->env_vars);
+		all->env_vars = tmp;
+		all->env_counter++;
+	}
+	if(pwd_flag == 0)
+	{
+		i = -1;
+		t_env *tmp;
+
+		tmp = malloc(sizeof (t_env) * (all->env_counter + 2));
+		while (all->env_vars[++i].key)
+			tmp[i] = all->env_vars[i];
+		tmp[i].key = ft_strdup("PWD");
+		tmp[i].key_len = ft_strlen(tmp[i].key);
+		tmp[i].value = getcwd(NULL, -1);
+		tmp[i].value_len = ft_strlen(tmp[i].value);
+		tmp[i + 1].key = NULL;
+		tmp[i + 1].value = NULL;
+		free(all->env_vars);
+		all->env_vars = tmp;
+		all->env_counter++;
+	}
+	if (oldpwd_flag == 0)
+	{
+		i = -1;
+		t_env *tmp;
+
+		tmp = malloc(sizeof (t_env) * (all->env_counter + 2));
+		while (all->env_vars[++i].key)
+			tmp[i] = all->env_vars[i];
+		tmp[i].key = ft_strdup("OLDPWD");
+		tmp[i].key_len = ft_strlen(tmp[i].key);
+		tmp[i].value = ft_strdup("nullvalue");
+		tmp[i].value_len = 0;
 		tmp[i + 1].key = NULL;
 		tmp[i + 1].value = NULL;
 		free(all->env_vars);
