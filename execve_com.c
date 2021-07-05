@@ -83,7 +83,7 @@ char *get_data_path(t_all *all)
 		free(tmp);
 		if (access(path_tmp, F_OK | X_OK) == 0) //todo replace access with read
 		{
-//			ft_free_array(path);
+//			ft_free_array(path); to free
 			return (path_tmp);
 		}
 		free(path_tmp);
