@@ -61,13 +61,26 @@ void echo_command(t_all *all)
 
 void cd_command(t_all *all)
 {
+	int i;
+
+	i = -1;
+	getcwd(all->cwd, sizeof(all->cwd));
+	while(++i < all->env_counter && ft_strcmp(all->env_vars[i].key, "OLDPWD"));
+	if (i != all->env_counter)
+		all->env_vars[i].value = ft_strdup(all->cwd); //todo зафришить все стрдапы в коде
 	chdir(all->args[1]);
-}
+	getcwd(all->cwd, sizeof(all->cwd));
+	i = -1;
+	while(++i < all->env_counter && ft_strcmp(all->env_vars[i].key, "PWD"));
+	if (i != all->env_counter)
+		all->env_vars[i].value = ft_strdup(all->cwd);
+	}
 
 void pwd_command (t_all *all)
 {
 	getcwd(all->cwd, sizeof(all->cwd));
 	write(1, all->cwd, ft_strlen(all->cwd));
+	write(1, "\n", 1);
 }
 
 void export_command(t_all *all) {
@@ -95,7 +108,7 @@ void add_new_variable(t_all *all, int arg_pos)
 	char *temp_value;
 	int ravno = 0;
 
-	if (!ft_isalpha(all->args[arg_pos][0]))
+	if (ft_isdigit(all->args[arg_pos][0]) || !ft_strcmp(all->args[arg_pos], "="))
 	{
 		printf("minishell: export: `%s': not a valid identifier\n", all->args[arg_pos]);
 		return;
