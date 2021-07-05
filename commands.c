@@ -25,7 +25,7 @@ void echo_command(t_all *all)
 	int i;
 	int flag;
 	int j;
-
+//todo -n в середине текста отображается, но срабатывает как флаг
 	i = 0;
 	flag = 0;
 	while (all->args[++i])
