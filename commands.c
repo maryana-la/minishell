@@ -242,15 +242,19 @@ void unset_command(t_all *all)
 	{
 		i = -1;
 
-		while (!ft_strncmp(all->env_vars[++i].key, all->args[j], ft_strlen(all->args[j]) + 1));
-		while (i < all->env_counter)
+		while(++i < all->env_counter && ft_strcmp(all->env_vars[i].key, all->args[j]));
+		if (i != all->env_counter)
 		{
-			all->env_vars[i] = all->env_vars[i+1];
-			i++;
-		}
-		if (i != all->env_counter - 1)
+			while (i < all->env_counter)
+			{
+				all->env_vars[i] = all->env_vars[i+1];
+				i++;
+			}
 			--all->env_counter;
+			continue;
+		}
+		else
+			continue;
 		//todo зафришить удаленную переменную
 	}
-
 }
