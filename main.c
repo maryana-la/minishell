@@ -38,7 +38,7 @@ char *ft_dollar(char *str, int *i, t_all *all)
 	char	*tmp2;
 	char	*value;
 /*
-** добавить обработку $ $1 $12 $$  $?
+** todo добавить обработку $ $1 $12 $$  $?
 */
 	pos_of_dollar = *i;
 	while(str[++*i]) //find end of variable
@@ -222,7 +222,7 @@ void ft_parser(char *str, t_all *all)
 	str = replace_env_with_value(str, all); // заменяем в строке переменные окружения
 	i = 0;
 
-	while(str[i] && !(check_set(str[i], "|;><")))
+	while((str[i]) && !(check_set(str[i], "|;><")))
 	{
 		skip_spaces(str, &i);
 		len = get_arg_len(str, i);
@@ -401,7 +401,7 @@ int takeInput(char** str)
 {
 	char* buf;
 
-	buf = readline(">>> ");
+	buf = readline("minishell>>> ");
 	if (strlen(buf) != 0)
 	{
 		add_history(buf);
@@ -423,15 +423,12 @@ int main(int argc, char **argv, char **env)
 	init_all(&all);
 	env_init(&all, env);
 
-//	char *str = "ECHO $SHLVL'pwd $PATH' \"$PAGER$LSCOLORS\"$;l$XPC_FLAGS\'ffrsvdd\'";
-
 	char *str;
 	while (1)
 	{
 		init_all(&all);
 		if (takeInput(&str))
-			continue;
-		//	printf("str_i = %s\n", str);
+			continue ;
 		if (ft_preparser(str) > 0)
 			ft_parser(str, &all);
 		else
