@@ -43,15 +43,13 @@ char *get_data_path(t_all *all)
 	if (ft_strncmp(all->args[0], "./", 2) == 0)
 	{
 		exec = ft_substr(all->args[0], 2, ft_strlen(all->args[0]) - 2);
-		i = -1;
-		while (all->env_vars[++i].key)
+		if (!(get_pwd = getcwd(NULL, -1)))
 		{
-			if (ft_strncmp(all->env_vars[i].key, "PWD", 4) == 0)
-				break;
+			perror("getcwd");
 		}
-		get_pwd = ft_strjoin(all->env_vars[i].key, "/");
-		tmp = get_pwd;
-		get_pwd = ft_strjoin(get_pwd, exec);
+		tmp = ft_strjoin(get_pwd, "/");
+		free(get_pwd);
+		get_pwd = ft_strjoin(tmp, exec);
 		free(tmp);
 		if (access(get_pwd, X_OK) != 0) // todo replace access with read
 		{
@@ -85,7 +83,7 @@ char *get_data_path(t_all *all)
 		free(tmp);
 		if (access(path_tmp, F_OK | X_OK) == 0) //todo replace access with read
 		{
-//			ft_free_array(path);
+//			ft_free_array(path); to free
 			return (path_tmp);
 		}
 		free(path_tmp);
