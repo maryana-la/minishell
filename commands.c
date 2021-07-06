@@ -16,8 +16,15 @@ void start_commands(t_all *all)
 		cd_command(all);
 	else if (!ft_strncmp(all->args[0], "echo", 5))
 		echo_command(all);
+	else if (!ft_strncmp(all->args[0], "exit", 5))
+		exit_command(all);
 	else
 		cmd_exec(all);
+}
+
+void exit_command(t_all *all)
+{
+	exit(0);
 }
 
 void echo_command(t_all *all)

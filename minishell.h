@@ -75,5 +75,6 @@ void unset_command(t_all *all);
 void cd_command(t_all *all);
 void rl_replace_line();
 void echo_command(t_all *all);
+void exit_command(t_all *all);
 
 #endif //MINISHELL_MINISHELL_H
