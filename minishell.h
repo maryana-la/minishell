@@ -1,14 +1,17 @@
 #ifndef MINISHELL_H
 #define MINISHELL_H
 
-#include <stdio.h>
-#include <unistd.h>
-#include "libft/libft.h"
-#include <string.h>
-#include <fcntl.h>
-#include <readline/readline.h>
-#include <readline/history.h>
-#include <editline/readline.h>
+# include <stdio.h>
+# include <unistd.h>
+# include "libft/libft.h"
+# include <string.h>
+# include <fcntl.h>
+# include <readline/readline.h>
+# include <readline/history.h>
+# include <editline/readline.h>
+# include <sys/types.h>
+# include <sys/wait.h>
+# include <sys/errno.h>
 
 
 typedef struct s_env
@@ -30,13 +33,16 @@ typedef struct s_all
 {
 	t_env	*env_vars;
 	t_env	*env_sorted;
-	t_cmnd 	cmnd;
+	t_cmnd 	*cmnd;
 	char	cwd[1000];
 	char	**envp;
 	char	**args;
 	int		arg_len;
 	int		env_counter;
+	int		pip_count;
+	int		i;
 	int 	arg_pos;
+	int 	fd[2];
 }				t_all;
 
 
@@ -71,6 +77,14 @@ void start_commands(t_all *all);
 void cmd_exec(t_all *all);
 char *get_data_path(t_all *all);
 void envs_list_to_array(t_all *all);
+
+/*
+ * 	pipi.c
+ */
+
+void 	launch_commands(t_all *all);
+
+
 
 //Maryana`s func end
 
