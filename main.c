@@ -399,6 +399,7 @@ int takeInput(t_all *all, char** str)
 {
 	char* buf;
 
+	rl_catch_signals = 0;
 	buf = readline(">>> ");
 	if (!buf)
 		exit_command(all);
