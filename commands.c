@@ -16,8 +16,15 @@ void start_commands(t_all *all)
 		cd_command(all);
 	else if (!ft_strncmp(all->args[0], "echo", 5))
 		echo_command(all);
+	else if (!ft_strncmp(all->args[0], "exit", 5))
+		exit_command(all);
 	else
 		cmd_exec(all);
+}
+
+void exit_command(t_all *all)
+{
+	exit(0);
 }
 
 void echo_command(t_all *all)
@@ -84,7 +91,7 @@ void pwd_command (t_all *all)
 }
 
 void export_command(t_all *all) {
-	int i = 0;
+	all->arg_pos = 0;
 
 	if (!all->args[1])
 	{
@@ -93,13 +100,13 @@ void export_command(t_all *all) {
 		return;
 	}
 
-	while (all->args[++i])
+	while (all->args[++all->arg_pos])
 	{
-		add_new_variable(all, i);
+		add_new_variable(all);
 	}
 }
 
-void add_new_variable(t_all *all, int arg_pos)
+void add_new_variable(t_all *all)
 {
 	int i = -1;
 	int j = -1;
@@ -108,22 +115,23 @@ void add_new_variable(t_all *all, int arg_pos)
 	char *temp_value;
 	int ravno = 0;
 
-	if (ft_isdigit(all->args[arg_pos][0]) || !ft_strcmp(all->args[arg_pos], "="))
+
+	if (ft_isdigit(all->args[all->arg_pos][0]) || !ft_strcmp(all->args[all->arg_pos], "="))
 	{
-		printf("minishell: export: `%s': not a valid identifier\n", all->args[arg_pos]);
+		error_handler(all, 1);
 		return;
 	}
 
-	while (all->args[arg_pos][++j])
+	while (all->args[all->arg_pos][++j])
 	{
-		if (all->args[arg_pos][j] == '=')
+		if (all->args[all->arg_pos][j] == '=')
 		{
 			ravno = 1;
 			break;
 		}
 	}
-	temp_key = ft_substr(all->args[arg_pos], 0, j);
-	temp_value = ft_substr(all->args[arg_pos], j + 1, ft_strlen(all->args[1])-j+1);
+	temp_key = ft_substr(all->args[all->arg_pos], 0, j);
+	temp_value = ft_substr(all->args[all->arg_pos], j + 1, ft_strlen(all->args[1])-j+1);
 //	if (temp_value[0] == '\0' && ravno)
 
 
@@ -144,13 +152,13 @@ void add_new_variable(t_all *all, int arg_pos)
 	tmp = malloc(sizeof (t_env) * (all->env_counter + 2));
 	while (all->env_vars[++i].key)
 		tmp[i] = all->env_vars[i];
-	while (all->args[arg_pos][++j])
+	while (all->args[all->arg_pos][++j])
 	{
-		if (all->args[arg_pos][j] == '=')
+		if (all->args[all->arg_pos][j] == '=')
 			break;
 	}
-	tmp[i].key = ft_substr(all->args[arg_pos], 0, j);
-	tmp[i].value = ft_substr(all->args[arg_pos], j + 1, ft_strlen(all->args[1])-j+1);
+	tmp[i].key = ft_substr(all->args[all->arg_pos], 0, j);
+	tmp[i].value = ft_substr(all->args[all->arg_pos], j + 1, ft_strlen(all->args[1])-j+1);
 	if (tmp[i].value[0] == '\0' && !ravno)
 		tmp[i].value = ft_strdup("nullvalue");
 	tmp[i].key_len = ft_strlen(tmp[i].key);
@@ -234,15 +242,19 @@ void unset_command(t_all *all)
 	{
 		i = -1;
 
-		while (!ft_strncmp(all->env_vars[++i].key, all->args[j], ft_strlen(all->args[j]) + 1));
-		while (i < all->env_counter)
+		while(++i < all->env_counter && ft_strcmp(all->env_vars[i].key, all->args[j]));
+		if (i != all->env_counter)
 		{
-			all->env_vars[i] = all->env_vars[i+1];
-			i++;
-		}
-		if (i != all->env_counter - 1)
+			while (i < all->env_counter)
+			{
+				all->env_vars[i] = all->env_vars[i+1];
+				i++;
+			}
 			--all->env_counter;
+			continue;
+		}
+		else
+			continue;
 		//todo зафришить удаленную переменную
 	}
-
 }
