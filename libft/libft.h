@@ -6,26 +6,23 @@
 /*   By: jjacquel <jjacquel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/29 22:09:56 by jjacquel          #+#    #+#             */
-/*   Updated: 2021/06/29 21:14:34 by jjacquel         ###   ########.fr       */
+/*   Updated: 2021/07/06 14:15:49 by jjacquel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef LIBFT_H
 # define LIBFT_H
-# ifndef BUFFER_SIZE
-#  define BUFFER_SIZE 42
-# endif
 # include <stdlib.h>
 # include <unistd.h>
 
-typedef struct s_list
+typedef struct		s_list
 {
 	void			*content;
 	struct s_list	*next;
 }					t_list;
 
-t_list				*ft_lstmap(t_list *lst, void \
-					*(*f)(void *), void (*del)(void *));
+t_list				*ft_lstmap(t_list *lst, void *(*f)(void *), void\
+					(*del)(void *));
 void				ft_lstiter(t_list *lst, void (*f)(void *));
 void				ft_lstclear(t_list **lst, void (*del)(void*));
 void				ft_lstdelone(t_list *lst, void (*del)(void*));
@@ -57,8 +54,8 @@ int					ft_tolower(int c);
 int					ft_toupper(int c);
 void				*ft_memchr(const void *s, int c, size_t n);
 size_t				ft_strlcat(char *dst, const char *src, size_t dstsize);
-char				*ft_strnstr(const char *haystack, \
-					const char *needle, size_t len);
+char				*ft_strnstr(const char *haystack, const\
+					char *needle, size_t len);
 char				*ft_substr(char const *s, unsigned int start, size_t len);
 char				*ft_strjoin(char const *s1, char const *s2);
 char				*ft_strtrim(char const *s1, char const *set);
@@ -70,7 +67,5 @@ void				ft_putendl_fd(char *s, int fd);
 void				ft_putnbr_fd(int n, int fd);
 char				**ft_split(char const *s, char c);
 char				*ft_strtrim(char const *s1, char const *set);
-char				*ft_strcpy(char *dest, char *src);
-int					get_next_line(int fd, char **line);
 int					ft_strcmp(char *s1, char *s2);
 #endif
