@@ -305,7 +305,7 @@ void env_init(t_all *all, char **env) // env init with lists:
 		{
 			all->env_vars[i].key = ft_strdup("SHLVL");
 			all->env_vars[i].key_len = ft_strlen(all->env_vars[i].key);
-			all->env_vars[i].value = ft_substr(env[i], 6, (ft_strlen(env[i]) - j + 1));
+			all->env_vars[i].value = ft_substr(env[i], 6, (ft_strlen(env[i]) - 6));
 			shlvl_tmp = ft_atoi(all->env_vars[i].value) + 1;
 			all->env_vars[i].value = ft_itoa(shlvl_tmp);
 			all->env_vars[i].value_len = ft_strlen(all->env_vars[i].value);
@@ -395,11 +395,13 @@ void init_all(t_all *all)
 	all->args = NULL;
 }
 
-int takeInput(char** str)
+int takeInput(t_all *all, char** str)
 {
 	char* buf;
 
 	buf = readline(">>> ");
+	if (!buf)
+		exit_command(all);
 	if (strlen(buf) != 0)
 	{
 		add_history(buf);
@@ -423,11 +425,14 @@ int main(int argc, char **argv, char **env)
 
 //	char *str = "ECHO $SHLVL'pwd $PATH' \"$PAGER$LSCOLORS\"$;l$XPC_FLAGS\'ffrsvdd\'";
 
+if (signal(SIGINT, sig_handler) == SIG_ERR)
+		error_handler(&all, 3);
+
 	char *str;
 	while (1)
 	{
 		init_all(&all);
-		if (takeInput(&str))
+		if (takeInput(&all, &str))
 			continue;
 		//	printf("str_i = %s\n", str);
 		if (ft_preparser(str) > 0)

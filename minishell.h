@@ -9,6 +9,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <editline/readline.h>
+#include <signal.h>
 
 
 typedef struct s_env
@@ -50,6 +51,7 @@ int check_tokens(char *str, int *i, char token);
 ** main.c
 */
 
+int takeInput(t_all *all, char** str);
 char *ft_slash(char *str, int *i);
 int check_set(char c, char *set);
 void skip_spaces(char *str, int *i);
@@ -86,5 +88,6 @@ void rl_replace_line();
 void echo_command(t_all *all);
 void exit_command(t_all *all);
 void error_handler(t_all *all, int errorcode);
+void sig_handler(int sig_id);
 
 #endif //MINISHELL_MINISHELL_H

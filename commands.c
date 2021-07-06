@@ -242,6 +242,13 @@ void unset_command(t_all *all)
 	{
 		i = -1;
 
+		if (ft_isdigit(all->args[j][0]) || !ft_strcmp(all->args[j], "="))
+		{
+			all->arg_pos = j;
+			error_handler(all, 2);
+			return;
+		}
+
 		while(++i < all->env_counter && ft_strcmp(all->env_vars[i].key, all->args[j]));
 		if (i != all->env_counter)
 		{
@@ -256,5 +263,16 @@ void unset_command(t_all *all)
 		else
 			continue;
 		//todo зафришить удаленную переменную
+	}
+}
+
+void sig_handler(int sig_id)
+{
+	if (sig_id == SIGINT)
+	{
+		printf("\n"); // Move to a new line
+		rl_on_new_line(); // Regenerate the prompt on a newline
+		rl_replace_line("", 0); // Clear the previous text
+		rl_redisplay();
 	}
 }

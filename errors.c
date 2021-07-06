@@ -11,4 +11,15 @@ void error_handler(t_all *all, int errorcode)
 		printf("minishell: export: `%s': not a valid identifier\n", all->args[all->arg_pos]);
 		return;
 	}
+	if (errorcode == 2)
+	{
+		printf("minishell: unset: `%s': not a valid identifier\n", all->args[all->arg_pos]);
+		return;
+	}
+	if (errorcode == 3)
+	{
+		printf("Signal init error\n");
+		return;
+	}
+
 }
