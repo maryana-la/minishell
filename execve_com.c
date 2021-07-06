@@ -51,7 +51,7 @@ char *get_data_path(t_all *all)
 		free(get_pwd);
 		get_pwd = ft_strjoin(tmp, exec);
 		free(tmp);
-		if (access(get_pwd, X_OK) != 0) // todo replace access with read
+		if (access(get_pwd, X_OK) != 0) // todo MAryana replace access with read
 		{
 			free(get_pwd);
 			perror (all->args[0]);
@@ -70,7 +70,7 @@ char *get_data_path(t_all *all)
 
 	if (!path)
 	{
-//		ft_free_array(*arg_data); todo free all
+//		ft_free_array(*arg_data); todo MAryana free all
 		exit(-1);
 	}
 	i = -1;
@@ -81,7 +81,7 @@ char *get_data_path(t_all *all)
 		tmp = path_tmp;
 		path_tmp = ft_strjoin(path_tmp, all->args[0]);
 		free(tmp);
-		if (access(path_tmp, F_OK | X_OK) == 0) //todo replace access with read
+		if (access(path_tmp, F_OK | X_OK) == 0) //todo Maryana replace access with read
 		{
 //			ft_free_array(path); to free
 			return (path_tmp);

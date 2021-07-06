@@ -19,10 +19,18 @@ typedef struct s_env
 	size_t		value_len;
 }				t_env;
 
+typedef struct s_cmnd
+{
+	char	**args;
+	int 	fd_in;
+	int 	fd_out;
+}				t_cmnd;
+
 typedef struct s_all
 {
 	t_env	*env_vars;
 	t_env	*env_sorted;
+	t_cmnd 	*cmnd;
 	char	cwd[1000];
 	char	**envp;
 	char	**args;
@@ -51,7 +59,7 @@ char *ft_double_quote(char *str, int *i, int *tmp);
 int	find_enf_of_arg(char *str, int i, t_all *all);
 char	*replace_env_with_value(char *str, t_all *all);
 void ft_parser(char *str, t_all *all);
-int env_init(t_all *all, char **env);
+void env_init(t_all *all, char **env);
 void init_all(t_all *all);
 void start_commands(t_all *all);
 
