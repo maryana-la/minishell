@@ -15,14 +15,18 @@ void cmd_exec(t_all *all)
 		else if (pid == 0)
 		{
 			close(fd[0]);
+			if (all->cmnd.fd_in != -1)
+				dup2(all->cmnd.fd_in, 0);
+			if (all->cmnd.fd_out != -1)
+				dup2(all->cmnd.fd_out, 1);
 			path = get_data_path(all);
 			envs_list_to_array(all);
-			if (execve(path, all->args, all->envp) == -1)
+			if (execve(path, all->cmnd.args, all->envp) == -1)
 			{
 	//		ft_free_line(pip->path);
 	//		ft_free_array(pip->arg_data);
-//				perror(all->args[0]);
-			ft_putstr_fd(all->args[0], 2);
+//				perror(all->cmnd.args[0]);
+			ft_putstr_fd(all->cmnd.args[0], 2);
 			ft_putstr_fd(" : command not found\n", 2);
 				exit(-10);
 			}
@@ -40,9 +44,9 @@ char *get_data_path(t_all *all)
 	char *exec;
 	int i;
 
-	if (ft_strncmp(all->args[0], "./", 2) == 0)
+	if (ft_strncmp(all->cmnd.args[0], "./", 2) == 0)
 	{
-		exec = ft_substr(all->args[0], 2, ft_strlen(all->args[0]) - 2);
+		exec = ft_substr(all->cmnd.args[0], 2, ft_strlen(all->cmnd.args[0]) - 2);
 		if (!(get_pwd = getcwd(NULL, -1)))
 		{
 			perror("getcwd");
@@ -54,7 +58,7 @@ char *get_data_path(t_all *all)
 		if (access(get_pwd, X_OK) != 0) // todo MAryana replace access with read
 		{
 			free(get_pwd);
-			perror (all->args[0]);
+			perror (all->cmnd.args[0]);
 			exit (1);
 		}
 		return (get_pwd);
@@ -79,7 +83,7 @@ char *get_data_path(t_all *all)
 	{
 		path_tmp = ft_strjoin(path[i], "/");
 		tmp = path_tmp;
-		path_tmp = ft_strjoin(path_tmp, all->args[0]);
+		path_tmp = ft_strjoin(path_tmp, all->cmnd.args[0]);
 		free(tmp);
 		if (access(path_tmp, F_OK | X_OK) == 0) //todo Maryana replace access with read
 		{

@@ -30,7 +30,7 @@ typedef struct s_all
 {
 	t_env	*env_vars;
 	t_env	*env_sorted;
-	t_cmnd 	*cmnd;
+	t_cmnd 	cmnd;
 	char	cwd[1000];
 	char	**envp;
 	char	**args;

@@ -180,34 +180,34 @@ void	ft_put_str_to_struct(char *arg, t_all *all)
 
 	i = 0;
 
-	if (all->args == 0)
+	if (all->cmnd.args == 0)
 	{
 		arg = check_lower_case(arg);
-		all->args = malloc(sizeof(char *) * 2);
-		all->args[0] = arg;
-		all->args[1] = 0;
+		all->cmnd.args = malloc(sizeof(char *) * 2);
+		all->cmnd.args[0] = arg;
+		all->cmnd.args[1] = 0;
 	}
-	else if (all->args)
+	else
 	{
 		i=0;
-		while (all->args[i] != NULL)
+		while (all->cmnd.args[i] != NULL)
 			i++;
 		tmp = malloc(sizeof(char *) * (i + 2));
 		i = 0;
-		while (all->args[i] != 0)
+		while (all->cmnd.args[i] != 0)
 		{
-			tmp[i] = ft_strdup(all->args[i]);
+			tmp[i] = ft_strdup(all->cmnd.args[i]);
 			i++;
 		}
 		tmp[i] = ft_strdup(arg);
 		tmp[i + 1] = 0;
 
-		free(all->args);
+		free(all->cmnd.args);
 		if (arg) {
 			free(arg);
 			arg = 0;
 		}
-		all->args = tmp;
+		all->cmnd.args = tmp;
 	}
 }
 
@@ -262,7 +262,7 @@ void	heredoc_stdin_read(t_all *all, char *stop)
 	char	*line;
 	int		ret;
 
-	all->cmnd->fd_in = open("tmp_file", O_CREAT | O_RDWR | O_TRUNC, S_IRWXU);
+	all->cmnd.fd_in = open("tmp_file", O_CREAT | O_RDWR | O_TRUNC, S_IRWXU);
 //	if (pip->fd_in < 0 || read(pip->fd_in, 0, 0) < 0)
 //		ft_error_exit(argv[1], pip, FILE_ERR);
 	ret = 1;
@@ -272,8 +272,8 @@ void	heredoc_stdin_read(t_all *all, char *stop)
 		ret = get_next_line(0, &line);
 		if (ft_strncmp(line, stop, ft_strlen(stop) + 1) == 0)
 			break ;
-		write(all->cmnd->fd_in, line, ft_strlen(line));
-		write(all->cmnd->fd_in, "\n", 1);
+		write(all->cmnd.fd_in, line, ft_strlen(line));
+		write(all->cmnd.fd_in, "\n", 1);
 		if (line)
 			free(line);
 	}
@@ -281,8 +281,8 @@ void	heredoc_stdin_read(t_all *all, char *stop)
 		free(line);
 
 
-	close (all->cmnd->fd_in);
-	all->cmnd->fd_in = open("tmp_file", O_RDONLY);
+	close (all->cmnd.fd_in);
+	all->cmnd.fd_in = open("tmp_file", O_RDONLY);
 //	if (all->cmnd->fd_in < 0 || read(all->cmnd->fd_in, 0, 0) < 0)
 //		ft_error_exit("tmp_file", pip, FILE_ERR);
 }
@@ -294,22 +294,26 @@ void	ft_handle_redirect(char *str, int *i, t_all *all)
 
 	if (str[*i] == '>' && str[*i + 1] != '>')
 	{
+		(*i)++;
 		file_name = get_file_name(str, i, all);
-		all->cmnd->fd_out = open(file_name, O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU);
+		all->cmnd.fd_out = open(file_name, O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU);
 	}
 	else if (str[*i] == '>' && str[*i + 1] == '>')
 	{
-		file_name = get_file_name(str, (i + 1), all);
-		all->cmnd->fd_out = open(file_name, O_CREAT | O_WRONLY | O_APPEND, S_IRWXU);
+		*i = *i + 2;
+		file_name = get_file_name(str, i, all);
+		all->cmnd.fd_out = open(file_name, O_CREAT | O_WRONLY | O_APPEND, S_IRWXU);
 	}
 	else if (str[*i] == '<' && str[*i + 1] != '<')
 	{
+		(*i)++;
 		file_name = get_file_name(str, i, all);
-		all->cmnd->fd_in = open(file_name, O_RDONLY);
+		all->cmnd.fd_in = open(file_name, O_RDONLY);
 	}
 	else if (str[*i] == '<' && str[*i + 1] == '<')
 	{
-		file_name = get_file_name(str, (i + 1), all);
+		*i = *i + 2;
+		file_name = get_file_name(str, i, all);
 		heredoc_stdin_read(all, file_name);
 	}
 }
@@ -330,41 +334,43 @@ void ft_parser(char *str, t_all *all)
 		skip_spaces(str, &i);
 		if (str[i] == '>' || str[i] == '<')
 			ft_handle_redirect(str, &i, all);
-		len = get_arg_len(str, i);
-		tmp = malloc(sizeof(char) * (len + 1));
-		j = 0;
-		while (str[i] && !check_set(str[i], " \t|;<>"))
+		else
 		{
-			if (str[i] == '\'')
+			len = get_arg_len(str, i);
+			tmp = malloc(sizeof(char) * (len + 1));
+			j = 0;
+			while (str[i] && !check_set(str[i], " \t|;<>"))
 			{
-				while (str[++i] && str[i] != '\'')
+				if (str[i] == '\'')
 				{
-					tmp[j] = str[i];
-					j++;
-				}
-				j--;
-			}
-			else if (str[i] == '\"')
-			{
-				while (str[++i] && str[i] != '\"')
-				{
-					if (str[i] == '\\' && (str[i + 1] == '$' || str[i + 1] == '\'' || str[i + 1] == '\"' || str[i + 1] == '\\'))
-						tmp[j] = str[++i];
-					else
+					while (str[++i] && str[i] != '\'')
+					{
 						tmp[j] = str[i];
-					j++;
-				}
-				j--;
+						j++;
+					}
+					j--;
+				} else if (str[i] == '\"')
+				{
+					while (str[++i] && str[i] != '\"')
+					{
+						if (str[i] == '\\' &&
+							(str[i + 1] == '$' || str[i + 1] == '\'' || str[i + 1] == '\"' || str[i + 1] == '\\'))
+							tmp[j] = str[++i];
+						else
+							tmp[j] = str[i];
+						j++;
+					}
+					j--;
+				} else if (str[i] == '\\')
+					tmp[j] = str[++i];
+				else
+					tmp[j] = str[i];
+				i++;
+				j++;
 			}
-			else if (str[i] == '\\')
-				tmp[j] = str[++i];
-			else
-				tmp[j] = str[i];
-			i++;
-			j++;
+			tmp[j] = '\0';
+			ft_put_str_to_struct(tmp, all);
 		}
-		tmp[j] = '\0';
-		ft_put_str_to_struct(tmp, all);
 	}
 	start_commands(all);
 }
@@ -493,11 +499,13 @@ void init_all(t_all *all)
 	int i;
 
 	i = -1;
-	if (all->args)
-		while (all->args[++i])
-			if (all->args[i])
-				all->args[i] = NULL;
-	all->args = NULL;
+	if (all->cmnd.args)
+		while (all->cmnd.args[++i])
+			if (all->cmnd.args[i])
+				all->cmnd.args[i] = NULL;
+	all->cmnd.args = NULL;
+	all->cmnd.fd_in = -1;
+	all->cmnd.fd_out = -1;
 }
 
 int takeInput(char** str)
