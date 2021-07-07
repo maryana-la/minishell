@@ -27,7 +27,6 @@ void cmd_exec(t_all *all)
 
 	pid = fork();
 	if (pid == -1)
-//			ft_error_exit("fork", &pip, FORK_ERR);
 		exit(-11);
 	else if (pid == 0)
 	{
@@ -50,9 +49,6 @@ void cmd_exec(t_all *all)
 		envs_list_to_array(all);
 		if (execve(path, all->cmnd[all->i].args, all->envp) == -1)
 		{
-			//		ft_free_line(pip->path);
-			//		ft_free_array(pip->arg_data);
-			//		perror(all->cmnd.args[0]);
 			ft_putstr_fd(all->cmnd[all->i].args[0], 2);
 			ft_putstr_fd(" : command not found\n", 2);
 			exit(-10);
