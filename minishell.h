@@ -1,14 +1,17 @@
 #ifndef MINISHELL_H
 #define MINISHELL_H
 
-#include <stdio.h>
-#include <unistd.h>
-#include "libft/libft.h"
-#include <string.h>
-#include <fcntl.h>
-#include <readline/readline.h>
-#include <readline/history.h>
-#include <editline/readline.h>
+# include <stdio.h>
+# include <unistd.h>
+# include "libft/libft.h"
+# include <string.h>
+# include <fcntl.h>
+# include <readline/readline.h>
+# include <readline/history.h>
+# include <editline/readline.h>
+# include <sys/types.h>
+# include <sys/wait.h>
+# include <sys/errno.h>
 #include <signal.h>
 
 
@@ -37,12 +40,17 @@ typedef struct s_all
 	char	**args;
 	int		arg_len;
 	int		env_counter;
+	int 	num_of_pipes;
+	int		pip_count;
+	int		i;
 	int 	arg_pos;
+	int 	fd[2];
+	int 	fd_tmp;
 }				t_all;
 
 
 //Maryana`s func start
-int ft_preparser(char *str);
+int ft_preparser(char *str, t_all *all);
 int check_inside_s_quote(char *str, int *i);
 int check_inside_d_quote(char *str, int *i);
 int check_tokens(char *str, int *i, char token);
@@ -59,28 +67,35 @@ char *ft_dollar(char *str, int *i, t_all *all);
 // char *ft_s_quote(char *str, int *i, int *tmp);
 void ft_s_quote(char *str, char **arg, int *i, int *j_tmp);
 char *ft_double_quote(char *str, int *i, int *tmp);
-int	find_enf_of_arg(char *str, int i, t_all *all);
+int	find_end_of_arg(char *str, int i, t_all *all);
 char	*replace_env_with_value(char *str, t_all *all);
-void ft_parser(char *str, t_all *all);
-void env_init(t_all *all, char **env);
-void init_all(t_all *all);
-void start_commands(t_all *all);
+void	ft_parser(char *str, t_all *all);
+void	env_init(t_all *all, char **env);
+void	init_all(t_all *all);
+void	start_commands(t_all *all);
 
 /*
  *  execve_com.c
  */
 
-void cmd_exec(t_all *all);
-char *get_data_path(t_all *all);
-void envs_list_to_array(t_all *all);
+void	cmd_exec(t_all *all);
+char	*get_data_path(t_all *all);
+void	envs_list_to_array(t_all *all);
+
+/*
+ * 	pipe.c
+ */
+
+void 	launch_commands(t_all *all);
+
+
 
 //Maryana`s func end
 
 void	pwd_command (t_all *all);
 void 	export_command(t_all *all);
-//void 	env_init(t_all *all, char **env);
-void print_env_list(t_env *for_print, int declare, int num_of_vars);
-void add_new_variable(t_all *all);
+void	print_env_list(t_env *for_print, int declare, int num_of_vars);
+void	add_new_variable(t_all *all);
 void	sort_envs(t_all *all);
 void unset_command(t_all *all);
 void cd_command(t_all *all);
