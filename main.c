@@ -327,23 +327,31 @@ void ft_parser(char *str, t_all *all)
 	char *from_quote;
 
 
-	all->cmnd = malloc(sizeof(t_cmnd) * 3); //todo change to number of pipes
+	all->cmnd = malloc(sizeof(t_cmnd) * (all->num_of_pipes + 2)); //todo change to number of pipes
 	i = -1;
-	while (++i < 3)
+	while (++i < (all->num_of_pipes + 2))
+	{
 		all->cmnd[i].args = NULL;
+		all->cmnd[i].fd_in = -1;
+		all->cmnd[i].fd_out = -1;
+	}
 	all->pip_count = 0;
 	str = replace_env_with_value(str, all); // заменяем в строке переменные окружения
 	i = 0;
 //todo malloc for cmnd array
+
 	while(str[i])
 	{
-		while (str[i] && !(check_set(str[i], "|;")))
-		{
-			all->cmnd[all->pip_count].fd_in = -1;
-			all->cmnd[all->pip_count].fd_out = -1;
+//		while (str[i] && !(check_set(str[i], "|;")))
+//		{
 			skip_spaces(str, &i);
 			if (str[i] == '>' || str[i] == '<')
 				ft_handle_redirect(str, &i, all);
+			else if (str[i] == '|')
+			{
+				all->pip_count++;
+				i++;
+			}
 			else
 			{
 				len = get_arg_len(str, i);
@@ -378,12 +386,13 @@ void ft_parser(char *str, t_all *all)
 					i++;
 					j++;
 				}
-				tmp[j] = '\0';
-				ft_put_str_to_struct(tmp, all);
+				if (len > 0)
+				{
+					tmp[j] = '\0';
+					ft_put_str_to_struct(tmp, all);
+				}
 			}
-		}
-		if (str[i] == '|')
-			all->pip_count++;
+//		}
 	}
 	launch_commands(all);
 }
@@ -516,6 +525,7 @@ void init_all(t_all *all)
 
 	i = -1;
 	j = 0;
+	all->num_of_pipes = 0;
 	if (all->cmnd)
 	{
 		while (all->cmnd[j].args[++i])
@@ -563,7 +573,7 @@ int main(int argc, char **argv, char **env)
 		if (takeInput(&str))
 			continue;
 		//	printf("str_i = %s\n", str);
-		if (ft_preparser(str) > 0)
+		if (ft_preparser(str, &all) > 0)
 			ft_parser(str, &all);
 		else
 			printf("%s\n", "preparser error");

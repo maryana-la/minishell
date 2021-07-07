@@ -1,21 +1,67 @@
 #include "minishell.h"
 
+//void cmd_exec(t_all *all)
+//{
+//	char *path;
+//
+//	path = get_data_path(all);
+//	envs_list_to_array(all);
+//	if (execve(path, all->cmnd[all->i].args, all->envp) == -1)
+//	{
+//	//	ft_free_line(pip->path);
+//	//	ft_free_array(pip->arg_data);
+//	//	perror(all->cmnd[all->i].args[0]);
+//		ft_putstr_fd(all->cmnd[all->i].args[0], 2);
+//		ft_putstr_fd(" : command not found\n", 2);
+//		exit(-10);
+//	}
+//}
+
+
+
 void cmd_exec(t_all *all)
 {
 	char *path;
 
-	path = get_data_path(all);
-	envs_list_to_array(all);
-	if (execve(path, all->cmnd[all->i].args, all->envp) == -1)
+	pid_t	pid;
+
+	pid = fork();
+	if (pid == -1)
+//			ft_error_exit("fork", &pip, FORK_ERR);
+		exit(-11);
+	else if (pid == 0)
 	{
-	//	ft_free_line(pip->path);
-	//	ft_free_array(pip->arg_data);
-	//	perror(all->cmnd[all->i].args[0]);
-		ft_putstr_fd(all->cmnd[all->i].args[0], 2);
-		ft_putstr_fd(" : command not found\n", 2);
-		exit(-10);
+		if (all->cmnd[all->i].fd_in > 0)
+		{
+			dup2(all->cmnd[all->i].fd_in, 0);
+			close(all->cmnd[all->i].fd_in);
+		}
+		else
+			dup2(all->fd_tmp, 0);
+		close(all->fd[0]);
+
+		if (all->cmnd[all->i].fd_out > 0)
+			dup2(all->cmnd[all->i].fd_out, 1);
+		else if (all->i != all->pip_count)
+			dup2(all->fd[1], 1);
+		close(all->fd[1]);
+
+		path = get_data_path(all);
+		envs_list_to_array(all);
+		if (execve(path, all->cmnd[all->i].args, all->envp) == -1)
+		{
+			//		ft_free_line(pip->path);
+			//		ft_free_array(pip->arg_data);
+			//		perror(all->cmnd.args[0]);
+			ft_putstr_fd(all->cmnd[all->i].args[0], 2);
+			ft_putstr_fd(" : command not found\n", 2);
+			exit(-10);
+		}
+		exit(10);
 	}
 }
+
+
 
 char *get_data_path(t_all *all)
 {
