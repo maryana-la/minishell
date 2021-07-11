@@ -4,20 +4,27 @@
 
 void start_commands(t_all *all)
 {
-	if (!ft_strncmp(all->args[0], "pwd", 4))
+	if (!ft_strncmp(all->cmnd[all->i].args[0], "pwd", 4))
 		pwd_command(all);
-	else if (!ft_strncmp(all->args[0], "env", 4))
+	else if (!ft_strncmp(all->cmnd[all->i].args[0], "env", 4))
 		print_env_list(all->env_vars, 0, all->env_counter);
-	else if (!ft_strncmp(all->args[0], "export", 7))
+	else if (!ft_strncmp(all->cmnd[all->i].args[0], "export", 7))
 		export_command(all);
-	else if (!ft_strncmp(all->args[0], "unset", 6))
+	else if (!ft_strncmp(all->cmnd[all->i].args[0], "unset", 6))
 		unset_command(all);
-	else if (!ft_strncmp(all->args[0], "cd", 3))
+	else if (!ft_strncmp(all->cmnd[all->i].args[0], "cd", 3))
 		cd_command(all);
-	else if (!ft_strncmp(all->args[0], "echo", 5))
+	else if (!ft_strncmp(all->cmnd[all->i].args[0], "echo", 5))
 		echo_command(all);
+	else if (!ft_strncmp(all->cmnd[all->i].args[0], "exit", 5))
+		exit_command(all);
 	else
 		cmd_exec(all);
+}
+
+void exit_command(t_all *all)
+{
+	exit(0);
 }
 
 void echo_command(t_all *all)
@@ -28,32 +35,32 @@ void echo_command(t_all *all)
 //todo -n в середине текста отображается, но срабатывает как флаг
 	i = 0;
 	flag = 0;
-	while (all->args[++i])
+	while (all->cmnd[all->i].args[++i])
 	{
-		if (!ft_strncmp (all->args[i], "-n", 2) && !flag)
+		if (!ft_strncmp (all->cmnd[all->i].args[i], "-n", 2) && !flag)
 		{
 			j=0;
-			while (all->args[i][++j] == 'n');
-			if (j != ft_strlen(all->args[i]))
+			while (all->cmnd[all->i].args[i][++j] == 'n');
+			if (j != ft_strlen(all->cmnd[all->i].args[i]))
 			{
 				flag = 1;
-				if (all->args[i+1])
-					printf("%s ", all->args[i]);
+				if (all->cmnd[all->i].args[i+1])
+					printf("%s ", all->cmnd[all->i].args[i]);
 				else
-					printf("%s", all->args[i]);
+					printf("%s", all->cmnd[all->i].args[i]);
 				continue;
 			}
-			if (ft_strncmp (all->args[i + 1], "-n", 2))
+			if (ft_strncmp (all->cmnd[all->i].args[i + 1], "-n", 2))
 			{
 				flag = 1;
 				continue;
 			}
 			continue;
 		}
-		if (all->args[i+1])
-			printf("%s ", all->args[i]);
+		if (all->cmnd[all->i].args[i+1])
+			printf("%s ", all->cmnd[all->i].args[i]);
 		else
-			printf("%s", all->args[i]);
+			printf("%s", all->cmnd[all->i].args[i]);
 	}
 	if (!flag)
 		printf("\n");
@@ -68,7 +75,7 @@ void cd_command(t_all *all)
 	while(++i < all->env_counter && ft_strcmp(all->env_vars[i].key, "OLDPWD"));
 	if (i != all->env_counter)
 		all->env_vars[i].value = ft_strdup(all->cwd); //todo зафришить все стрдапы в коде
-	chdir(all->args[1]);
+	chdir(all->cmnd[all->i].args[1]);
 	getcwd(all->cwd, sizeof(all->cwd));
 	i = -1;
 	while(++i < all->env_counter && ft_strcmp(all->env_vars[i].key, "PWD"));
@@ -84,46 +91,47 @@ void pwd_command (t_all *all)
 }
 
 void export_command(t_all *all) {
-	int i = 0;
+	all->arg_pos = 0;
 
-	if (!all->args[1])
+	if (!all->cmnd[all->i].args[1])
 	{
 		sort_envs(all);
 		print_env_list(all->env_sorted, 1, all->env_counter);
 		return;
 	}
 
-	while (all->args[++i])
+	while (all->cmnd[all->i].args[++all->arg_pos])
 	{
-		add_new_variable(all, i);
+		add_new_variable(all);
 	}
 }
 
-void add_new_variable(t_all *all, int arg_pos)
+void add_new_variable(t_all *all)
 {
-	int i = -1;
+	int i;
 	int j = -1;
 	t_env *tmp;
 	char *temp_key;
 	char *temp_value;
 	int ravno = 0;
 
-	if (ft_isdigit(all->args[arg_pos][0]) || !ft_strcmp(all->args[arg_pos], "="))
+
+	if (ft_isdigit(all->cmnd[all->i].args[all->arg_pos][0]) || !ft_strcmp(all->cmnd[all->i].args[all->arg_pos], "="))
 	{
-		printf("minishell: export: `%s': not a valid identifier\n", all->args[arg_pos]);
+		error_handler(all, 1);
 		return;
 	}
 
-	while (all->args[arg_pos][++j])
+	while (all->cmnd[all->i].args[all->arg_pos][++j])
 	{
-		if (all->args[arg_pos][j] == '=')
+		if (all->cmnd[all->i].args[all->arg_pos][j] == '=')
 		{
 			ravno = 1;
 			break;
 		}
 	}
-	temp_key = ft_substr(all->args[arg_pos], 0, j);
-	temp_value = ft_substr(all->args[arg_pos], j + 1, ft_strlen(all->args[1])-j+1);
+	temp_key = ft_substr(all->cmnd[all->i].args[all->arg_pos], 0, j);
+	temp_value = ft_substr(all->cmnd[all->i].args[all->arg_pos], j + 1, ft_strlen(all->cmnd[all->i].args[1])-j+1);
 //	if (temp_value[0] == '\0' && ravno)
 
 
@@ -144,13 +152,13 @@ void add_new_variable(t_all *all, int arg_pos)
 	tmp = malloc(sizeof (t_env) * (all->env_counter + 2));
 	while (all->env_vars[++i].key)
 		tmp[i] = all->env_vars[i];
-	while (all->args[arg_pos][++j])
+	while (all->cmnd[all->i].args[all->arg_pos][++j])
 	{
-		if (all->args[arg_pos][j] == '=')
+		if (all->cmnd[all->i].args[all->arg_pos][j] == '=')
 			break;
 	}
-	tmp[i].key = ft_substr(all->args[arg_pos], 0, j);
-	tmp[i].value = ft_substr(all->args[arg_pos], j + 1, ft_strlen(all->args[1])-j+1);
+	tmp[i].key = ft_substr(all->cmnd[all->i].args[all->arg_pos], 0, j);
+	tmp[i].value = ft_substr(all->cmnd[all->i].args[all->arg_pos], j + 1, ft_strlen(all->cmnd[all->i].args[1])-j+1);
 	if (tmp[i].value[0] == '\0' && !ravno)
 		tmp[i].value = ft_strdup("nullvalue");
 	tmp[i].key_len = ft_strlen(tmp[i].key);
@@ -166,7 +174,7 @@ void sort_envs(t_all *all)
 {
 	int i = -1;
 	int z = -1;
-	int j = -1;
+	int j;
 
 	all->env_sorted = malloc(sizeof (t_env) * (all->env_counter + 1));
 	while (all->env_vars[++i].key)
@@ -230,19 +238,41 @@ void unset_command(t_all *all)
 	int i;
 	int j = 0;
 
-	while (all->args[++j])
+	while (all->cmnd[all->i].args[++j])
 	{
 		i = -1;
 
-		while (!ft_strncmp(all->env_vars[++i].key, all->args[j], ft_strlen(all->args[j]) + 1));
-		while (i < all->env_counter)
+		if (ft_isdigit(all->cmnd[all->i].args[j][0]) || !ft_strcmp(all->cmnd[all->i].args[j], "="))
 		{
-			all->env_vars[i] = all->env_vars[i+1];
-			i++;
+			all->arg_pos = j;
+			error_handler(all, 2);
+			return;
 		}
-		if (i != all->env_counter - 1)
+
+		while(++i < all->env_counter && ft_strcmp(all->env_vars[i].key, all->cmnd[all->i].args[j]));
+		if (i != all->env_counter)
+		{
+			while (i < all->env_counter)
+			{
+				all->env_vars[i] = all->env_vars[i+1];
+				i++;
+			}
 			--all->env_counter;
+			continue;
+		}
+		else
+			continue;
 		//todo зафришить удаленную переменную
 	}
+}
 
+void sig_handler(int sig_id)
+{
+	if (sig_id == SIGINT)
+	{
+		printf("\n"); // Move to a new line
+		rl_on_new_line(); // Regenerate the prompt on a newline
+		rl_replace_line("", 0); // Clear the previous text
+		rl_redisplay();
+	}
 }

@@ -1,35 +1,63 @@
 #include "minishell.h"
 
+//void cmd_exec(t_all *all)
+//{
+//	char *path;
+//
+//	path = get_data_path(all);
+//	envs_list_to_array(all);
+//	if (execve(path, all->cmnd[all->i].args, all->envp) == -1)
+//	{
+//	//	ft_free_line(pip->path);
+//	//	ft_free_array(pip->arg_data);
+//	//	perror(all->cmnd[all->i].args[0]);
+//		ft_putstr_fd(all->cmnd[all->i].args[0], 2);
+//		ft_putstr_fd(" : command not found\n", 2);
+//		exit(-10);
+//	}
+//}
+
+
+
 void cmd_exec(t_all *all)
 {
 	char *path;
-	int fd[2];
 
 	pid_t	pid;
 
-		pipe(fd);
-		pid = fork();
-		if (pid == -1)
-//			ft_error_exit("fork", &pip, FORK_ERR);
-			exit(-11);
-		else if (pid == 0)
+	pid = fork();
+	if (pid == -1)
+		exit(-11);
+	else if (pid == 0)
+	{
+		if (all->cmnd[all->i].fd_in > 0)
 		{
-			close(fd[0]);
-			path = get_data_path(all);
-			envs_list_to_array(all);
-			if (execve(path, all->args, all->envp) == -1)
-			{
-	//		ft_free_line(pip->path);
-	//		ft_free_array(pip->arg_data);
-//				perror(all->args[0]);
-			ft_putstr_fd(all->args[0], 2);
-			ft_putstr_fd(" : command not found\n", 2);
-				exit(-10);
-			}
+			dup2(all->cmnd[all->i].fd_in, 0);
+			close(all->cmnd[all->i].fd_in);
 		}
-		wait(NULL);
-		close(fd[1]);
+		else
+			dup2(all->fd_tmp, 0);
+		close(all->fd[0]);
+
+		if (all->cmnd[all->i].fd_out > 0)
+			dup2(all->cmnd[all->i].fd_out, 1);
+		else if (all->i != all->pip_count)
+			dup2(all->fd[1], 1);
+		close(all->fd[1]);
+
+		path = get_data_path(all);
+		envs_list_to_array(all);
+		if (execve(path, all->cmnd[all->i].args, all->envp) == -1)
+		{
+			ft_putstr_fd(all->cmnd[all->i].args[0], 2);
+			ft_putstr_fd(" : command not found\n", 2);
+			exit(-10);
+		}
+		exit(10);
+	}
 }
+
+
 
 char *get_data_path(t_all *all)
 {
@@ -40,9 +68,9 @@ char *get_data_path(t_all *all)
 	char *exec;
 	int i;
 
-	if (ft_strncmp(all->args[0], "./", 2) == 0)
+	if (ft_strncmp(all->cmnd[all->i].args[0], "./", 2) == 0)
 	{
-		exec = ft_substr(all->args[0], 2, ft_strlen(all->args[0]) - 2);
+		exec = ft_substr(all->cmnd[all->i].args[0], 2, ft_strlen(all->cmnd[all->i].args[0]) - 2);
 		if (!(get_pwd = getcwd(NULL, -1)))
 		{
 			perror("getcwd");
@@ -51,10 +79,10 @@ char *get_data_path(t_all *all)
 		free(get_pwd);
 		get_pwd = ft_strjoin(tmp, exec);
 		free(tmp);
-		if (access(get_pwd, X_OK) != 0) // todo replace access with read
+		if (access(get_pwd, X_OK) != 0) // todo Maryana replace access with read
 		{
 			free(get_pwd);
-			perror (all->args[0]);
+			perror (all->cmnd[all->i].args[0]);
 			exit (1);
 		}
 		return (get_pwd);
@@ -70,7 +98,7 @@ char *get_data_path(t_all *all)
 
 	if (!path)
 	{
-//		ft_free_array(*arg_data); todo free all
+//		ft_free_array(*arg_data); todo Maryana free all
 		exit(-1);
 	}
 	i = -1;
@@ -79,9 +107,9 @@ char *get_data_path(t_all *all)
 	{
 		path_tmp = ft_strjoin(path[i], "/");
 		tmp = path_tmp;
-		path_tmp = ft_strjoin(path_tmp, all->args[0]);
+		path_tmp = ft_strjoin(path_tmp, all->cmnd[all->i].args[0]);
 		free(tmp);
-		if (access(path_tmp, F_OK | X_OK) == 0) //todo replace access with read
+		if (access(path_tmp, F_OK | X_OK) == 0) //todo Maryana replace access with read
 		{
 //			ft_free_array(path); to free
 			return (path_tmp);

@@ -72,12 +72,13 @@ int check_tokens(char *str, int *i, char token)
 	return (1);
 }
 
-int ft_preparser(char *str)
+int ft_preparser(char *str, t_all *all)
 {
 	int i;
 	int len;
 	int start;
 
+	all->num_of_pipes = 0;
 	len = (int)ft_strlen(str) - 1;
 	i = 0;
 	skip_spaces(str, &i);
@@ -105,6 +106,8 @@ int ft_preparser(char *str)
 //			i = i + 2;
 		else if (str[i] == '|' || str[i] == '<' || str[i] == '>')
 		{
+			if (str[i] == '|')
+				all->num_of_pipes++;
 			if (check_tokens(str, &i, str[i]) < 0)
 				return (-1);
 		}

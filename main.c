@@ -38,7 +38,7 @@ char *ft_dollar(char *str, int *i, t_all *all)
 	char	*tmp2;
 	char	*value;
 /*
-** todo добавить обработку $ $1 $12 $$  $?
+**todo Maryana добавить обработку $ $1 $12 $$  $?
 */
 	pos_of_dollar = *i;
 	while(str[++*i]) //find end of variable
@@ -152,7 +152,7 @@ int get_arg_len(char *str, int i)
 	return (len);
 }
 
-char *check_lower_case(char *str)
+char	*check_lower_case(char *str)
 {
 	int i;
 	char *dest;
@@ -173,41 +173,148 @@ char *check_lower_case(char *str)
 	return(str);
 }
 
-void ft_put_str_to_struct(char *arg, t_all *all)
+void	ft_put_str_to_struct(char *arg, t_all *all)
 {
 	int i;
 	char **tmp;
 
 	i = 0;
 
-	if (all->args == 0)
+	if (!all->cmnd[all->pip_count].args)
 	{
 		arg = check_lower_case(arg);
-		all->args = malloc(sizeof(char *) * 2);
-		all->args[0] = arg;
-		all->args[1] = 0;
+		all->cmnd[all->pip_count].args = malloc(sizeof(char *) * 2);
+		all->cmnd[all->pip_count].args[0] = arg;
+		all->cmnd[all->pip_count].args[1] = 0;
 	}
-	else if (all->args)
+	else
 	{
 		i=0;
-		while (all->args[i] != NULL)
+		while (all->cmnd[all->pip_count].args[i] != NULL)
 			i++;
 		tmp = malloc(sizeof(char *) * (i + 2));
 		i = 0;
-		while (all->args[i] != 0)
+		while (all->cmnd[all->pip_count].args[i] != 0)
 		{
-			tmp[i] = ft_strdup(all->args[i]);
+			tmp[i] = ft_strdup(all->cmnd[all->pip_count].args[i]);
 			i++;
 		}
 		tmp[i] = ft_strdup(arg);
 		tmp[i + 1] = 0;
 
-		free(all->args);
+		free(all->cmnd[all->pip_count].args);
 		if (arg) {
 			free(arg);
 			arg = 0;
 		}
-		all->args = tmp;
+		all->cmnd[all->pip_count].args = tmp;
+	}
+}
+
+char	*get_file_name(char *str, int *i, t_all *all)
+{
+	int	len;
+	char *tmp;
+	int j;
+
+	skip_spaces(str, i);
+	len = get_arg_len(str, *i);
+	tmp = malloc(sizeof(char) * (len + 1));
+	if (!tmp)
+		return (0); //malloc error
+	j = 0;
+	while (str[*i] && !check_set(str[*i], " \t|;<>"))
+	{
+		if (str[*i] == '\'')
+		{
+			while (str[++(*i)] && str[*i] != '\'')
+			{
+				tmp[j] = str[(*i)];
+				j++;
+			}
+			j--;
+		}
+		else if (str[*i] == '\"')
+		{
+			while (str[++(*i)] && str[*i] != '\"')
+			{
+				if (str[*i] == '\\' && (str[*i + 1] == '$' || str[*i + 1] == '\'' || str[*i + 1] == '\"' || str[*i + 1] == '\\'))
+					tmp[j] = str[++(*i)];
+				else
+					tmp[j] = str[*i];
+				j++;
+			}
+			j--;
+		}
+		else if (str[*i] == '\\')
+			tmp[j] = str[++(*i)];
+		else
+			tmp[j] = str[*i];
+		(*i)++;
+		j++;
+	}
+	tmp[j] = '\0';
+	return(tmp);
+}
+
+void	heredoc_stdin_read(t_all *all, char *stop)
+{
+	char	*line;
+	int		ret;
+
+	all->cmnd[all->pip_count].fd_in = open("tmp_file", O_CREAT | O_RDWR | O_TRUNC, S_IRWXU);
+//	if (pip->fd_in < 0 || read(pip->fd_in, 0, 0) < 0)
+//		ft_error_exit(argv[1], pip, FILE_ERR);
+	ret = 1;
+	while (ret)
+	{
+		write(0, "> ", 2);
+		ret = get_next_line(0, &line);
+		if (ft_strncmp(line, stop, ft_strlen(stop) + 1) == 0)
+			break ;
+		write(all->cmnd[all->pip_count].fd_in, line, ft_strlen(line));
+		write(all->cmnd[all->pip_count].fd_in, "\n", 1);
+		if (line)
+			free(line);
+	}
+	if (line)
+		free(line);
+
+
+	close (all->cmnd[all->pip_count].fd_in);
+	all->cmnd[all->pip_count].fd_in = open("tmp_file", O_RDONLY);
+//	if (all->cmnd->fd_in < 0 || read(all->cmnd->fd_in, 0, 0) < 0)
+//		ft_error_exit("tmp_file", pip, FILE_ERR);
+}
+
+
+void	ft_handle_redirect(char *str, int *i, t_all *all)
+{
+	char *file_name;
+
+	if (str[*i] == '>' && str[*i + 1] != '>')
+	{
+		(*i)++;
+		file_name = get_file_name(str, i, all);
+		all->cmnd[all->pip_count].fd_out = open(file_name, O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU);
+	}
+	else if (str[*i] == '>' && str[*i + 1] == '>')
+	{
+		*i = *i + 2;
+		file_name = get_file_name(str, i, all);
+		all->cmnd[all->pip_count].fd_out = open(file_name, O_CREAT | O_WRONLY | O_APPEND, S_IRWXU);
+	}
+	else if (str[*i] == '<' && str[*i + 1] != '<')
+	{
+		(*i)++;
+		file_name = get_file_name(str, i, all);
+		all->cmnd[all->pip_count].fd_in = open(file_name, O_RDONLY);
+	}
+	else if (str[*i] == '<' && str[*i + 1] == '<')
+	{
+		*i = *i + 2;
+		file_name = get_file_name(str, i, all);
+		heredoc_stdin_read(all, file_name);
 	}
 }
 
@@ -219,52 +326,79 @@ void ft_parser(char *str, t_all *all)
 	char *tmp;
 	char *from_quote;
 
+
+	all->cmnd = malloc(sizeof(t_cmnd) * (all->num_of_pipes + 2)); //todo change to number of pipes
+	i = -1;
+	while (++i < (all->num_of_pipes + 2))
+	{
+		all->cmnd[i].args = NULL;
+		all->cmnd[i].fd_in = -1;
+		all->cmnd[i].fd_out = -1;
+	}
+	all->pip_count = 0;
 	str = replace_env_with_value(str, all); // заменяем в строке переменные окружения
 	i = 0;
+//todo malloc for cmnd array
 
-	while((str[i]) && !(check_set(str[i], "|;><")))
+	while(str[i])
 	{
-		skip_spaces(str, &i);
-		len = get_arg_len(str, i);
-		tmp = malloc(sizeof(char) * (len + 1));
-		j = 0;
-		while (str[i] && !check_set(str[i], " \t|;<>"))
-		{
-			if (str[i] == '\'')
+//		while (str[i] && !(check_set(str[i], "|;")))
+//		{
+			skip_spaces(str, &i);
+			if (str[i] == '>' || str[i] == '<')
+				ft_handle_redirect(str, &i, all);
+			else if (str[i] == '|')
 			{
-				while (str[++i] && str[i] != '\'')
-				{
-					tmp[j] = str[i];
-					j++;
-				}
-				j--;
+				all->pip_count++;
+				i++;
 			}
-			else if (str[i] == '\"')
+			else
 			{
-				while (str[++i] && str[i] != '\"')
+				len = get_arg_len(str, i);
+				tmp = malloc(sizeof(char) * (len + 1));
+				j = 0;
+				while (str[i] && !check_set(str[i], " \t|;<>"))
 				{
-					if (str[i] == '\\' && (str[i + 1] == '$' || str[i + 1] == '\'' || str[i + 1] == '\"' || str[i + 1] == '\\'))
+					if (str[i] == '\'')
+					{
+						while (str[++i] && str[i] != '\'')
+						{
+							tmp[j] = str[i];
+							j++;
+						}
+						j--;
+					} else if (str[i] == '\"')
+					{
+						while (str[++i] && str[i] != '\"')
+						{
+							if (str[i] == '\\' &&
+								(str[i + 1] == '$' || str[i + 1] == '\'' || str[i + 1] == '\"' || str[i + 1] == '\\'))
+								tmp[j] = str[++i];
+							else
+								tmp[j] = str[i];
+							j++;
+						}
+						j--;
+					} else if (str[i] == '\\')
 						tmp[j] = str[++i];
 					else
 						tmp[j] = str[i];
+					i++;
 					j++;
 				}
-				j--;
+				if (len > 0)
+				{
+					tmp[j] = '\0';
+					ft_put_str_to_struct(tmp, all);
+				}
 			}
-			else if (str[i] == '\\')
-				tmp[j] = str[++i];
-			else
-				tmp[j] = str[i];
-			i++;
-			j++;
-		}
-		tmp[j] = '\0';
-		ft_put_str_to_struct(tmp, all);
+//		}
 	}
-	start_commands(all);
+	launch_commands(all);
 }
 
-int env_init(t_all *all, char **env) // env init with lists:
+
+void env_init(t_all *all, char **env) // env init with lists:
 {
 	t_env	*tmp;
 	int shlvl_tmp = 0;
@@ -280,7 +414,7 @@ int env_init(t_all *all, char **env) // env init with lists:
 	while (env[++i]);
 	all->env_vars = malloc(sizeof(t_env) * (i + 1));
 	if (!all->env_vars)
-		return 0;
+		exit (-2);
 	i = -1;
 	while(env[++i])
 	{
@@ -304,7 +438,7 @@ int env_init(t_all *all, char **env) // env init with lists:
 		{
 			all->env_vars[i].key = ft_strdup("SHLVL");
 			all->env_vars[i].key_len = ft_strlen(all->env_vars[i].key);
-			all->env_vars[i].value = ft_substr(env[i], 6, (ft_strlen(env[i]) - j + 1));
+			all->env_vars[i].value = ft_substr(env[i], 6, (ft_strlen(env[i]) - 6));
 			shlvl_tmp = ft_atoi(all->env_vars[i].value) + 1;
 			all->env_vars[i].value = ft_itoa(shlvl_tmp);
 			all->env_vars[i].value_len = ft_strlen(all->env_vars[i].value);
@@ -326,9 +460,8 @@ int env_init(t_all *all, char **env) // env init with lists:
 	all->env_vars[i].key = NULL;
 	all->env_vars[i].value = NULL;
 
-// to inc SHLVL
-
-	if(shlvl_flag == 0) // if no SHVLV - set it to 1
+	// if no SHVLV PWD OLDPWD- set it to 1
+	if(shlvl_flag == 0)
 	{
 		i = -1;
 		t_env *tmp;
@@ -364,7 +497,7 @@ int env_init(t_all *all, char **env) // env init with lists:
 		all->env_vars = tmp;
 		all->env_counter++;
 	}
-	if (oldpwd_flag == 0)
+	if(oldpwd_flag == 0)
 	{
 		i = -1;
 		t_env *tmp;
@@ -382,26 +515,36 @@ int env_init(t_all *all, char **env) // env init with lists:
 		all->env_vars = tmp;
 		all->env_counter++;
 	}
-	return (0);
 }
 
 void init_all(t_all *all)
 {
 	int i;
+	int	j;
 
 	i = -1;
-	if (all->args)
-		while (all->args[++i])
-			if (all->args[i])
-				all->args[i] = NULL;
-	all->args = NULL;
+	j = 0;
+	all->num_of_pipes = 0;
+	if (all->cmnd)
+	{
+		while (all->cmnd[j].args[++i])
+		{
+			if (all->cmnd[j].args[i])
+				all->cmnd[j].args[i] = NULL;
+			j++;
+		}
+	}
+	all->cmnd = NULL;
 }
 
-int takeInput(char** str)
+int takeInput(t_all *all, char** str)
 {
 	char* buf;
 
-	buf = readline("minishell>>> ");
+	rl_catch_signals = 0;
+	buf = readline("minishell > ");
+	if (!buf)
+		exit_command(all);
 	if (strlen(buf) != 0)
 	{
 		add_history(buf);
@@ -420,16 +563,22 @@ int main(int argc, char **argv, char **env)
 	int i = 0;
 	char **test;
 
-	init_all(&all);
+//	init_all(&all);
 	env_init(&all, env);
+
+//	char *str = "ECHO $SHLVL'pwd $PATH' \"$PAGER$LSCOLORS\"$;l$XPC_FLAGS\'ffrsvdd\'";
+
+if (signal(SIGINT, sig_handler) == SIG_ERR)
+		error_handler(&all, 3);
 
 	char *str;
 	while (1)
 	{
-		init_all(&all);
-		if (takeInput(&str))
-			continue ;
-		if (ft_preparser(str) > 0)
+//		init_all(&all);
+		if (takeInput(&all, &str))
+			continue;
+		//	printf("str_i = %s\n", str);
+		if (ft_preparser(str, &all) > 0)
 			ft_parser(str, &all);
 		else
 			printf("%s\n", "preparser error");

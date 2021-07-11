@@ -6,7 +6,7 @@
 /*   By: jjacquel <jjacquel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/02 21:11:50 by jjacquel          #+#    #+#             */
-/*   Updated: 2020/11/12 17:02:39 by jjacquel         ###   ########.fr       */
+/*   Updated: 2021/06/29 18:41:10 by jjacquel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ void	*ft_memchr(const void *s, int c, size_t n)
 	while (i < n)
 	{
 		if (temp[i] == (unsigned char)c)
-			return ((void*)s + i);
+			return ((void *)s + i);
 		i++;
 	}
 	return (NULL);

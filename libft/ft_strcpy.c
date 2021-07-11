@@ -1,37 +1,27 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_atoi.c                                          :+:      :+:    :+:   */
+/*   ft_strchr.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: jjacquel <jjacquel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2020/10/29 14:05:52 by jjacquel          #+#    #+#             */
-/*   Updated: 2021/06/29 18:35:54 by jjacquel         ###   ########.fr       */
+/*   Created: 2020/11/02 21:11:50 by jjacquel          #+#    #+#             */
+/*   Updated: 2020/11/12 18:05:29 by jjacquel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-int	ft_atoi(const char *str)
+char	*ft_strcpy(char *dest, char *src)
 {
-	unsigned long int		chislo;
-	int						znak;
+	int	i;
 
-	chislo = 0;
-	znak = 1;
-	while ((*str == 32) || ((*str >= 9) && (*str <= 13)))
-		str++;
-	if (*str == '+')
-		str++;
-	else if (*str == '-')
+	i = 0;
+	while (src[i] != '\0')
 	{
-		znak = znak * -1;
-		str++;
+		dest[i] = src[i];
+		i++;
 	}
-	while (*str >= '0' && *str <= '9')
-	{
-		chislo = chislo * 10 + *str - '0';
-		str++;
-	}
-	return (chislo * znak);
+	dest[i] = '\0';
+	return (dest);
 }

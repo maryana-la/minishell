@@ -14,7 +14,7 @@
 
 void	ft_putnbr_fd(int n, int fd)
 {
-	unsigned	t;
+	unsigned int	t;
 
 	t = 0;
 	if (n < 0)
