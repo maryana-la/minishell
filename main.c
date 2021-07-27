@@ -522,19 +522,27 @@ void init_all(t_all *all)
 	int i;
 	int	j;
 
-	i = -1;
+	i = 0;
 	j = 0;
-	all->num_of_pipes = 0;
 	if (all->cmnd)
 	{
-		while (all->cmnd[j].args[++i])
+		while (j < all->num_of_pipes + 1)
 		{
-			if (all->cmnd[j].args[i])
-				all->cmnd[j].args[i] = NULL;
+			i = -1;
+			if (all->cmnd[j].args[++i])
+			{
+				while (all->cmnd[j].args[i])
+				{
+					if (all->cmnd[j].args[i])
+						all->cmnd[j].args[i] = NULL;
+				}
+//				all->cmnd[j].args[i] = NULL;
+			}
 			j++;
 		}
 	}
 	all->cmnd = NULL;
+	all->num_of_pipes = 0;
 }
 
 int takeInput(t_all *all, char** str)
@@ -563,7 +571,7 @@ int main(int argc, char **argv, char **env)
 	int i = 0;
 	char **test;
 
-//	init_all(&all);
+	init_all(&all);
 	env_init(&all, env);
 
 //	char *str = "ECHO $SHLVL'pwd $PATH' \"$PAGER$LSCOLORS\"$;l$XPC_FLAGS\'ffrsvdd\'";
@@ -574,7 +582,7 @@ if (signal(SIGINT, sig_handler) == SIG_ERR)
 	char *str;
 	while (1)
 	{
-//		init_all(&all);
+		init_all(&all);
 		if (takeInput(&all, &str))
 			continue;
 		//	printf("str_i = %s\n", str);
