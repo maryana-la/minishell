@@ -65,6 +65,7 @@ void cmd_exec(t_all *all)// for no pipes
 
 	pid_t	pid;
 
+	pipe(all->fd); //new
 	pid = fork();
 	if (pid == -1)
 		exit(-11);
@@ -93,6 +94,9 @@ void cmd_exec(t_all *all)// for no pipes
 		}
 		exit(10);
 	}
+	close(all->fd[1]);
+	close(all->fd[0]);
+	wait(NULL);
 }
 
 

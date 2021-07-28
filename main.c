@@ -180,12 +180,17 @@ void	ft_put_str_to_struct(char *arg, t_all *all)
 
 	i = 0;
 
-	if (!all->cmnd[all->pip_count].args)
+	if (!all->cmnd[all->pip_count].args) //if first argument
 	{
 		arg = check_lower_case(arg);
 		all->cmnd[all->pip_count].args = malloc(sizeof(char *) * 2);
-		all->cmnd[all->pip_count].args[0] = arg;
+		all->cmnd[all->pip_count].args[0] = ft_strdup(arg);
 		all->cmnd[all->pip_count].args[1] = 0;
+		if (arg)
+		{
+			free(arg);
+			arg = NULL;
+		}
 	}
 	else
 	{
@@ -203,9 +208,10 @@ void	ft_put_str_to_struct(char *arg, t_all *all)
 		tmp[i + 1] = 0;
 
 		free(all->cmnd[all->pip_count].args);
-		if (arg) {
+		if (arg)
+		{
 			free(arg);
-			arg = 0;
+			arg = NULL;
 		}
 		all->cmnd[all->pip_count].args = tmp;
 	}

@@ -75,7 +75,8 @@ void 	launch_commands(t_all *all)
 				{
 					dup2(all->cmnd[all->i].fd_in, 0);
 					close(all->cmnd[all->i].fd_in);
-				} else
+				}
+				else
 					dup2(all->fd_tmp, 0);
 				close(all->fd[0]);
 				if (all->cmnd[all->i].fd_out > 0)
