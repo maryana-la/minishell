@@ -8,7 +8,7 @@
 # include <fcntl.h>
 # include <readline/readline.h>
 # include <readline/history.h>
-# include <editline/readline.h>
+//# include <editline/readline.h>
 # include <sys/types.h>
 # include <sys/wait.h>
 # include <sys/errno.h>
@@ -45,6 +45,7 @@ typedef struct s_all
 	int		i;
 	int 	arg_pos;
 	int 	fd[2];
+	int 	fd_std[2];
 	int 	fd_tmp;
 }				t_all;
 

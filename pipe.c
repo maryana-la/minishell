@@ -49,13 +49,13 @@ void 	launch_commands(t_all *all)
 
 	if (all->pip_count == 0)
 	{
-//		if (all->cmnd[all->i].fd_in > 0)
-//		{
-//			dup2(all->cmnd[all->i].fd_in, 0);
-//			close(all->cmnd[all->i].fd_in);
-//		}
-//		if (all->cmnd[all->i].fd_out > 0)
-//			dup2(all->cmnd[all->i].fd_out, 1);
+		if (all->cmnd[all->i].fd_in > 0)
+		{
+			dup2(all->cmnd[all->i].fd_in, 0);
+			close(all->cmnd[all->i].fd_in);
+		}
+		if (all->cmnd[all->i].fd_out > 0)
+			dup2(all->cmnd[all->i].fd_out, 1);
 
 		start_commands(all);
 	}
@@ -121,4 +121,6 @@ void 	launch_commands(t_all *all)
 		while (++i < all->pip_count + 1)
 			wait(NULL);
 	}
+	dup2(all->fd_std[0], 0);
+	dup2(all->fd_std[1], 1);
 }

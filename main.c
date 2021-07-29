@@ -428,8 +428,9 @@ void env_init(t_all *all, char **env) // env init with lists:
 		{
 			all->env_vars[i].key = ft_strdup("PWD");
 			all->env_vars[i].key_len = ft_strlen(all->env_vars[i].key);
-			all->env_vars[i].value = getcwd(NULL, -1);
+			all->env_vars[i].value = getcwd(NULL, 0);
 			all->env_vars[i].value_len = ft_strlen(all->env_vars[i].value);
+//			perror("pwd path:");
 			pwd_flag = 1;
 		}
 		else if (ft_strncmp(env[i], "OLDPWD=", 7) == 0)
@@ -532,22 +533,24 @@ void init_all(t_all *all)
 	j = 0;
 	if (all->cmnd)
 	{
-		while (j < all->num_of_pipes + 1)
-		{
-			i = -1;
-			if (all->cmnd[j].args[++i])
-			{
-				while (all->cmnd[j].args[i])
-				{
-					if (all->cmnd[j].args[i])
-						all->cmnd[j].args[i] = NULL;
-				}
-//				all->cmnd[j].args[i] = NULL;
-			}
-			j++;
-		}
+//		while (j < all->num_of_pipes + 1)
+//		{
+//			i = 0;
+//			if (all->cmnd[j].args[i])
+//			{
+//				while (all->cmnd[j].args[i])
+//				{
+//					if (all->cmnd[j].args[i])
+//						all->cmnd[j].args[i] = NULL;
+//					i++;
+//				}
+////				all->cmnd[j].args[i] = NULL;
+//			}
+//			j++;
+//		}
+		all->cmnd = NULL;
 	}
-	all->cmnd = NULL;
+//	all->cmnd = NULL;
 	all->num_of_pipes = 0;
 }
 
@@ -579,6 +582,8 @@ int main(int argc, char **argv, char **env)
 
 	init_all(&all);
 	env_init(&all, env);
+	all.fd_std[0] = dup(0);
+	all.fd_std[1] = dup(1);
 
 //	char *str = "ECHO $SHLVL'pwd $PATH' \"$PAGER$LSCOLORS\"$;l$XPC_FLAGS\'ffrsvdd\'";
 
