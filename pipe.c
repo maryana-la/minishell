@@ -17,7 +17,7 @@ void	call_child(t_all *all)
 //	close(all->fd[0]);
 //
 //
-//	if (all->cmnd[all->i].fd_out > 0)
+//	if (all->cmnd[all->i].fd_out > 1)
 //		dup2(all->cmnd[all->i].fd_out, 1);
 //	else if (all->i != all->pip_count)
 //		dup2(all->fd[1], 1);
@@ -71,7 +71,7 @@ void 	launch_commands(t_all *all)
 				exit(-11);
 			else if (pid == 0)
 			{
-				if (all->cmnd[all->i].fd_in > 0)
+				if (all->cmnd[all->i].fd_in > STDIN_FILENO)
 				{
 					dup2(all->cmnd[all->i].fd_in, 0);
 					close(all->cmnd[all->i].fd_in);
@@ -79,7 +79,7 @@ void 	launch_commands(t_all *all)
 				else
 					dup2(all->fd_tmp, 0);
 				close(all->fd[0]);
-				if (all->cmnd[all->i].fd_out > 0)
+				if (all->cmnd[all->i].fd_out > STDOUT_FILENO)
 					dup2(all->cmnd[all->i].fd_out, 1);
 				else if (all->i != all->pip_count)
 					dup2(all->fd[1], 1);
@@ -103,23 +103,28 @@ void 	launch_commands(t_all *all)
 				else
 					cmd_exec1(all);
 
-//				path = get_data_path(all);
-//				envs_list_to_array(all);
-//				if (execve(path, all->cmnd[all->i].args, all->envp) == -1)
-//				{
-//					ft_putstr_fd(all->cmnd[all->i].args[0], 2);
-//					ft_putstr_fd(" : command not found\n", 2);
-//					exit(-10);
-//				}
-				exit(10);
+				exit(10); //todo check return value from builtin-s
 			}
 			close(all->fd[1]);
 			all->fd_tmp = all->fd[0];
+
 			all->i++;
 		}
 		int i = -1;
+		int wstat;
 		while (++i < all->pip_count + 1)
-			wait(NULL);
+		{
+			wait(&wstat);
+			if (WIFEXITED(wstat))
+			{
+				int exit_code = WEXITSTATUS(wstat);
+				if (exit_code == 0)
+					printf ("Success\n");
+				else
+					printf ("Error %d\n", exit_code);
+			}
+
+		}
 	}
 	dup2(all->fd_std[0], 0);
 	dup2(all->fd_std[1], 1);

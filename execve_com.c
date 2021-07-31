@@ -1,51 +1,8 @@
 #include "minishell.h"
 
-//void cmd_exec(t_all *all)
-//{
-//	char *path;
-//
-//	path = get_data_path(all);
-//	envs_list_to_array(all);
-//	if (execve(path, all->cmnd[all->i].args, all->envp) == -1)
-//	{
-//	//	ft_free_line(pip->path);
-//	//	ft_free_array(pip->arg_data);
-//	//	perror(all->cmnd[all->i].args[0]);
-//		ft_putstr_fd(all->cmnd[all->i].args[0], 2);
-//		ft_putstr_fd(" : command not found\n", 2);
-//		exit(-10);
-//	}
-//}
-
-//todo export -> ls - not working((
-//todo builtin + redirect
-
-
 void cmd_exec1(t_all *all) //for multi pipes
 {
 	char *path;
-//
-//	pid_t	pid;
-//
-//	pid = fork();
-//	if (pid == -1)
-//		exit(-11);
-//	else if (pid == 0)
-//	{
-//		if (all->cmnd[all->i].fd_in > 0)
-//		{
-//			dup2(all->cmnd[all->i].fd_in, 0);
-//			close(all->cmnd[all->i].fd_in);
-//		}
-//		else
-//			dup2(all->fd_tmp, 0);
-//		close(all->fd[0]);
-//
-//		if (all->cmnd[all->i].fd_out > 0)
-//			dup2(all->cmnd[all->i].fd_out, 1);
-//		else if (all->i != all->pip_count)
-//			dup2(all->fd[1], 1);
-//		close(all->fd[1]);
 
 		path = get_data_path(all);
 		envs_list_to_array(all);
@@ -53,9 +10,9 @@ void cmd_exec1(t_all *all) //for multi pipes
 		{
 			ft_putstr_fd(all->cmnd[all->i].args[0], 2);
 			ft_putstr_fd(" : command not found\n", 2);
-			exit(-10);
+			exit(127);
 		}
-		exit(10);
+		exit(0);
 //	}
 }
 
@@ -71,16 +28,14 @@ void cmd_exec(t_all *all)// for no pipes
 		exit(-11);
 	else if (pid == 0)
 	{
-		if (all->cmnd[all->i].fd_in > 0)
+		if (all->cmnd[all->i].fd_in > STDIN_FILENO)
 		{
 			dup2(all->cmnd[all->i].fd_in, 0);
 			close(all->cmnd[all->i].fd_in);
 		}
-		else
-			dup2(all->fd_tmp, 0);
 		close(all->fd[0]);
 
-		if (all->cmnd[all->i].fd_out > 0)
+		if (all->cmnd[all->i].fd_out > 1)
 			dup2(all->cmnd[all->i].fd_out, 1);
 		close(all->fd[1]);
 
@@ -90,13 +45,22 @@ void cmd_exec(t_all *all)// for no pipes
 		{
 			ft_putstr_fd(all->cmnd[all->i].args[0], 2);
 			ft_putstr_fd(" : command not found\n", 2);
-			exit(-10);
+			exit(127);
 		}
-		exit(10);
+		exit(0);
 	}
 	close(all->fd[1]);
 	close(all->fd[0]);
-	wait(NULL);
+	int wstat;
+	wait(&wstat);
+	if (WIFEXITED(wstat))
+	{
+		int exit_code = WEXITSTATUS(wstat);
+		if (exit_code == 0)
+			printf("Success\n");
+		else
+			printf("Error %d\n", exit_code);
+	}
 }
 
 
@@ -153,7 +117,7 @@ char *get_data_path(t_all *all)
 		free(tmp);
 		if (access(path_tmp, F_OK | X_OK) == 0) //todo Maryana replace access with read
 		{
-//			ft_free_array(path); to free
+//			ft_free_array(path); //todo free
 			return (path_tmp);
 		}
 		free(path_tmp);

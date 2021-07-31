@@ -47,6 +47,7 @@ typedef struct s_all
 	int 	fd[2];
 	int 	fd_std[2];
 	int 	fd_tmp;
+	int 	last_exit;
 }				t_all;
 
 
@@ -61,14 +62,14 @@ int check_tokens(char *str, int *i, char token);
 */
 
 int takeInput(t_all *all, char** str);
-char *ft_slash(char *str, int *i);
+//char *ft_slash(char *str, int *i);
 int check_set(char c, char *set);
 void skip_spaces(char *str, int *i);
 char *ft_dollar(char *str, int *i, t_all *all);
 // char *ft_s_quote(char *str, int *i, int *tmp);
-void ft_s_quote(char *str, char **arg, int *i, int *j_tmp);
-char *ft_double_quote(char *str, int *i, int *tmp);
-int	find_end_of_arg(char *str, int i, t_all *all);
+//void ft_s_quote(char *str, char **arg, int *i, int *j_tmp);
+//char *ft_double_quote(char *str, int *i, int *tmp);
+//int	find_end_of_arg(char *str, int i, t_all *all);
 char	*replace_env_with_value(char *str, t_all *all);
 void	ft_parser(char *str, t_all *all);
 void	env_init(t_all *all, char **env);

@@ -302,13 +302,13 @@ void	ft_handle_redirect(char *str, int *i, t_all *all)
 	{
 		(*i)++;
 		file_name = get_file_name(str, i, all);
-		all->cmnd[all->pip_count].fd_out = open(file_name, O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU);
+		all->cmnd[all->pip_count].fd_out = open(file_name, O_CREAT | O_RDWR | O_TRUNC, S_IRWXU);
 	}
 	else if (str[*i] == '>' && str[*i + 1] == '>')
 	{
 		*i = *i + 2;
 		file_name = get_file_name(str, i, all);
-		all->cmnd[all->pip_count].fd_out = open(file_name, O_CREAT | O_WRONLY | O_APPEND, S_IRWXU);
+		all->cmnd[all->pip_count].fd_out = open(file_name, O_CREAT | O_RDWR | O_APPEND, S_IRWXU);
 	}
 	else if (str[*i] == '<' && str[*i + 1] != '<')
 	{
@@ -333,18 +333,17 @@ void ft_parser(char *str, t_all *all)
 	char *from_quote;
 
 
-	all->cmnd = malloc(sizeof(t_cmnd) * (all->num_of_pipes + 2)); //todo change to number of pipes
+	all->cmnd = malloc(sizeof(t_cmnd) * (all->num_of_pipes + 2)); //malloc for number of commands
 	i = -1;
 	while (++i < (all->num_of_pipes + 2))
 	{
 		all->cmnd[i].args = NULL;
-		all->cmnd[i].fd_in = -1;
-		all->cmnd[i].fd_out = -1;
+		all->cmnd[i].fd_in = STDIN_FILENO;
+		all->cmnd[i].fd_out = STDOUT_FILENO;
 	}
 	all->pip_count = 0;
 	str = replace_env_with_value(str, all); // заменяем в строке переменные окружения
 	i = 0;
-//todo malloc for cmnd array
 
 	while(str[i])
 	{
