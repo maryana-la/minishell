@@ -53,7 +53,17 @@ char *ft_dollar(char *str, int *i, t_all *all)
 	var = ft_substr(str, pos_of_dollar + 1, (end_of_var - pos_of_dollar -1));
 	// printf("var = %s\n", var);
 
-	if (ft_isdigit(var[0]) != 0) // check all ascii symbols
+	if (!(ft_strncmp(var, "?", 2)))
+	{
+		value = ft_itoa(all->last_exit);
+		tmp1 = ft_substr(str, 0, pos_of_dollar);
+		tmp2 = ft_substr(str, *i, (ft_strlen(str) - *i + 1));
+		tmp1 = ft_strjoin(tmp1, value);
+		tmp1 = ft_strjoin(tmp1, tmp2);
+		*i = pos_of_dollar + (int)ft_strlen(value) - 1;
+		return(tmp1);
+	}
+	else if (ft_isdigit(var[0]) != 0) // check all ascii symbols
 	{
 		if(ft_strlen(var) == 1)
 		{
@@ -85,7 +95,7 @@ char *ft_dollar(char *str, int *i, t_all *all)
 	tmp2 = ft_substr(str, *i, (ft_strlen(str) - *i + 1)); // cut after variable
 	tmp1 = ft_strjoin(tmp1, value);
 	tmp1 = ft_strjoin(tmp1, tmp2);
-	*i = pos_of_dollar + ft_strlen(value) - 1;
+	*i = pos_of_dollar + (int)ft_strlen(value) - 1;
 	return (tmp1);
 }
 
@@ -576,15 +586,11 @@ int takeInput(t_all *all, char** str)
 int main(int argc, char **argv, char **env)
 {
 	t_all  all;
-	int i = 0;
-	char **test;
 
 	init_all(&all);
 	env_init(&all, env);
 	all.fd_std[0] = dup(0);
 	all.fd_std[1] = dup(1);
-
-//	char *str = "ECHO $SHLVL'pwd $PATH' \"$PAGER$LSCOLORS\"$;l$XPC_FLAGS\'ffrsvdd\'";
 
 if (signal(SIGINT, sig_handler) == SIG_ERR)
 		error_handler(&all, 3);

@@ -1,48 +1,7 @@
-//
-// Created by Ragwyle Chelsea on 7/6/21.
-//
-
 #include "minishell.h"
-
-
-void	call_child(t_all *all)
-{
-//	if (all->cmnd[all->i].fd_in > 0)
-//	{
-//		dup2(all->cmnd[all->i].fd_in, 0);
-//		close(all->cmnd[all->i].fd_in);
-//	}
-//	else
-//		dup2(fd_tmp, 0);
-//	close(all->fd[0]);
-//
-//
-//	if (all->cmnd[all->i].fd_out > 1)
-//		dup2(all->cmnd[all->i].fd_out, 1);
-//	else if (all->i != all->pip_count)
-//		dup2(all->fd[1], 1);
-//	close(all->fd[1]);
-
-//	start_commands(all);
-
-
-//	pip->path = get_data_path(argv[i], env, pip);
-//	if (execve(pip->path, pip->arg_data, env) == -1)
-//	{
-//		ft_free_line(pip->path);
-//		ft_free_array(pip->arg_data);
-//		ft_putstr_fd(argv[i], 2);
-//		ft_putstr_fd(" : command not found\n", 2);
-//		exit (0);
-//	}
-//	ft_free_line(pip->path);
-//	ft_free_array(pip->arg_data);
-}
-
 
 void 	launch_commands(t_all *all)
 {
-	char *path;
 	pid_t pid;
 
 	all->i = 0;
@@ -54,7 +13,7 @@ void 	launch_commands(t_all *all)
 			dup2(all->cmnd[all->i].fd_in, 0);
 			close(all->cmnd[all->i].fd_in);
 		}
-		if (all->cmnd[all->i].fd_out > 0)
+		if (all->cmnd[all->i].fd_out > 1)
 			dup2(all->cmnd[all->i].fd_out, 1);
 
 		start_commands(all);
@@ -118,12 +77,16 @@ void 	launch_commands(t_all *all)
 			if (WIFEXITED(wstat))
 			{
 				int exit_code = WEXITSTATUS(wstat);
-				if (exit_code == 0)
-					printf ("Success\n");
-				else
-					printf ("Error %d\n", exit_code);
+				if (exit_code != 0) // todo do nothing
+				{
+					if (exit_code == 13)
+						all->last_exit = 126;
+					else if (exit_code == 14)
+						all->last_exit = 127;
+					printf("Error %d\n", all->last_exit);
+				} else
+					printf("Success\n");
 			}
-
 		}
 	}
 	dup2(all->fd_std[0], 0);
