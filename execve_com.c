@@ -69,7 +69,7 @@ void cmd_exec(t_all *all)// for no pipes
 	close(all->fd[0]);
 	int wstat;
 	wait(&wstat);
-//	printf("wstat=%d\n", wstat);
+	printf("wstat=%d\n", wstat);
 	if (WIFEXITED(wstat))
 	{
 		int exit_code = WEXITSTATUS(wstat);
@@ -88,6 +88,13 @@ void cmd_exec(t_all *all)// for no pipes
 			printf("Success\n");
 			all->last_exit = 0;
 		}
+	}
+	else
+	{
+		if (wstat == SIGINT)
+			all->last_exit = 130;
+		else if (wstat == SIGQUIT)
+			all->last_exit = 130;
 	}
 }
 
