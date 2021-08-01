@@ -277,4 +277,8 @@ void sig_handler(int sig_id)
 		rl_replace_line("", 0); // Clear the previous text
 		rl_redisplay();
 	}
+	if (sig_id == SIGQUIT)
+	{
+
+	}
 }

@@ -53,6 +53,7 @@ void cmd_exec(t_all *all)// for no pipes
 	close(all->fd[0]);
 	int wstat;
 	wait(&wstat);
+//	printf("wstat=%d\n", wstat);
 	if (WIFEXITED(wstat))
 	{
 		int exit_code = WEXITSTATUS(wstat);

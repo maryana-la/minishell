@@ -588,6 +588,8 @@ int main(int argc, char **argv, char **env)
 
 if (signal(SIGINT, sig_handler) == SIG_ERR)
 		error_handler(&all, 3);
+if (signal(SIGQUIT, sig_handler) == SIG_ERR)
+		error_handler(&all, 3);
 
 	char *str;
 	while (1)

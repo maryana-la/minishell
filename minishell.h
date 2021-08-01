@@ -6,6 +6,7 @@
 # include "libft/libft.h"
 # include <string.h>
 # include <fcntl.h>
+//# include "/Users/jjacquel/.brew/Cellar/readline/8.1/include/readline/readline.h"
 # include <readline/readline.h>
 # include <readline/history.h>
 //# include <editline/readline.h>
@@ -13,7 +14,6 @@
 # include <sys/wait.h>
 # include <sys/errno.h>
 # include <signal.h>
-
 
 typedef struct s_env
 {
