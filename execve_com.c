@@ -8,12 +8,19 @@ void cmd_exec1(t_all *all) //for multi pipes
 		envs_list_to_array(all);
 		if (execve(path, all->cmnd[all->i].args, all->envp) == -1)
 		{
-			ft_putstr_fd(all->cmnd[all->i].args[0], 2);
-			ft_putstr_fd(" : command not found\n", 2);
-			exit(127);
+			if (errno == 14)
+			{
+				ft_putstr_fd("minishell: ", 2);
+				ft_putstr_fd(all->cmnd[all->i].args[0], 2);
+				ft_putstr_fd(" : command not found\n", 2);
+			}
+			else
+				perror(all->cmnd[all->i].args[0]);
+			printf("%d\n", errno);
+			exit (errno);
 		}
 		exit(0);
-//	}
+
 }
 
 void cmd_exec(t_all *all)// for no pipes
@@ -24,6 +31,7 @@ void cmd_exec(t_all *all)// for no pipes
 
 	pipe(all->fd); //new
 	pid = fork();
+
 	if (pid == -1)
 		exit(-11);
 	else if (pid == 0)
@@ -41,11 +49,19 @@ void cmd_exec(t_all *all)// for no pipes
 
 		path = get_data_path(all);
 		envs_list_to_array(all);
+
 		if (execve(path, all->cmnd[all->i].args, all->envp) == -1)
 		{
-			ft_putstr_fd(all->cmnd[all->i].args[0], 2);
-			ft_putstr_fd(" : command not found\n", 2);
-			exit(127);
+			if (errno == 14)
+			{
+				ft_putstr_fd("minishell: ", 2);
+				ft_putstr_fd(all->cmnd[all->i].args[0], 2);
+				ft_putstr_fd(" : command not found\n", 2);
+			}
+			else
+				perror(all->cmnd[all->i].args[0]);
+			printf("%d\n", errno);
+			exit (errno); // todo 14-bad address = 127 command not found, 13 - permission denied 126
 		}
 		exit(0);
 	}
@@ -56,10 +72,21 @@ void cmd_exec(t_all *all)// for no pipes
 	if (WIFEXITED(wstat))
 	{
 		int exit_code = WEXITSTATUS(wstat);
-		if (exit_code == 0)
-			printf("Success\n");
+		if (exit_code != 0) // todo do nothing
+		{
+			if (exit_code == 13)
+				all->last_exit = 126;
+			else if (exit_code == 14)
+				all->last_exit = 127;
+			else
+				all->last_exit = exit_code;
+			printf("Error %d\n", all->last_exit);
+		}
 		else
-			printf("Error %d\n", exit_code);
+		{
+			printf("Success\n");
+			all->last_exit = 0;
+		}
 	}
 }
 
@@ -70,29 +97,10 @@ char *get_data_path(t_all *all)
 	char **path;
 	char *path_tmp;
 	char *tmp;
-	char *get_pwd;
-	char *exec;
 	int i;
 
-	if (ft_strncmp(all->cmnd[all->i].args[0], "./", 2) == 0)
-	{
-		exec = ft_substr(all->cmnd[all->i].args[0], 2, ft_strlen(all->cmnd[all->i].args[0]) - 2);
-		if (!(get_pwd = getcwd(NULL, -1)))
-		{
-			perror("getcwd");
-		}
-		tmp = ft_strjoin(get_pwd, "/");
-		free(get_pwd);
-		get_pwd = ft_strjoin(tmp, exec);
-		free(tmp);
-		if (access(get_pwd, X_OK) != 0) // todo Maryana replace access with read
-		{
-			free(get_pwd);
-			perror (all->cmnd[all->i].args[0]);
-			exit (1);
-		}
-		return (get_pwd);
-	}
+	if (ft_strchr(all->cmnd[all->i].args[0], '/'))
+		return (ft_strdup(all->cmnd[all->i].args[0]));
 
 	i = -1;
 	while (all->env_vars[++i].key)
@@ -122,7 +130,7 @@ char *get_data_path(t_all *all)
 		}
 		free(path_tmp);
 	}
-	return (0);
+	return (NULL);
 }
 
 void envs_list_to_array(t_all *all)
