@@ -33,6 +33,7 @@ void echo_command(t_all *all)
 	int flag;
 	int j;
 //todo -n в середине текста отображается, но срабатывает как флаг
+
 	i = 0;
 	flag = 0;
 	while (all->cmnd[all->i].args[++i])
@@ -66,7 +67,7 @@ void echo_command(t_all *all)
 		printf("\n");
 }
 
-void cd_command(t_all *all)
+void cd_command(t_all *all) //todo error code 1 if folder doesn't exist
 {
 	int i;
 
@@ -90,7 +91,8 @@ void pwd_command (t_all *all)
 	write(1, "\n", 1);
 }
 
-void export_command(t_all *all) {
+void export_command(t_all *all) //todo error code 1
+{
 	all->arg_pos = 0;
 
 	if (!all->cmnd[all->i].args[1])
@@ -233,7 +235,7 @@ void print_env_list(t_env *for_print, int declare, int num_of_vars)
 }
 
 
-void unset_command(t_all *all)
+void unset_command(t_all *all)//todo unset 123 - error 1
 {
 	int i;
 	int j = 0;
@@ -274,5 +276,9 @@ void sig_handler(int sig_id)
 		rl_on_new_line(); // Regenerate the prompt on a newline
 		rl_replace_line("", 0); // Clear the previous text
 		rl_redisplay();
+	}
+	if (sig_id == SIGQUIT)
+	{
+
 	}
 }

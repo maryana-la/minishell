@@ -4,7 +4,7 @@
 
 #include "minishell.h"
 
-void error_handler(t_all *all, int errorcode)
+void error_handler(t_all *all, int errorcode) //todo change to all->cmnd
 {
 	if (errorcode == 1)
 	{

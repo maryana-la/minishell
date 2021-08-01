@@ -53,7 +53,17 @@ char *ft_dollar(char *str, int *i, t_all *all)
 	var = ft_substr(str, pos_of_dollar + 1, (end_of_var - pos_of_dollar -1));
 	// printf("var = %s\n", var);
 
-	if (ft_isdigit(var[0]) != 0) // check all ascii symbols
+	if (!(ft_strncmp(var, "?", 2)))
+	{
+		value = ft_itoa(all->last_exit);
+		tmp1 = ft_substr(str, 0, pos_of_dollar);
+		tmp2 = ft_substr(str, *i, (ft_strlen(str) - *i + 1));
+		tmp1 = ft_strjoin(tmp1, value);
+		tmp1 = ft_strjoin(tmp1, tmp2);
+		*i = pos_of_dollar + (int)ft_strlen(value) - 1;
+		return(tmp1);
+	}
+	else if (ft_isdigit(var[0]) != 0) // check all ascii symbols
 	{
 		if(ft_strlen(var) == 1)
 		{
@@ -85,7 +95,7 @@ char *ft_dollar(char *str, int *i, t_all *all)
 	tmp2 = ft_substr(str, *i, (ft_strlen(str) - *i + 1)); // cut after variable
 	tmp1 = ft_strjoin(tmp1, value);
 	tmp1 = ft_strjoin(tmp1, tmp2);
-	*i = pos_of_dollar + ft_strlen(value) - 1;
+	*i = pos_of_dollar + (int)ft_strlen(value) - 1;
 	return (tmp1);
 }
 
@@ -180,12 +190,17 @@ void	ft_put_str_to_struct(char *arg, t_all *all)
 
 	i = 0;
 
-	if (!all->cmnd[all->pip_count].args)
+	if (!all->cmnd[all->pip_count].args) //if first argument
 	{
 		arg = check_lower_case(arg);
 		all->cmnd[all->pip_count].args = malloc(sizeof(char *) * 2);
-		all->cmnd[all->pip_count].args[0] = arg;
+		all->cmnd[all->pip_count].args[0] = ft_strdup(arg);
 		all->cmnd[all->pip_count].args[1] = 0;
+		if (arg)
+		{
+			free(arg);
+			arg = NULL;
+		}
 	}
 	else
 	{
@@ -203,9 +218,10 @@ void	ft_put_str_to_struct(char *arg, t_all *all)
 		tmp[i + 1] = 0;
 
 		free(all->cmnd[all->pip_count].args);
-		if (arg) {
+		if (arg)
+		{
 			free(arg);
-			arg = 0;
+			arg = NULL;
 		}
 		all->cmnd[all->pip_count].args = tmp;
 	}
@@ -296,13 +312,13 @@ void	ft_handle_redirect(char *str, int *i, t_all *all)
 	{
 		(*i)++;
 		file_name = get_file_name(str, i, all);
-		all->cmnd[all->pip_count].fd_out = open(file_name, O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU);
+		all->cmnd[all->pip_count].fd_out = open(file_name, O_CREAT | O_RDWR | O_TRUNC, S_IRWXU);
 	}
 	else if (str[*i] == '>' && str[*i + 1] == '>')
 	{
 		*i = *i + 2;
 		file_name = get_file_name(str, i, all);
-		all->cmnd[all->pip_count].fd_out = open(file_name, O_CREAT | O_WRONLY | O_APPEND, S_IRWXU);
+		all->cmnd[all->pip_count].fd_out = open(file_name, O_CREAT | O_RDWR | O_APPEND, S_IRWXU);
 	}
 	else if (str[*i] == '<' && str[*i + 1] != '<')
 	{
@@ -327,18 +343,17 @@ void ft_parser(char *str, t_all *all)
 	char *from_quote;
 
 
-	all->cmnd = malloc(sizeof(t_cmnd) * (all->num_of_pipes + 2)); //todo change to number of pipes
+	all->cmnd = malloc(sizeof(t_cmnd) * (all->num_of_pipes + 2)); //malloc for number of commands
 	i = -1;
 	while (++i < (all->num_of_pipes + 2))
 	{
 		all->cmnd[i].args = NULL;
-		all->cmnd[i].fd_in = -1;
-		all->cmnd[i].fd_out = -1;
+		all->cmnd[i].fd_in = STDIN_FILENO;
+		all->cmnd[i].fd_out = STDOUT_FILENO;
 	}
 	all->pip_count = 0;
 	str = replace_env_with_value(str, all); // заменяем в строке переменные окружения
 	i = 0;
-//todo malloc for cmnd array
 
 	while(str[i])
 	{
@@ -422,8 +437,9 @@ void env_init(t_all *all, char **env) // env init with lists:
 		{
 			all->env_vars[i].key = ft_strdup("PWD");
 			all->env_vars[i].key_len = ft_strlen(all->env_vars[i].key);
-			all->env_vars[i].value = getcwd(NULL, -1);
+			all->env_vars[i].value = getcwd(NULL, 0);
 			all->env_vars[i].value_len = ft_strlen(all->env_vars[i].value);
+//			perror("pwd path:");
 			pwd_flag = 1;
 		}
 		else if (ft_strncmp(env[i], "OLDPWD=", 7) == 0)
@@ -522,19 +538,29 @@ void init_all(t_all *all)
 	int i;
 	int	j;
 
-	i = -1;
+	i = 0;
 	j = 0;
-	all->num_of_pipes = 0;
 	if (all->cmnd)
 	{
-		while (all->cmnd[j].args[++i])
-		{
-			if (all->cmnd[j].args[i])
-				all->cmnd[j].args[i] = NULL;
-			j++;
-		}
+//		while (j < all->num_of_pipes + 1)
+//		{
+//			i = 0;
+//			if (all->cmnd[j].args[i])
+//			{
+//				while (all->cmnd[j].args[i])
+//				{
+//					if (all->cmnd[j].args[i])
+//						all->cmnd[j].args[i] = NULL;
+//					i++;
+//				}
+////				all->cmnd[j].args[i] = NULL;
+//			}
+//			j++;
+//		}
+		all->cmnd = NULL;
 	}
-	all->cmnd = NULL;
+//	all->cmnd = NULL;
+	all->num_of_pipes = 0;
 }
 
 int takeInput(t_all *all, char** str)
@@ -560,21 +586,21 @@ int takeInput(t_all *all, char** str)
 int main(int argc, char **argv, char **env)
 {
 	t_all  all;
-	int i = 0;
-	char **test;
 
-//	init_all(&all);
+	init_all(&all);
 	env_init(&all, env);
-
-//	char *str = "ECHO $SHLVL'pwd $PATH' \"$PAGER$LSCOLORS\"$;l$XPC_FLAGS\'ffrsvdd\'";
+	all.fd_std[0] = dup(0);
+	all.fd_std[1] = dup(1);
 
 if (signal(SIGINT, sig_handler) == SIG_ERR)
+		error_handler(&all, 3);
+if (signal(SIGQUIT, sig_handler) == SIG_ERR)
 		error_handler(&all, 3);
 
 	char *str;
 	while (1)
 	{
-//		init_all(&all);
+		init_all(&all);
 		if (takeInput(&all, &str))
 			continue;
 		//	printf("str_i = %s\n", str);
