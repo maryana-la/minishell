@@ -568,7 +568,7 @@ int takeInput(t_all *all, char** str)
 	rl_catch_signals = 0;
 	buf = readline("minishell > ");
 	if (!buf)
-		exit_command(all);
+		print_and_exit(all, 0);
 	if (strlen(buf) != 0)
 	{
 		add_history(buf);

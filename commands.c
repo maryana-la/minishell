@@ -20,7 +20,14 @@ void start_commands(t_all *all)
 		cmd_exec(all);
 }
 
-void exit_command(t_all *all)  //todo exit codes
+void print_and_exit (t_all *all, int err)
+{
+	if (!all->num_of_pipes)
+		printf("exit\n");
+	exit(err);
+}
+
+void exit_command(t_all *all)
 {
 	int i;
 	int error_code;
@@ -28,10 +35,7 @@ void exit_command(t_all *all)  //todo exit codes
 	i = -1;
 	while(all->cmnd[all->i].args[++i]);
 	if (i == 1)
-	{
-		printf("exit\n");
-		exit(0);
-	}
+		print_and_exit(all, 0);
 	if (i > 2)
 	{
 		printf("minishell: exit: too many arguments\n");
@@ -42,7 +46,7 @@ void exit_command(t_all *all)  //todo exit codes
 	i = -1;
 	while (all->cmnd[all->i].args[1][++i]) //check if only numbers
 	{
-		if (!ft_isdigit(all->cmnd[all->i].args[1][i]) && (all->cmnd[all->i].args[1][i] == '-' && i != 0))
+		if (!ft_isdigit(all->cmnd[all->i].args[1][i]) || (all->cmnd[all->i].args[1][i] == '-' && i != 0))
 		{
 			printf("minishell: exit: %s: numeric argument required\n", all->cmnd[all->i].args[1]);
 			exit (255);
@@ -50,23 +54,11 @@ void exit_command(t_all *all)  //todo exit codes
 	}
 	error_code = ft_atoi(all->cmnd[all->i].args[1]);
 	if (error_code < 0)
-	{
-		printf("exit\n");
-		exit (256 + error_code % 256);
-	}
-
+		print_and_exit(all,256 + error_code % 256);
 	else if (error_code < 256)
-	{
-		printf("exit\n");
-		exit(error_code);
-	}
+		print_and_exit(all, error_code);
 	else
-	{
-		printf("exit\n");
-		exit(error_code % 256);
-	}
-
-
+		print_and_exit(all,error_code % 256);
 }
 
 void echo_command(t_all *all)

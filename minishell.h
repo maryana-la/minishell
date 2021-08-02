@@ -108,5 +108,6 @@ void echo_command(t_all *all);
 void exit_command(t_all *all);
 void error_handler(char *arg, int errorcode);
 void sig_handler(int sig_id);
+void print_and_exit (t_all *all, int err);
 
 #endif //MINISHELL_MINISHELL_H

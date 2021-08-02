@@ -16,7 +16,6 @@ void cmd_exec1(t_all *all) //for multi pipes
 			}
 			else
 				perror(all->cmnd[all->i].args[0]);
-			printf("%d\n", errno);
 			exit (errno);
 		}
 		exit(0);
@@ -60,7 +59,6 @@ void cmd_exec(t_all *all)// for no pipes
 			}
 			else
 				perror(all->cmnd[all->i].args[0]);
-//			printf("%d\n", errno);
 			exit (errno);
 		}
 		exit(0);
@@ -68,8 +66,7 @@ void cmd_exec(t_all *all)// for no pipes
 	close(all->fd[1]);
 	close(all->fd[0]);
 	int wstat;
-	wait(&wstat);
-//	printf("wstat=%d\n", wstat);
+	waitpid(pid, &wstat, 0);
 	if (WIFEXITED(wstat))
 	{
 		int exit_code = WEXITSTATUS(wstat);
@@ -81,15 +78,11 @@ void cmd_exec(t_all *all)// for no pipes
 				all->last_exit = 127;
 			else
 				all->last_exit = exit_code;
-//			printf("Error %d\n", all->last_exit);
 		}
 		else
-		{
-//			printf("Success\n");
 			all->last_exit = 0;
-		}
 	}
-	else //todo for ctrl \ add Quit:3 error
+	else //WIFSIGNALED
 	{
 		if (wstat == SIGINT)
 			all->last_exit = 130;
