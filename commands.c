@@ -343,7 +343,5 @@ void sig_handler(int sig_id)
 		rl_redisplay();
 	}
 	if (sig_id == SIGQUIT)
-	{
-
-	}
+	{}
 }
