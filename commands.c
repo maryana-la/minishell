@@ -1,7 +1,5 @@
 #include "minishell.h"
 
-
-
 void start_commands(t_all *all)
 {
 	if (!ft_strncmp(all->cmnd[all->i].args[0], "pwd", 4))
@@ -22,42 +20,82 @@ void start_commands(t_all *all)
 		cmd_exec(all);
 }
 
-void exit_command(t_all *all)
+void exit_command(t_all *all)  //todo exit codes
 {
-	exit(0);
+	int i;
+	int error_code;
+
+	i = -1;
+	while(all->cmnd[all->i].args[++i]);
+	if (i == 1)
+	{
+		printf("exit\n");
+		exit(0);
+	}
+	if (i > 2)
+	{
+		printf("minishell: exit: too many arguments\n");
+		all->last_exit = 1;
+		return ;
+	}
+
+	i = -1;
+	while (all->cmnd[all->i].args[1][++i]) //check if only numbers
+	{
+		if (!ft_isdigit(all->cmnd[all->i].args[1][i]) && (all->cmnd[all->i].args[1][i] == '-' && i != 0))
+		{
+			printf("minishell: exit: %s: numeric argument required\n", all->cmnd[all->i].args[1]);
+			exit (255);
+		}
+	}
+	error_code = ft_atoi(all->cmnd[all->i].args[1]);
+	if (error_code < 0)
+	{
+		printf("exit\n");
+		exit (256 + error_code % 256);
+	}
+
+	else if (error_code < 256)
+	{
+		printf("exit\n");
+		exit(error_code);
+	}
+	else
+	{
+		printf("exit\n");
+		exit(error_code % 256);
+	}
+
+
 }
 
 void echo_command(t_all *all)
 {
 	int i;
-	int flag;
 	int j;
-//todo -n в середине текста отображается, но срабатывает как флаг
+	int flag;
 
 	i = 0;
 	flag = 0;
+
 	while (all->cmnd[all->i].args[++i])
 	{
-		if (!ft_strncmp (all->cmnd[all->i].args[i], "-n", 2) && !flag)
+		if (!(ft_strncmp(all->cmnd[all->i].args[i], "-n", 2)))
 		{
-			j=0;
+			j = 0;
 			while (all->cmnd[all->i].args[i][++j] == 'n');
-			if (j != ft_strlen(all->cmnd[all->i].args[i]))
-			{
+			if (j == ft_strlen(all->cmnd[all->i].args[i]))
 				flag = 1;
-				if (all->cmnd[all->i].args[i+1])
-					printf("%s ", all->cmnd[all->i].args[i]);
-				else
-					printf("%s", all->cmnd[all->i].args[i]);
-				continue;
-			}
-			if (ft_strncmp (all->cmnd[all->i].args[i + 1], "-n", 2))
-			{
-				flag = 1;
-				continue;
-			}
-			continue;
+			else
+				break;
 		}
+		else
+			break ;
+	}
+
+	i--;
+	while (all->cmnd[all->i].args[++i])
+	{
 		if (all->cmnd[all->i].args[i+1])
 			printf("%s ", all->cmnd[all->i].args[i]);
 		else
@@ -67,22 +105,39 @@ void echo_command(t_all *all)
 		printf("\n");
 }
 
-void cd_command(t_all *all) //todo error code 1 if folder doesn't exist
+void cd_command(t_all *all)
 {
 	int i;
+	char *tmp;
 
 	i = -1;
-	getcwd(all->cwd, sizeof(all->cwd));
+	all->tmp_cwd = getcwd(NULL, 0);
+	if (chdir(all->cmnd[all->i].args[1]) == -1) //check if no error with folder
+	{
+		printf("minishell: cd: %s: %s\n", all->cmnd[all->i].args[1], strerror(errno));
+		all->last_exit = 1;
+		return ;
+	}
+
+//if PWD or OLDPWD unset - they don't appear
 	while(++i < all->env_counter && ft_strcmp(all->env_vars[i].key, "OLDPWD"));
 	if (i != all->env_counter)
-		all->env_vars[i].value = ft_strdup(all->cwd); //todo зафришить все стрдапы в коде
-	chdir(all->cmnd[all->i].args[1]);
+	{
+		tmp = all->env_vars[i].value; //to free malloc
+		all->env_vars[i].value = ft_strdup(all->tmp_cwd);
+		free (tmp);
+	}
+
 	getcwd(all->cwd, sizeof(all->cwd));
 	i = -1;
 	while(++i < all->env_counter && ft_strcmp(all->env_vars[i].key, "PWD"));
 	if (i != all->env_counter)
+	{
+		tmp = all->env_vars[i].value; //to free malloc
 		all->env_vars[i].value = ft_strdup(all->cwd);
+		free (tmp);
 	}
+}
 
 void pwd_command (t_all *all)
 {
@@ -91,7 +146,7 @@ void pwd_command (t_all *all)
 	write(1, "\n", 1);
 }
 
-void export_command(t_all *all) //todo error code 1
+void export_command(t_all *all)
 {
 	all->arg_pos = 0;
 
@@ -99,7 +154,7 @@ void export_command(t_all *all) //todo error code 1
 	{
 		sort_envs(all);
 		print_env_list(all->env_sorted, 1, all->env_counter);
-		return;
+		return ;
 	}
 
 	while (all->cmnd[all->i].args[++all->arg_pos])
@@ -118,10 +173,11 @@ void add_new_variable(t_all *all)
 	int ravno = 0;
 
 
-	if (ft_isdigit(all->cmnd[all->i].args[all->arg_pos][0]) || !ft_strcmp(all->cmnd[all->i].args[all->arg_pos], "="))
+	if (!ft_isalpha(all->cmnd[all->i].args[all->arg_pos][0]) && (all->cmnd[all->i].args[all->arg_pos][0] != '_'))
 	{
-		error_handler(all, 1);
-		return;
+		error_handler(all->cmnd[all->i].args[all->arg_pos], 1);
+		all->last_exit = 1;
+		return ;
 	}
 
 	while (all->cmnd[all->i].args[all->arg_pos][++j])
@@ -129,24 +185,32 @@ void add_new_variable(t_all *all)
 		if (all->cmnd[all->i].args[all->arg_pos][j] == '=')
 		{
 			ravno = 1;
-			break;
+			break ;
+		}
+		else if (!ft_isalnum(all->cmnd[all->i].args[all->arg_pos][j]) &&(all->cmnd[all->i].args[all->arg_pos][0] != '_'))
+		{
+			error_handler(all->cmnd[all->i].args[all->arg_pos], 1);
+			all->last_exit = 1;
+			return ;
 		}
 	}
 	temp_key = ft_substr(all->cmnd[all->i].args[all->arg_pos], 0, j);
 	temp_value = ft_substr(all->cmnd[all->i].args[all->arg_pos], j + 1, ft_strlen(all->cmnd[all->i].args[1])-j+1);
-//	if (temp_value[0] == '\0' && ravno)
-
 
 	i=-1;
 	while(++i < all->env_counter && ft_strcmp(all->env_vars[i].key, temp_key));
 
 	if (i != all->env_counter && temp_value[0] == '\0' && !ravno)
-		return;
+	{
+		all->last_exit = 0;
+		return ;
+	}
 
 	if (i != all->env_counter)
 	{
 		all->env_vars[i].value = temp_value;
-		return;
+		all->last_exit = 0;
+		return ;
 	}
 
 	i=-1;
@@ -161,7 +225,7 @@ void add_new_variable(t_all *all)
 	}
 	tmp[i].key = ft_substr(all->cmnd[all->i].args[all->arg_pos], 0, j);
 	tmp[i].value = ft_substr(all->cmnd[all->i].args[all->arg_pos], j + 1, ft_strlen(all->cmnd[all->i].args[1])-j+1);
-	if (tmp[i].value[0] == '\0' && !ravno)
+	if ((!tmp[i].value) || (tmp[i].value[0] == '\0' && !ravno))
 		tmp[i].value = ft_strdup("nullvalue");
 	tmp[i].key_len = ft_strlen(tmp[i].key);
 	tmp[i].value_len = ft_strlen(tmp[i].value);
@@ -170,6 +234,7 @@ void add_new_variable(t_all *all)
 	free(all->env_vars);
 	all->env_vars = tmp;
 	all->env_counter++;
+	all->last_exit = 0;
 }
 
 void sort_envs(t_all *all)
@@ -234,8 +299,7 @@ void print_env_list(t_env *for_print, int declare, int num_of_vars)
 	}
 }
 
-
-void unset_command(t_all *all)//todo unset 123 - error 1
+void unset_command(t_all *all)
 {
 	int i;
 	int j = 0;
@@ -244,11 +308,12 @@ void unset_command(t_all *all)//todo unset 123 - error 1
 	{
 		i = -1;
 
-		if (ft_isdigit(all->cmnd[all->i].args[j][0]) || !ft_strcmp(all->cmnd[all->i].args[j], "="))
+		if (!ft_isalpha(all->cmnd[all->i].args[j][0]) && (all->cmnd[all->i].args[j][0] != '_'))
 		{
+			error_handler(all->cmnd[all->i].args[j], 2);
 			all->arg_pos = j;
-			error_handler(all, 2);
-			return;
+			all->last_exit = 1;
+			return ;
 		}
 
 		while(++i < all->env_counter && ft_strcmp(all->env_vars[i].key, all->cmnd[all->i].args[j]));

@@ -37,9 +37,7 @@ char *ft_dollar(char *str, int *i, t_all *all)
 	char	*tmp1;
 	char	*tmp2;
 	char	*value;
-/*
-**todo Maryana добавить обработку $ $1 $12 $$  $?
-*/
+
 	pos_of_dollar = *i;
 	while(str[++*i]) //find end of variable
 		if(check_set(str[*i], " \t\'\"\\$;|><"))
@@ -593,9 +591,9 @@ int main(int argc, char **argv, char **env)
 	all.fd_std[1] = dup(1);
 
 if (signal(SIGINT, sig_handler) == SIG_ERR)
-		error_handler(&all, 3);
+	printf("Signal init error\n");
 if (signal(SIGQUIT, sig_handler) == SIG_ERR)
-		error_handler(&all, 3);
+	printf("Signal init error\n");
 
 	char *str;
 	while (1)
@@ -603,7 +601,6 @@ if (signal(SIGQUIT, sig_handler) == SIG_ERR)
 		init_all(&all);
 		if (takeInput(&all, &str))
 			continue;
-		//	printf("str_i = %s\n", str);
 		if (ft_preparser(str, &all) > 0)
 			ft_parser(str, &all);
 		else

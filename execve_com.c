@@ -61,7 +61,7 @@ void cmd_exec(t_all *all)// for no pipes
 			else
 				perror(all->cmnd[all->i].args[0]);
 			printf("%d\n", errno);
-			exit (errno); // todo 14-bad address = 127 command not found, 13 - permission denied 126
+			exit (errno);
 		}
 		exit(0);
 	}
@@ -73,7 +73,7 @@ void cmd_exec(t_all *all)// for no pipes
 	if (WIFEXITED(wstat))
 	{
 		int exit_code = WEXITSTATUS(wstat);
-		if (exit_code != 0) // todo do nothing
+		if (exit_code != 0)
 		{
 			if (exit_code == 13)
 				all->last_exit = 126;
@@ -89,12 +89,12 @@ void cmd_exec(t_all *all)// for no pipes
 			all->last_exit = 0;
 		}
 	}
-	else
+	else //todo for ctrl \ add Quit:3 error
 	{
 		if (wstat == SIGINT)
 			all->last_exit = 130;
 		else if (wstat == SIGQUIT)
-			all->last_exit = 130;
+			all->last_exit = 131;
 	}
 }
 

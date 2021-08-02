@@ -62,13 +62,14 @@ void 	launch_commands(t_all *all)
 				else
 					cmd_exec1(all);
 
-				exit(10); //todo check return value from builtin-s
+				exit(0); //todo check return value from builtin-s
 			}
 			close(all->fd[1]);
 			all->fd_tmp = all->fd[0];
 
 			all->i++;
 		}
+//		wait(NULL);
 		int i = -1;
 		int wstat;
 		while (++i < all->pip_count + 1)
@@ -77,15 +78,16 @@ void 	launch_commands(t_all *all)
 			if (WIFEXITED(wstat))
 			{
 				int exit_code = WEXITSTATUS(wstat);
-				if (exit_code != 0) // todo do nothing
+				if (exit_code != 0)
 				{
 					if (exit_code == 13)
 						all->last_exit = 126;
 					else if (exit_code == 14)
 						all->last_exit = 127;
-					printf("Error %d\n", all->last_exit);
+//					printf("Error %d\n", all->last_exit);
 				} else
-					printf("Success\n");
+//					printf("Success\n");
+					all->last_exit = 0;
 			}
 		}
 	}
