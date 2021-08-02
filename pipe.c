@@ -26,6 +26,8 @@ void 	launch_commands(t_all *all)
 		{
 			pipe(all->fd); //new
 			pid = fork();
+//			if (pid)
+//				global_pid = pid;
 			if (pid == -1)
 				exit(-11);
 			else if (pid == 0)
@@ -64,10 +66,13 @@ void 	launch_commands(t_all *all)
 
 				exit(0); //todo check return value from builtin-s
 			}
+//			else
+//				global_pid = pid;
 			close(all->fd[1]);
 			all->fd_tmp = all->fd[0];
 
 			all->i++;
+
 		}
 //		wait(NULL);
 		int i = -1;

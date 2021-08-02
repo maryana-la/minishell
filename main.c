@@ -1,5 +1,6 @@
 #include "minishell.h"
 
+
 char *ft_slash(char *str, int *i)
 {
 	char *tmp;
@@ -568,7 +569,7 @@ int takeInput(t_all *all, char** str)
 	rl_catch_signals = 0;
 	buf = readline("minishell > ");
 	if (!buf)
-		exit_command(all);
+		exit (0);
 	if (strlen(buf) != 0)
 	{
 		add_history(buf);
@@ -580,6 +581,8 @@ int takeInput(t_all *all, char** str)
 	else
 		return 1;
 }
+
+
 
 int main(int argc, char **argv, char **env)
 {
@@ -594,6 +597,8 @@ if (signal(SIGINT, sig_handler) == SIG_ERR)
 	printf("Signal init error\n");
 if (signal(SIGQUIT, sig_handler) == SIG_ERR)
 	printf("Signal init error\n");
+
+//global_pid = getpid();
 
 	char *str;
 	while (1)

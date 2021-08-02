@@ -335,13 +335,23 @@ void unset_command(t_all *all)
 
 void sig_handler(int sig_id)
 {
-	if (sig_id == SIGINT)
-	{
-		printf("\n"); // Move to a new line
-		rl_on_new_line(); // Regenerate the prompt on a newline
-		rl_replace_line("", 0); // Clear the previous text
-		rl_redisplay();
+
+
+		if (sig_id == SIGINT)
+		{
+			printf("getpid=%d, globalpid=%d", getpid(), global_pid);
+			if (getpid() == global_pid)
+			{
+				printf("\n"); // Move to a new line
+				rl_on_new_line(); // Regenerate the prompt on a newline
+				rl_replace_line("", 0); // Clear the previous text
+				rl_redisplay();
+			}
+
+
+
+		}
 	}
-	if (sig_id == SIGQUIT)
-	{}
-}
+
+
+
