@@ -21,3 +21,15 @@ void error_handler(char *arg, int errorcode)
 		return;
 	}
 }
+
+void	*ft_memdel(void *ptr)
+{
+	if (ptr)
+	{
+		free(ptr);
+		ptr = NULL;
+	}
+	return (NULL);
+}
+
+

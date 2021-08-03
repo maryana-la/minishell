@@ -6,8 +6,8 @@ int check_inside_s_quote(char *str, int *i)
 	while(str[*i] && str[*i] != '\'')
 		*i = *i + 1;
 	if (str[*i] == '\'')
-		return (1);
-	return (0);
+		return (0); //ok
+	return (1); //error
 }
 
 int check_inside_d_quote(char *str, int *i)
@@ -15,15 +15,13 @@ int check_inside_d_quote(char *str, int *i)
 	*i = *i + 1;
 	while(str[*i])
 	{
-		if (str[*i] == '\\')
-			return (0);
-		else if (str[*i] == '\"')
+		if (str[*i] == '\"' && str[*i - 1] != '\\')
 			break;
 		*i = *i + 1;
 	}
 	if (str[*i] == '\"')
-		return (1);
-	return (0);
+		return (0); //ok
+	return (1); //error
 }
 
 int check_tokens(char *str, int *i, char token)
@@ -37,80 +35,73 @@ int check_tokens(char *str, int *i, char token)
 		*i = *i + 1;
 	diff = *i - first;
 	if (diff > 1 && str[*i] == token) // if 2 equal tokens with space between
-		return (-1);
-
-//	if (token == ';')
-//	{
-//		if (str[*i] == token || str[*i] == '|' || (str[*i] == '<' && str[*i + 1] == '<' ))
-//			return (-1);
-//		if (str[*i] == '<' || (str[*i] == '>' && str[*i + 1] == '>') || str[*i] == '>')
-//			return (1);
-//	}
+		return (1);
 	if (token == '|')
 	{
-		if (str[*i] == ';' || str[*i] == token || (str[*i] == '<' && str[*i + 1] == '<' ))
-			return (-1);
-		if (str[*i] == '<'|| (str[*i] == '>' && str[*i + 1] == '>') || str[*i] == '>')
+		if (str[*i] == ';' || str[*i] == token || (str[*i] == '<' && str[*i + 1] == '<' ) \
+			|| str[*i] == '<'|| (str[*i] == '>' && str[*i + 1] == '>') || str[*i] == '>')
 			return (1);
 	}
 	if (token == '>')
 	{
-		if (str[*i] == '<' || (str[*i] == '>' && str[*i + 1] == '>') || (str[*i] == '|' && diff > 1) ||
-			(str[*i] == '>' && str[*i + 1] == '|') || str[*i] == ';')
-			return (-1);
-		if (str[*i] == '>' || (str[*i] == '|' && diff == 1))
+		if (str[*i] == '<' || (str[*i] == '>' && str[*i + 1] == '>') || str[*i] == '|' || str[*i] == ';')
 			return (1);
 	}
 	if (token == '<')
 	{
-		if (str[*i] == '|' || str[*i] == ';' || (str[*i] == '>' && diff > 1))
-			return (-1);
-		if ((str[*i] == '>' && diff == 1) || str[*i] == '<')
+		if (str[*i] == '|' || str[*i] == ';' || (str[*i] == '>'))
 			return (1);
 	}
 	*i = *i - 1;
-	return (1);
+	return (0);
+}
+
+int preparser_error(t_all *all, char* token, int len)
+{
+	write(2, "minishell: syntax error near unexpected token `", 47);
+	write(2, token, len);
+	write (2, "'\n", 2);
+	return (all->last_exit = 258);
 }
 
 int ft_preparser(char *str, t_all *all)
 {
 	int i;
 	int len;
-	int start;
 
 	all->num_of_pipes = 0;
 	len = (int)ft_strlen(str) - 1;
 	i = 0;
 	skip_spaces(str, &i);
-	start = i;
-	if (str[i] == ';' || str[i] == '|' || str[len] == '\\' || str[len] == '|')
-		return (-1);
+	if (str[i] == '|' || str[len] == '|')
+	{
+		if (str[i] == str[i + 1] || str[len] == str[len - 1])
+			return(preparser_error(all, "||", 2));
+		else
+			return(preparser_error(all, "|", 1));
+	}
 	i--;
 	while (str[++i])
 	{
 		if (str[i] == '\\' || str[i] == ';')
-			return (-1);
+			return(preparser_error(all, &str[i], 1));
 		else if (str[i] == '\'')
-//			&& (i == start || str[i - 1] != '\\'))
 		{
-			if (check_inside_s_quote(str, &i) == 0)
-				return (-1); // \' is not closed
+			if (check_inside_s_quote(str, &i) == 1)
+				return(preparser_error(all, "\'", 1)); // ' is not closed
 		}
 		else if (str[i] == '\"')
-//			&& (i == start || str[i - 1] != '\\'))
 		{
-			if (check_inside_d_quote(str, &i) == 0)
-				return (-1); // \" is not closed
+			if (check_inside_d_quote(str, &i) == 1)
+				return(preparser_error(all, "\"", 1)); // " is not closed
 		}
-//		else if (str[i] == '\\' && (str[i + 1] == '\'' || str[i + 1] == '\"'))
-//			i = i + 2;
 		else if (str[i] == '|' || str[i] == '<' || str[i] == '>')
 		{
 			if (str[i] == '|')
 				all->num_of_pipes++;
-			if (check_tokens(str, &i, str[i]) < 0)
-				return (-1);
+			if (check_tokens(str, &i, str[i]) == 1)
+				return(preparser_error(all, &str[i], 1));
 		}
 	}
-	return (1);
+	return (0);
 }

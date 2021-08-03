@@ -585,6 +585,8 @@ int main(int argc, char **argv, char **env)
 {
 	t_all  all;
 
+	(void)argc;
+	(void)argv;
 	init_all(&all);
 	env_init(&all, env);
 	all.fd_std[0] = dup(0);
@@ -601,12 +603,10 @@ if (signal(SIGQUIT, sig_handler) == SIG_ERR)
 		init_all(&all);
 		if (takeInput(&all, &str))
 			continue;
-		if (ft_preparser(str, &all) > 0)
+		if (ft_preparser(str, &all) == 0)
 			ft_parser(str, &all);
-		else
-			printf("%s\n", "preparser error");
-
-		if (str) {
+		if (str)
+		{
 			free(str);
 			str = NULL;
 		}
