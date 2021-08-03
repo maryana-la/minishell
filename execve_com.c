@@ -13,9 +13,10 @@ void cmd_exec1(t_all *all) //for multi pipes
 				ft_putstr_fd("minishell: ", 2);
 				ft_putstr_fd(all->cmnd[all->i].args[0], 2);
 				ft_putstr_fd(" : command not found\n", 2);
+				perror(all->cmnd[all->i].args[1]);
 			}
 			else
-				perror(all->cmnd[all->i].args[0]);
+				printf("%s\n", strerror(errno));
 			exit (errno);
 		}
 		exit(0);
@@ -162,4 +163,5 @@ void envs_list_to_array(t_all *all)
 			}
 		}
 	}
+	all->envp[i] = NULL;
 }

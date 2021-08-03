@@ -30,7 +30,7 @@ void 	launch_commands(t_all *all)
 			pid[all->i] = fork();
 			if (pid[all->i] == -1)
 				exit(-11); //todo errno push
-			else if (pid[all->i] == 0)
+			else if (pid[all->i] == 0) //child starts here
 			{
 				if (all->cmnd[all->i].fd_in > STDIN_FILENO)
 				{
@@ -65,8 +65,6 @@ void 	launch_commands(t_all *all)
 					cmd_exec1(all);
 				exit(all->last_exit); //todo check return value from builtin-s
 			}
-//			else
-//				global_pid = pid;
 			close(all->fd[1]);
 			all->fd_tmp = all->fd[0];
 			all->i++;
@@ -104,9 +102,9 @@ void 	launch_commands(t_all *all)
 			}
 //		}
 
-		int i = -1;
-		while (++i < all->pip_count)
-			kill(pid[i], SIGKILL);
+//		int i = -1;
+//		while (++i < all->pip_count)
+//			kill(pid[i], SIGKILL);
 	}
 	dup2(all->fd_std[0], 0);
 	dup2(all->fd_std[1], 1);

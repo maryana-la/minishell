@@ -187,7 +187,7 @@ void add_new_variable(t_all *all)
 		}
 	}
 	temp_key = ft_substr(all->cmnd[all->i].args[all->arg_pos], 0, j);
-	temp_value = ft_substr(all->cmnd[all->i].args[all->arg_pos], j + 1, ft_strlen(all->cmnd[all->i].args[1])-j+1);
+	temp_value = ft_substr(all->cmnd[all->i].args[all->arg_pos], j + 1, ft_strlen(all->cmnd[all->i].args[all->arg_pos]) - j + 1);
 
 	i=-1;
 	while(++i < all->env_counter && ft_strcmp(all->env_vars[i].key, temp_key));
@@ -210,13 +210,17 @@ void add_new_variable(t_all *all)
 	tmp = malloc(sizeof (t_env) * (all->env_counter + 2));
 	while (all->env_vars[++i].key)
 		tmp[i] = all->env_vars[i];
+
+	/*
+	 * повторяется код с тем, что на стр 175, можно сократить
+	 */
 	while (all->cmnd[all->i].args[all->arg_pos][++j])
 	{
 		if (all->cmnd[all->i].args[all->arg_pos][j] == '=')
 			break;
 	}
 	tmp[i].key = ft_substr(all->cmnd[all->i].args[all->arg_pos], 0, j);
-	tmp[i].value = ft_substr(all->cmnd[all->i].args[all->arg_pos], j + 1, ft_strlen(all->cmnd[all->i].args[1])-j+1);
+	tmp[i].value = ft_substr(all->cmnd[all->i].args[all->arg_pos], j + 1, ft_strlen(all->cmnd[all->i].args[all->arg_pos]) - j + 1);
 	if ((!tmp[i].value) || (tmp[i].value[0] == '\0' && !ravno))
 		tmp[i].value = ft_strdup("nullvalue");
 	tmp[i].key_len = ft_strlen(tmp[i].key);
