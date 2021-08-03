@@ -14,7 +14,7 @@
 # include <sys/wait.h>
 # include <sys/errno.h>
 # include <signal.h>
-
+pid_t global_pid;
 typedef struct s_env
 {
 	char		*key;
@@ -36,6 +36,7 @@ typedef struct s_all
 	t_env	*env_sorted;
 	t_cmnd 	*cmnd;
 	char	cwd[1000];
+	char 	*tmp_cwd;
 	char	**envp;
 	char	**args;
 	int		arg_len;
@@ -105,7 +106,8 @@ void cd_command(t_all *all);
 void rl_replace_line();
 void echo_command(t_all *all);
 void exit_command(t_all *all);
-void error_handler(t_all *all, int errorcode);
+void error_handler(char *arg, int errorcode);
 void sig_handler(int sig_id);
+void print_and_exit (t_all *all, int err);
 
 #endif //MINISHELL_MINISHELL_H

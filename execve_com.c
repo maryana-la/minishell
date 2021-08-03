@@ -16,7 +16,6 @@ void cmd_exec1(t_all *all) //for multi pipes
 			}
 			else
 				perror(all->cmnd[all->i].args[0]);
-			printf("%d\n", errno);
 			exit (errno);
 		}
 		exit(0);
@@ -36,6 +35,7 @@ void cmd_exec(t_all *all)// for no pipes
 		exit(-11);
 	else if (pid == 0)
 	{
+//		global_pid = getpid();
 		if (all->cmnd[all->i].fd_in > STDIN_FILENO)
 		{
 			dup2(all->cmnd[all->i].fd_in, 0);
@@ -60,20 +60,20 @@ void cmd_exec(t_all *all)// for no pipes
 			}
 			else
 				perror(all->cmnd[all->i].args[0]);
-			printf("%d\n", errno);
-			exit (errno); // todo 14-bad address = 127 command not found, 13 - permission denied 126
+			exit (errno);
 		}
 		exit(0);
 	}
+//	else
+//		global_pid = pid;
 	close(all->fd[1]);
 	close(all->fd[0]);
 	int wstat;
-	wait(&wstat);
-//	printf("wstat=%d\n", wstat);
+	waitpid(pid, &wstat, 0);
 	if (WIFEXITED(wstat))
 	{
 		int exit_code = WEXITSTATUS(wstat);
-		if (exit_code != 0) // todo do nothing
+		if (exit_code != 0)
 		{
 			if (exit_code == 13)
 				all->last_exit = 126;
@@ -81,12 +81,18 @@ void cmd_exec(t_all *all)// for no pipes
 				all->last_exit = 127;
 			else
 				all->last_exit = exit_code;
-			printf("Error %d\n", all->last_exit);
 		}
 		else
-		{
-			printf("Success\n");
 			all->last_exit = 0;
+	}
+	else //WIFSIGNALED
+	{
+		if (wstat == SIGINT)
+			all->last_exit = 130;
+		else if (wstat == SIGQUIT)
+		{
+			all->last_exit = 131;
+			printf("Quit: 3\n");
 		}
 	}
 }

@@ -37,9 +37,7 @@ char *ft_dollar(char *str, int *i, t_all *all)
 	char	*tmp1;
 	char	*tmp2;
 	char	*value;
-/*
-**todo Maryana добавить обработку $ $1 $12 $$  $?
-*/
+
 	pos_of_dollar = *i;
 	while(str[++*i]) //find end of variable
 		if(check_set(str[*i], " \t\'\"\\$;|><"))
@@ -570,7 +568,7 @@ int takeInput(t_all *all, char** str)
 	rl_catch_signals = 0;
 	buf = readline("minishell > ");
 	if (!buf)
-		exit_command(all);
+		print_and_exit(all, 0);
 	if (strlen(buf) != 0)
 	{
 		add_history(buf);
@@ -587,15 +585,19 @@ int main(int argc, char **argv, char **env)
 {
 	t_all  all;
 
+	(void)argc;
+	(void)argv;
 	init_all(&all);
 	env_init(&all, env);
 	all.fd_std[0] = dup(0);
 	all.fd_std[1] = dup(1);
 
 if (signal(SIGINT, sig_handler) == SIG_ERR)
-		error_handler(&all, 3);
+	printf("Signal init error\n");
 if (signal(SIGQUIT, sig_handler) == SIG_ERR)
-		error_handler(&all, 3);
+	printf("Signal init error\n");
+
+//global_pid = getpid();
 
 	char *str;
 	while (1)
@@ -603,13 +605,10 @@ if (signal(SIGQUIT, sig_handler) == SIG_ERR)
 		init_all(&all);
 		if (takeInput(&all, &str))
 			continue;
-		//	printf("str_i = %s\n", str);
-		if (ft_preparser(str, &all) > 0)
+		if (ft_preparser(str, &all) == 0)
 			ft_parser(str, &all);
-		else
-			printf("%s\n", "preparser error");
-
-		if (str) {
+		if (str)
+		{
 			free(str);
 			str = NULL;
 		}
