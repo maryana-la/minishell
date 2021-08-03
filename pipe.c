@@ -46,6 +46,7 @@ void 	launch_commands(t_all *all)
 					dup2(all->fd[1], 1);
 				close(all->fd[1]);
 
+
 				if (!ft_strncmp(all->cmnd[all->i].args[0], "pwd", 4))
 					pwd_command(all);
 				else if (!ft_strncmp(all->cmnd[all->i].args[0], "env", 4))
@@ -64,11 +65,13 @@ void 	launch_commands(t_all *all)
 					cmd_exec1(all);
 				exit(all->last_exit); //todo check return value from builtin-s
 			}
+//			else
+//				global_pid = pid;
 			close(all->fd[1]);
 			all->fd_tmp = all->fd[0];
 			all->i++;
 		}
-
+//		wait(NULL);
 		int wstat;
 //		int i = -1;
 //		while (++i < all->pip_count)
@@ -86,6 +89,7 @@ void 	launch_commands(t_all *all)
 					else
 						all->last_exit = exit_code;
 				} else
+//					printf("Success\n");
 					all->last_exit = 0;
 			}
 			else // WIFSIGNALED

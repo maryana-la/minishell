@@ -14,7 +14,7 @@
 # include <sys/wait.h>
 # include <sys/errno.h>
 # include <signal.h>
-
+pid_t global_pid;
 typedef struct s_env
 {
 	char		*key;

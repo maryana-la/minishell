@@ -327,13 +327,32 @@ void unset_command(t_all *all)
 
 void sig_handler(int sig_id)
 {
-	if (sig_id == SIGINT)
+	int		code;
+
+	wait(&code);
+	if (code == sig_id)
 	{
-		printf("\n"); // Move to a new line
-		rl_on_new_line(); // Regenerate the prompt on a newline
-		rl_replace_line("", 0); // Clear the previous text
-		rl_redisplay();
+		if (sig_id == SIGINT)
+		{
+			write(1, "\n", 1);
+			rl_on_new_line();
+			rl_replace_line("", 0);
+		}
+		else if (sig_id == SIGQUIT)
+		{
+			ft_putstr_fd("Quit: 3\n", 1); //todo проверить на двойной вывод  этой строки
+		}
+//		g_status = 128 + sig_id;
 	}
-	if (sig_id == SIGQUIT)
-	{}
+	else if (sig_id == SIGINT)
+	{
+		write(1, "\n", 1);
+		rl_on_new_line();
+		rl_replace_line("", 0);
+		rl_redisplay();
+//		g_status = 1;
+	}
 }
+
+
+

@@ -35,6 +35,7 @@ void cmd_exec(t_all *all)// for no pipes
 		exit(-11);
 	else if (pid == 0)
 	{
+//		global_pid = getpid();
 		if (all->cmnd[all->i].fd_in > STDIN_FILENO)
 		{
 			dup2(all->cmnd[all->i].fd_in, 0);
@@ -63,6 +64,8 @@ void cmd_exec(t_all *all)// for no pipes
 		}
 		exit(0);
 	}
+//	else
+//		global_pid = pid;
 	close(all->fd[1]);
 	close(all->fd[0]);
 	int wstat;
