@@ -36,7 +36,6 @@ void cmd_exec(t_all *all)// for no pipes
 		exit(-11);
 	else if (pid == 0)
 	{
-//		global_pid = getpid();
 		if (all->cmnd[all->i].fd_in > STDIN_FILENO)
 		{
 			dup2(all->cmnd[all->i].fd_in, 0);
@@ -65,14 +64,30 @@ void cmd_exec(t_all *all)// for no pipes
 		}
 		exit(0);
 	}
-//	else
-//		global_pid = pid;
 	close(all->fd[1]);
 	close(all->fd[0]);
 	int wstat;
 	waitpid(pid, &wstat, 0);
-	if (WIFEXITED(wstat))
+	printf("wstat = %d; %d\n", wstat, (wstat % 256));
+	if (WIFSIGNALED(wstat))
 	{
+		printf("ifsignaled\n");
+		int temp;
+		temp = WTERMSIG(wstat);
+		printf("WIFSIGNALLED %d\n", temp);
+		if (temp == SIGINT)
+			all->last_exit = 130;
+		else if (temp == SIGQUIT)
+		{
+			all->last_exit = 131;
+			printf("Quit: 3\n");
+		}
+	}
+
+	else if (WIFEXITED(wstat))
+	{
+
+		printf("ifexited\n");
 		int exit_code = WEXITSTATUS(wstat);
 		if (exit_code != 0)
 		{
@@ -83,18 +98,8 @@ void cmd_exec(t_all *all)// for no pipes
 			else
 				all->last_exit = exit_code;
 		}
-		else
-			all->last_exit = 0;
-	}
-	else //WIFSIGNALED
-	{
-		if (wstat == SIGINT)
-			all->last_exit = 130;
-		else if (wstat == SIGQUIT)
-		{
-			all->last_exit = 131;
-			printf("Quit: 3\n");
-		}
+//		else
+//			all->last_exit = 0;
 	}
 }
 
@@ -130,13 +135,13 @@ char *get_data_path(t_all *all)
 		path_tmp = ft_strjoin(path[i], "/");
 		tmp = path_tmp;
 		path_tmp = ft_strjoin(path_tmp, all->cmnd[all->i].args[0]);
-		free(tmp);
+		ft_memdel(tmp);
 		if (access(path_tmp, F_OK | X_OK) == 0) //todo Maryana replace access with read
 		{
 //			ft_free_array(path); //todo free
 			return (path_tmp);
 		}
-		free(path_tmp);
+		ft_memdel(path_tmp);
 	}
 	return (NULL);
 }
@@ -159,7 +164,7 @@ void envs_list_to_array(t_all *all)
 			{
 				tmp = all->envp[i];
 				all->envp[i] = ft_strjoin(all->envp[i], all->env_vars[i].value);
-				free(tmp);
+				ft_memdel(tmp);
 			}
 		}
 	}

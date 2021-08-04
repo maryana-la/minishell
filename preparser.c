@@ -80,6 +80,9 @@ int ft_preparser(char *str, t_all *all)
 		else
 			return(preparser_error(all, "|", 1));
 	}
+	if (str[i] == '<' || str[len] == '<' || str[i] == '>' || str[len] == '>')
+		return(preparser_error(all, "newline", 7));
+
 	i--;
 	while (str[++i])
 	{

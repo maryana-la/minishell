@@ -29,7 +29,7 @@ char	*ft_dollar(char *str, int *i, t_all *all) //done leaks
 
 	pos_of_dollar = *i;
 	while(str[++*i]) //find end of variable
-		if(check_set(str[*i], " \t\'\"\\$;|><"))
+		if(check_set(str[*i], " \t\'\"\\$;|></"))
 			break;
 	end_of_var = *i;
 
@@ -46,11 +46,11 @@ char	*ft_dollar(char *str, int *i, t_all *all) //done leaks
 		tmp = ft_strjoin(begin_of_str, value);
 		str = ft_strjoin(tmp, end_of_line);
 		*i = pos_of_dollar + (int)ft_strlen(value) - 1;
-		free(tmp);
-		free(begin_of_str);
-		free(value);
-		free(end_of_line);
-		free(var);
+		ft_memdel(tmp);
+		ft_memdel(begin_of_str);
+		ft_memdel(value);
+		ft_memdel(end_of_line);
+		ft_memdel(var);
 		return(str);
 	}
 	else if (ft_isdigit(var[0]) != 0) // if numeric
@@ -61,9 +61,9 @@ char	*ft_dollar(char *str, int *i, t_all *all) //done leaks
 			end_of_line = ft_substr(str, pos_of_dollar + 2, (ft_strlen(str) - pos_of_dollar - 1));
 		begin_of_str = ft_substr(str, 0, pos_of_dollar);
 		str = ft_strjoin(begin_of_str, end_of_line);
-		free(begin_of_str);
-		free(end_of_line);
-		free(var);
+		ft_memdel(begin_of_str);
+		ft_memdel(end_of_line);
+		ft_memdel(var);
 		return (str);
 	}
 
@@ -76,17 +76,17 @@ char	*ft_dollar(char *str, int *i, t_all *all) //done leaks
 	if (all->env_vars[j].key) //если долистал до конца или вылетел из цикла
 		value = ft_strdup(all->env_vars[j].value);
 	else
-		value = "\0";
+		value = ft_strdup("\0");
 	begin_of_str = ft_substr(str, 0, pos_of_dollar); // cut till $
 	end_of_line = ft_substr(str, *i, (ft_strlen(str) - *i + 1)); // cut after variable
 	tmp = ft_strjoin(begin_of_str, value);
-	str = ft_strjoin(tmp, end_of_line);
+	str = ft_strjoin(tmp, end_of_line); //todo if $bla
 	*i = pos_of_dollar + (int)ft_strlen(value) - 1;
-	free(tmp);
-	free(begin_of_str);
-	free(value);
-	free(end_of_line);
-	free(var);
+	ft_memdel(tmp);
+	ft_memdel(begin_of_str);
+	ft_memdel(value);
+	ft_memdel(end_of_line);
+	ft_memdel(var);
 	return (str);
 }
 
@@ -163,7 +163,7 @@ char	*check_lower_case(char *str) //done leaks
 		dest[i] = ft_tolower(str[i]);
 		i++;
 	}
-	free(str);
+	ft_memdel(str);
 	return(dest);
 }
 
@@ -178,11 +178,7 @@ void	ft_put_str_to_struct(char *arg, t_all *all) //done leaks
 		all->cmnd[all->pip_count].args = malloc(sizeof(char *) * 2);
 		all->cmnd[all->pip_count].args[0] = ft_strdup(arg);
 		all->cmnd[all->pip_count].args[1] = 0; //maybe change to NULL?
-		if (arg)
-		{
-			free(arg);
-			arg = NULL;
-		}
+		ft_memdel(arg);
 	}
 	else
 	{
@@ -194,17 +190,12 @@ void	ft_put_str_to_struct(char *arg, t_all *all) //done leaks
 		while (all->cmnd[all->pip_count].args[++i] != 0) //copy all to a tmp massive and free previous commands
 		{
 			tmp[i] = ft_strdup(all->cmnd[all->pip_count].args[i]);
-			free(all->cmnd[all->pip_count].args[i]);
-			all->cmnd[all->pip_count].args[i] = NULL;
+			ft_memdel(all->cmnd[all->pip_count].args[i]);
 		}
 
 		tmp[i] = ft_strdup(arg);
 		tmp[i + 1] = 0; //maybe change to NULL?
-		if (arg)
-		{
-			free(arg);
-			arg = NULL;
-		}
+		ft_memdel(arg);
 		all->cmnd[all->pip_count].args = tmp;
 	}
 }
@@ -284,7 +275,8 @@ void ft_parser(char *str, t_all *all)
 			}
 //		}
 	}
-	launch_commands(all);
+	if (all->cmnd->args)
+		launch_commands(all);
 }
 
 
@@ -337,7 +329,7 @@ void env_init(t_all *all, char **env) // env init with lists/ leaks done
 				shlvl_tmp = 1;
 			}
 			all->env_vars[i].value = ft_itoa(shlvl_tmp);
-			free(tmp_str);
+			ft_memdel(tmp_str);
 			all->env_vars[i].value_len = ft_strlen(all->env_vars[i].value);
 			shlvl_flag = 1;
 		}
@@ -372,7 +364,7 @@ void env_init(t_all *all, char **env) // env init with lists/ leaks done
 		tmp[i].value_len = ft_strlen(tmp[i].value);
 		tmp[i + 1].key = NULL;
 		tmp[i + 1].value = NULL;
-		free(all->env_vars);
+		ft_memdel(all->env_vars);
 		all->env_vars = tmp;
 		all->env_counter++;
 	}
@@ -390,7 +382,7 @@ void env_init(t_all *all, char **env) // env init with lists/ leaks done
 		tmp[i].value_len = ft_strlen(tmp[i].value);
 		tmp[i + 1].key = NULL;
 		tmp[i + 1].value = NULL;
-		free(all->env_vars);
+		ft_memdel(all->env_vars);
 		all->env_vars = tmp;
 		all->env_counter++;
 	}
@@ -408,7 +400,7 @@ void env_init(t_all *all, char **env) // env init with lists/ leaks done
 		tmp[i].value_len = 0;
 		tmp[i + 1].key = NULL;
 		tmp[i + 1].value = NULL;
-		free(all->env_vars);
+		ft_memdel(all->env_vars);
 		all->env_vars = tmp;
 		all->env_counter++;
 	}
@@ -456,8 +448,7 @@ int takeInput(t_all *all, char** str)
 	{
 		add_history(buf);
 		*str = ft_strdup(buf);
-		if (buf)
-			free(buf);
+		ft_memdel(buf);
 		return 0;
 	}
 	else
@@ -490,11 +481,7 @@ if (signal(SIGQUIT, sig_handler) == SIG_ERR)
 			continue;
 		if (ft_preparser(str, &all) == 0)
 			ft_parser(str, &all);
-		if (str)
-		{
-			free(str);
-			str = NULL;
-		}
+		ft_memdel(str);
 	}
 	return 0;
 }

@@ -38,11 +38,20 @@ void 	launch_commands(t_all *all)
 					close(all->cmnd[all->i].fd_in);
 				}
 				else
+				{
 					dup2(all->fd_tmp, 0);
+					close (all->fd_tmp);
+				}
 				close(all->fd[0]);
-				close (all->fd_tmp); //todo if not first command
+//				if (all->i != 0)
+//					close (all->fd_tmp); //todo if not first command
+
+
 				if (all->cmnd[all->i].fd_out > STDOUT_FILENO)
+				{
 					dup2(all->cmnd[all->i].fd_out, 1);
+					close(all->cmnd[all->i].fd_out);
+				}
 				else if (all->i != all->pip_count)
 					dup2(all->fd[1], 1);
 				close(all->fd[1]);
@@ -68,6 +77,7 @@ void 	launch_commands(t_all *all)
 			}
 			close(all->fd[1]);
 			all->fd_tmp = all->fd[0];
+//			close(all->fd[0]);
 			all->i++;
 			//todo close all fds
 		}
@@ -77,6 +87,7 @@ void 	launch_commands(t_all *all)
 		while (++i < all->pip_count)
 		{
 			waitpid(pid[i], &wstat, 0);
+			printf("wstat = %d; %d\n", wstat, (wstat % 256));
 			if (WIFEXITED(wstat))
 			{
 				int exit_code = WEXITSTATUS(wstat);
@@ -94,6 +105,9 @@ void 	launch_commands(t_all *all)
 			}
 			else // WIFSIGNALED
 			{
+				int temp;
+				temp = WTERMSIG(wstat);
+				printf("WTERMSIG %d\n", temp);
 				if (wstat == SIGINT)
 					all->last_exit = 130;
 				else if (wstat == SIGQUIT)

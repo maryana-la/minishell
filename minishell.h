@@ -94,6 +94,7 @@ void 	launch_commands(t_all *all);
 char	*get_file_name(char *str, int *i, t_all *all);
 void	heredoc_stdin_read(t_all *all, char *stop);
 void	ft_handle_redirect(char *str, int *i, t_all *all);
+void	*ft_memdel(void *ptr);
 
 //Maryana`s func end
 

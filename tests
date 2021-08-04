@@ -1,7 +1,5 @@
 cat /dev/random | head -n 1 | cat -e
-echo >
-*cd $HOME/Documents - sega, double free
-*export "" et unset "" - check no sega
+
 cat Makefile | grep pr | head -n 5 | cd test (mybin) # check status code
 cat Makefile | grep pr | head -n 5 | hello (NA) - обработка ()???
 
@@ -9,7 +7,6 @@ cat < test # with non-existent test
 echo bonjour > $test потом cat $test - сега
 sleep 10 ctrl+\ echo $?
 sleep 10 ctrl+c echo $?
-$bla - сега
  cd ~ - todo Dima
 > a ls > b < Makefile - todo add check for open|read
  echo > a Hello World! - if chmod 000 a

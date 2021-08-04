@@ -119,7 +119,7 @@ void cd_command(t_all *all)
 	{
 		tmp = all->env_vars[i].value; //to free malloc
 		all->env_vars[i].value = ft_strdup(all->tmp_cwd);
-		free (tmp);
+		ft_memdel (tmp);
 	}
 
 	getcwd(all->cwd, sizeof(all->cwd));
@@ -129,7 +129,7 @@ void cd_command(t_all *all)
 	{
 		tmp = all->env_vars[i].value; //to free malloc
 		all->env_vars[i].value = ft_strdup(all->cwd);
-		free (tmp);
+		ft_memdel (tmp);
 	}
 }
 
@@ -229,7 +229,7 @@ void add_new_variable(t_all *all)
 	tmp[i].value_len = ft_strlen(tmp[i].value);
 	tmp[i + 1].key = NULL;
 	tmp[i + 1].value = NULL;
-	free(all->env_vars);
+	ft_memdel(all->env_vars);
 	all->env_vars = tmp;
 	all->env_counter++;
 	all->last_exit = 0;

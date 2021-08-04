@@ -63,11 +63,9 @@ void	heredoc_stdin_read(t_all *all, char *stop)
 			break ;
 		write(all->cmnd[all->pip_count].fd_in, line, ft_strlen(line));
 		write(all->cmnd[all->pip_count].fd_in, "\n", 1);
-		if (line)
-			free(line);
+		ft_memdel(line);
 	}
-	if (line)
-		free(line);
+	ft_memdel(line);
 
 
 	close (all->cmnd[all->pip_count].fd_in);
