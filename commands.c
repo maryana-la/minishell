@@ -104,6 +104,8 @@ void cd_command(t_all *all)
 
 	i = -1;
 	all->tmp_cwd = getcwd(NULL, 0);
+	if (!all->cmnd[all->i].args[1])
+		return ;
 	if (chdir(all->cmnd[all->i].args[1]) == -1) //check if no error with folder
 	{
 		printf("minishell: cd: %s: %s\n", all->cmnd[all->i].args[1], strerror(errno));

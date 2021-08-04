@@ -40,6 +40,7 @@ void 	launch_commands(t_all *all)
 				else
 					dup2(all->fd_tmp, 0);
 				close(all->fd[0]);
+				close (all->fd_tmp); //todo if not first command
 				if (all->cmnd[all->i].fd_out > STDOUT_FILENO)
 					dup2(all->cmnd[all->i].fd_out, 1);
 				else if (all->i != all->pip_count)
@@ -68,13 +69,14 @@ void 	launch_commands(t_all *all)
 			close(all->fd[1]);
 			all->fd_tmp = all->fd[0];
 			all->i++;
+			//todo close all fds
 		}
 //		wait(NULL);
 		int wstat;
-//		int i = -1;
-//		while (++i < all->pip_count)
-//		{
-			waitpid(pid[all->i - 1], &wstat, 0);
+		int i = -1;
+		while (++i < all->pip_count)
+		{
+			waitpid(pid[i], &wstat, 0);
 			if (WIFEXITED(wstat))
 			{
 				int exit_code = WEXITSTATUS(wstat);
@@ -100,12 +102,13 @@ void 	launch_commands(t_all *all)
 					printf("Quit: 3\n");
 				}
 			}
-//		}
+		}
 
 //		int i = -1;
 //		while (++i < all->pip_count)
 //			kill(pid[i], SIGKILL);
 	}
+	//todo close all fds
 	dup2(all->fd_std[0], 0);
 	dup2(all->fd_std[1], 1);
 }
