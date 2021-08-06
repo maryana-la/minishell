@@ -155,7 +155,7 @@ char	*check_lower_case(char *str) //done leaks
 	char *dest;
 
 	i = 0;
-	dest = malloc(sizeof(char) * ft_strlen(str));
+	dest = malloc(sizeof(char) * (ft_strlen(str) + 1));
 	if (!dest)
 		return (NULL);
 	while (str[i] != 0)
@@ -163,6 +163,7 @@ char	*check_lower_case(char *str) //done leaks
 		dest[i] = ft_tolower(str[i]);
 		i++;
 	}
+	dest[i] = '\0';
 	ft_memdel(str);
 	return(dest);
 }
@@ -208,7 +209,6 @@ void ft_parser(char *str, t_all *all)
 	char *tmp;
 	char *from_quote;
 
-
 	all->cmnd = malloc(sizeof(t_cmnd) * (all->num_of_pipes + 2)); //malloc for number of commands
 	i = -1;
 	while (++i < (all->num_of_pipes + 2))
@@ -223,57 +223,57 @@ void ft_parser(char *str, t_all *all)
 
 	while(str[i])
 	{
-//		while (str[i] && !(check_set(str[i], "|;")))
-//		{
-			skip_spaces(str, &i);
-			if (str[i] == '>' || str[i] == '<')
-				ft_handle_redirect(str, &i, all);
-			else if (str[i] == '|')
-			{
-				all->pip_count++;
-				i++;
-			}
-			else
-			{
-				len = get_arg_len(str, i);
-				tmp = malloc(sizeof(char) * (len + 1));
-				j = 0;
-				while (str[i] && !check_set(str[i], " \t|;<>"))
-				{
-					if (str[i] == '\'')
-					{
-						while (str[++i] && str[i] != '\'')
-						{
-							tmp[j] = str[i];
-							j++;
-						}
-						j--;
-					} else if (str[i] == '\"')
-					{
-						while (str[++i] && str[i] != '\"')
-						{
-							if (str[i] == '\\' &&
-								(str[i + 1] == '$' || str[i + 1] == '\'' || str[i + 1] == '\"' || str[i + 1] == '\\'))
-								tmp[j] = str[++i];
-							else
-								tmp[j] = str[i];
-							j++;
-						}
-						j--;
-					} else if (str[i] == '\\')
-						tmp[j] = str[++i];
-					else
-						tmp[j] = str[i];
-					i++;
-					j++;
-				}
-				if (len > 0)
-				{
-					tmp[j] = '\0';
-					ft_put_str_to_struct(tmp, all);
-				}
-			}
-//		}
+	    skip_spaces(str, &i);
+	    if (str[i] == '>' || str[i] == '<')
+	        ft_handle_redirect(str, &i, all);
+	    else if (str[i] == '|')
+	    {
+	        all->pip_count++;
+	        i++;
+	    }
+	    else
+	    {
+	        len = get_arg_len(str, i);
+	        tmp = ft_calloc((len + 2), sizeof(char));
+	        j = 0;
+	        while (str[i] && !check_set(str[i], " \t|;<>"))
+	        {
+	            if (str[i] == '\'')
+	            {
+	                while (str[++i] && str[i] != '\'')
+	                {
+	                    tmp[j] = str[i];
+	                    j++;
+	                }
+	                j--;
+	            }
+	            else if (str[i] == '\"')
+	            {
+	                while (str[++i] && str[i] != '\"')
+	                {
+	                    if (str[i] == '\\' &&
+	                    (str[i + 1] == '$' || str[i + 1] == '\'' || str[i + 1] == '\"' || str[i + 1] == '\\'))
+	                        tmp[j] = str[++i];
+	                    else
+	                        tmp[j] = str[i];
+	                    j++;
+	                }
+	                j--;
+	            }
+	            else if (str[i] == '\\')
+	                tmp[j] = str[++i];
+	            else
+	                tmp[j] = str[i];
+	            i++;
+	            j++;
+	        }
+	        if (len > 0)
+	        {
+	            tmp[j] = '\0';
+	            ft_put_str_to_struct(tmp, all);
+	        }
+//	        ft_memdel(tmp);
+	    }
 	}
 	if (all->cmnd->args)
 		launch_commands(all);
@@ -378,7 +378,7 @@ void env_init(t_all *all, char **env) // env init with lists/ leaks done
 			tmp[i] = all->env_vars[i];
 		tmp[i].key = ft_strdup("PWD");
 		tmp[i].key_len = ft_strlen(tmp[i].key);
-		tmp[i].value = getcwd(NULL, -1);
+		tmp[i].value = getcwd(NULL, 0);
 		tmp[i].value_len = ft_strlen(tmp[i].value);
 		tmp[i + 1].key = NULL;
 		tmp[i + 1].value = NULL;

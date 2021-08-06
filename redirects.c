@@ -8,9 +8,11 @@ char	*get_file_name(char *str, int *i, t_all *all)
 
 	skip_spaces(str, i);
 	len = get_arg_len(str, *i);
+	if (!len)
+		return NULL;
 	tmp = malloc(sizeof(char) * (len + 1));
 	if (!tmp)
-		return (0); //malloc error
+		return (NULL); //malloc error
 	j = 0;
 	while (str[*i] && !check_set(str[*i], " \t|;<>"))
 	{
@@ -49,11 +51,19 @@ char	*get_file_name(char *str, int *i, t_all *all)
 void	heredoc_stdin_read(t_all *all, char *stop)
 {
 	char	*line;
+	char 	*heredoc_file;
 	int		ret;
 
-	all->cmnd[all->pip_count].fd_in = open("tmp_file", O_CREAT | O_RDWR | O_TRUNC, S_IRWXU);
-//	if (pip->fd_in < 0 || read(pip->fd_in, 0, 0) < 0)
-//		ft_error_exit(argv[1], pip, FILE_ERR);
+	heredoc_file = ft_strjoin(stop, "tmp_file");
+	all->cmnd[all->pip_count].fd_in = open(heredoc_file, O_CREAT | O_RDWR | O_TRUNC, S_IRWXU);
+	if (all->cmnd[all->pip_count].fd_in < 0 || read(all->cmnd[all->pip_count].fd_in, 0, 0) < 0)
+	{
+		all->last_exit = errno;
+		printf("minishell: %s: %s\n", heredoc_file, strerror(errno));
+		unlink(heredoc_file);
+		ft_memdel(heredoc_file);
+		return ;
+	}
 	ret = 1;
 	while (ret)
 	{
@@ -70,37 +80,68 @@ void	heredoc_stdin_read(t_all *all, char *stop)
 
 	close (all->cmnd[all->pip_count].fd_in);
 	all->cmnd[all->pip_count].fd_in = open("tmp_file", O_RDONLY);
-//	if (all->cmnd->fd_in < 0 || read(all->cmnd->fd_in, 0, 0) < 0)
-//		ft_error_exit("tmp_file", pip, FILE_ERR);
+	{
+		all->last_exit = errno;
+		printf("minishell: %s: %s\n", heredoc_file, strerror(errno));
+		unlink(heredoc_file);
+		ft_memdel(heredoc_file);
+		return ;
+	}
+	unlink(heredoc_file);
+	ft_memdel(heredoc_file);
 }
 
 
 void	ft_handle_redirect(char *str, int *i, t_all *all)
 {
 	char *file_name;
+	char *stop_word;
 
 	if (str[*i] == '>' && str[*i + 1] != '>')
 	{
 		(*i)++;
 		file_name = get_file_name(str, i, all);
 		all->cmnd[all->pip_count].fd_out = open(file_name, O_CREAT | O_RDWR | O_TRUNC, S_IRWXU);
+		if (all->cmnd[all->pip_count].fd_out < 0 || read(all->cmnd[all->pip_count].fd_out, NULL, 0) < 0)
+		{
+			all->last_exit = errno;
+			printf("minishell: %s: %s\n", file_name, strerror(errno));
+			ft_memdel(file_name);
+			return ;//todo maybe change function to int?
+		}
+
 	}
 	else if (str[*i] == '>' && str[*i + 1] == '>')
 	{
 		*i = *i + 2;
 		file_name = get_file_name(str, i, all);
 		all->cmnd[all->pip_count].fd_out = open(file_name, O_CREAT | O_RDWR | O_APPEND, S_IRWXU);
+		if (all->cmnd[all->pip_count].fd_out < 0 || read(all->cmnd[all->pip_count].fd_out, NULL, 0) < 0)
+		{
+			all->last_exit = errno;
+			printf("minishell: %s: %s\n", file_name, strerror(errno));
+			ft_memdel(file_name);
+			return ;//todo maybe change function to int?
+		}
 	}
 	else if (str[*i] == '<' && str[*i + 1] != '<')
 	{
 		(*i)++;
 		file_name = get_file_name(str, i, all);
 		all->cmnd[all->pip_count].fd_in = open(file_name, O_RDONLY);
+		if (all->cmnd[all->pip_count].fd_in < 0 || read(all->cmnd[all->pip_count].fd_in, NULL, 0) < 0)
+		{
+			all->last_exit = errno;
+			printf("minishell: %s: %s\n", file_name, strerror(errno));
+			ft_memdel(file_name);
+			return ;//todo maybe change function to int?
+		}
 	}
 	else if (str[*i] == '<' && str[*i + 1] == '<')
 	{
 		*i = *i + 2;
-		file_name = get_file_name(str, i, all);
+		stop_word = get_file_name(str, i, all);
 		heredoc_stdin_read(all, file_name);
+		ft_memdel(stop_word);
 	}
 }

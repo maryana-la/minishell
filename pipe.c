@@ -87,7 +87,7 @@ void 	launch_commands(t_all *all)
 		while (++i < all->pip_count)
 		{
 			waitpid(pid[i], &wstat, 0);
-			printf("wstat = %d; %d\n", wstat, (wstat % 256));
+//			printf("wstat = %d; %d\n", wstat, (wstat % 256));
 			if (WIFEXITED(wstat))
 			{
 				int exit_code = WEXITSTATUS(wstat);
@@ -107,7 +107,7 @@ void 	launch_commands(t_all *all)
 			{
 				int temp;
 				temp = WTERMSIG(wstat);
-				printf("WTERMSIG %d\n", temp);
+//				printf("WTERMSIG %d\n", temp);
 				if (wstat == SIGINT)
 					all->last_exit = 130;
 				else if (wstat == SIGQUIT)
