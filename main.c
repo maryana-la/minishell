@@ -459,6 +459,7 @@ int main(int argc, char **argv, char **env)
 {
 	t_all  all;
 
+	rl_outstream = stderr;
 	(void)argc;
 	(void)argv;
 	init_all(&all);

@@ -23,7 +23,8 @@ void start_commands(t_all *all)
 void print_and_exit (t_all *all, int err)
 {
 	if (!all->num_of_pipes)
-		printf("exit\n");
+		ft_putendl_fd("exit", 2);
+//		printf("exit\n");
 	exit(err);
 }
 
