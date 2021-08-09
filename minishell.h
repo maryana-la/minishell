@@ -15,6 +15,7 @@
 # include <sys/errno.h>
 # include <signal.h>
 //pid_t global_pid;
+
 typedef struct s_env
 {
 	char		*key;
@@ -48,6 +49,7 @@ typedef struct s_all
 	int 	fd_std[2];
 	int 	fd_tmp;
 	int 	last_exit;
+//	char	*heredoc_file;
 }				t_all;
 
 
@@ -65,7 +67,7 @@ int takeInput(t_all *all, char** str);
 int check_set(char c, char *set);
 void skip_spaces(char *str, int *i);
 char *ft_dollar(char *str, int *i, t_all *all);
-char	*replace_env_with_value(char *str, t_all *all);
+char	*replace_env_with_value(char *str, int i, t_all *all);
 void	ft_parser(char *str, t_all *all);
 void	env_init(t_all *all, char **env);
 void	init_all(t_all *all);
@@ -91,7 +93,7 @@ void 	launch_commands(t_all *all);
  *  redirects
  */
 
-char	*get_file_name(char *str, int *i, t_all *all);
+char	*get_file_name(char *str, int *i, int type, t_all *all);
 void	heredoc_stdin_read(t_all *all, char *stop);
 void	ft_handle_redirect(char *str, int *i, t_all *all);
 void	*ft_memdel(void *ptr);

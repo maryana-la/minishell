@@ -16,7 +16,12 @@ void cmd_exec1(t_all *all) //for multi pipes
 				perror(all->cmnd[all->i].args[1]);
 			}
 			else
-				printf("%s\n", strerror(errno));
+			{
+				ft_putstr_fd("minishell: ", 2);
+				ft_putstr_fd(all->cmnd[all->i].args[0], 2);
+				ft_putstr_fd(strerror(errno), 2);
+				ft_putstr_fd("\n", 2);
+			}
 			exit (errno);
 		}
 		exit(0);
@@ -38,13 +43,13 @@ void cmd_exec(t_all *all)// for no pipes
 	{
 		if (all->cmnd[all->i].fd_in > STDIN_FILENO)
 		{
-			dup2(all->cmnd[all->i].fd_in, 0);
+			dup2(all->cmnd[all->i].fd_in, STDIN_FILENO);
 			close(all->cmnd[all->i].fd_in);
 		}
 		close(all->fd[0]);
 
-		if (all->cmnd[all->i].fd_out > 1)
-			dup2(all->cmnd[all->i].fd_out, 1);
+		if (all->cmnd[all->i].fd_out > STDOUT_FILENO)
+			dup2(all->cmnd[all->i].fd_out, STDOUT_FILENO);
 		close(all->fd[1]);
 
 		path = get_data_path(all);
@@ -59,7 +64,12 @@ void cmd_exec(t_all *all)// for no pipes
 				ft_putstr_fd(" : command not found\n", 2);
 			}
 			else
-				perror(all->cmnd[all->i].args[0]);
+			{
+				ft_putstr_fd("minishell: ", 2);
+				ft_putstr_fd(all->cmnd[all->i].args[0], 2);
+				ft_putstr_fd(strerror(errno), 2);
+				ft_putstr_fd("\n", 2);
+			}
 			exit (errno);
 		}
 		exit(0);
