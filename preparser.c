@@ -61,7 +61,7 @@ int preparser_error(t_all *all, char* token, int len)
 	write(2, "minishell: syntax error near unexpected token `", 47);
 	write(2, token, len);
 	write (2, "'\n", 2);
-	return (all->last_exit = 258);
+	return (g_status = 258);
 }
 
 int ft_preparser(char *str, t_all *all)

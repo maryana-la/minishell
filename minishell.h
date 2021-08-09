@@ -16,6 +16,9 @@
 # include <signal.h>
 //pid_t global_pid;
 
+
+int 	g_status;
+
 typedef struct s_env
 {
 	char		*key;

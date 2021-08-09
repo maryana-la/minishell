@@ -40,7 +40,8 @@ char	*ft_dollar(char *str, int *i, t_all *all) //done leaks
 
 	if (!(ft_strncmp(var, "?", 2)))
 	{
-		value = ft_itoa(all->last_exit);
+//		value = ft_itoa(all->last_exit);
+		value = ft_itoa(g_status);
 		begin_of_str = ft_substr(str, 0, pos_of_dollar);
 		end_of_line = ft_substr(str, *i, (ft_strlen(str) - *i + 1));
 		tmp = ft_strjoin(begin_of_str, value);
@@ -472,8 +473,6 @@ int main(int argc, char **argv, char **env)
 		printf("Signal init error\n");
 	if (signal(SIGQUIT, sig_handler) == SIG_ERR)
 		printf("Signal init error\n");
-
-//global_pid = getpid();
 
 	char *str;
 	while (1)

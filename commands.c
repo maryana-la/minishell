@@ -64,7 +64,7 @@ void exit_command(t_all *all)
 	if (i > 2)
 	{
 		printf("minishell: exit: too many arguments\n");
-		all->last_exit = 1;
+		g_status = 1;
 		return ;
 	}
 
@@ -134,7 +134,7 @@ void cd_command(t_all *all)
 	if (chdir(all->cmnd[all->i].args[1]) == -1) //check if no error with folder
 	{
 		printf("minishell: cd: %s: %s\n", all->cmnd[all->i].args[1], strerror(errno));
-		all->last_exit = 1;
+		g_status = 1;
 		return ;
 	}
 
@@ -195,7 +195,7 @@ void add_new_variable(t_all *all)
 	if (!ft_isalpha(all->cmnd[all->i].args[all->arg_pos][0]) && (all->cmnd[all->i].args[all->arg_pos][0] != '_'))
 	{
 		error_handler(all->cmnd[all->i].args[all->arg_pos], 1);
-		all->last_exit = 1;
+		g_status = 1;
 		return ;
 	}
 
@@ -209,7 +209,7 @@ void add_new_variable(t_all *all)
 		else if (!ft_isalnum(all->cmnd[all->i].args[all->arg_pos][j]) &&(all->cmnd[all->i].args[all->arg_pos][0] != '_'))
 		{
 			error_handler(all->cmnd[all->i].args[all->arg_pos], 1);
-			all->last_exit = 1;
+			g_status = 1;
 			return ;
 		}
 	}
@@ -221,14 +221,14 @@ void add_new_variable(t_all *all)
 
 	if (i != all->env_counter && temp_value[0] == '\0' && !ravno)
 	{
-		all->last_exit = 0;
+		g_status = 0;
 		return ;
 	}
 
 	if (i != all->env_counter)
 	{
 		all->env_vars[i].value = temp_value;
-		all->last_exit = 0;
+		g_status = 0;
 		return ;
 	}
 
@@ -257,7 +257,7 @@ void add_new_variable(t_all *all)
 	ft_memdel(all->env_vars);
 	all->env_vars = tmp;
 	all->env_counter++;
-	all->last_exit = 0;
+	g_status = 0;
 }
 
 void sort_envs(t_all *all)
@@ -335,7 +335,7 @@ void unset_command(t_all *all)
 		{
 			error_handler(all->cmnd[all->i].args[j], 2);
 			all->arg_pos = j;
-			all->last_exit = 1;
+			g_status = 1;
 			return ;
 		}
 
@@ -373,7 +373,7 @@ void sig_handler(int sig_id)
 		{
 			ft_putstr_fd("Quit: 3\n", 2); //todo проверить на двойной вывод  этой строки
 		}
-//		g_status = 128 + sig_id;
+		g_status = 128 + sig_id;
 	}
 	else if (sig_id == SIGINT)
 	{
@@ -381,7 +381,7 @@ void sig_handler(int sig_id)
 		rl_on_new_line();
 		rl_replace_line("", 0);
 		rl_redisplay();
-//		g_status = 1;
+		g_status = 1;
 	}
 }
 

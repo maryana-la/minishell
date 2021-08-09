@@ -5,13 +5,13 @@ void 	launch_commands(t_all *all)
 	pid_t *pid;
 
 	all->i = 0;
-	all->last_exit = 0;
+	g_status = 0;
 
 	if (all->pip_count == 0)
 	{
 		if (all->cmnd[all->i].fd_in < 0 || all->cmnd[all->i].fd_out < 0)
 		{
-			all->last_exit = 1;
+			g_status = 1;
 			return ;
 		}
 		start_commands(all);
@@ -73,7 +73,7 @@ void 	launch_commands(t_all *all)
 					exit_command(all);
 				else
 					cmd_exec1(all);
-				exit(all->last_exit); //todo check return value from builtin-s
+				exit(g_status); //todo check return value from builtin-s
 			}
 			close(all->fd[1]);
 			if (all->i != 0)
@@ -98,15 +98,15 @@ void 	launch_commands(t_all *all)
 				if (exit_code != 0)
 				{
 					if (exit_code == 13)
-						all->last_exit = 126;
+						g_status = 126;
 					else if (exit_code == 14)
-						all->last_exit = 127;
+						g_status = 127;
 					else
-						all->last_exit = exit_code;
+						g_status = exit_code;
 				}
 				else
 //					printf("Success\n");
-					all->last_exit = 0;
+					g_status = 0;
 			}
 			else // WIFSIGNALED
 			{
@@ -114,10 +114,10 @@ void 	launch_commands(t_all *all)
 				temp = WTERMSIG(wstat);
 //				printf("WTERMSIG %d\n", temp);
 				if (wstat == SIGINT)
-					all->last_exit = 130;
+					g_status = 130;
 				else if (wstat == SIGQUIT)
 				{
-					all->last_exit = 131;
+					g_status = 131;
 					printf("Quit: 3\n");
 				}
 			}

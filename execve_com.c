@@ -83,10 +83,10 @@ void cmd_exec(t_all *all)// for no pipes
 //		int temp;
 //		temp = WTERMSIG(wstat);
 //		if (temp == SIGINT)
-//			all->last_exit = 130;
+//			g_status = 130;
 //		else if (temp == SIGQUIT)
 //		{
-//			all->last_exit = 131;
+//			g_status = 131;
 //			printf("Quit: 3\n");
 //		}
 //	}
@@ -97,14 +97,14 @@ void cmd_exec(t_all *all)// for no pipes
 		if (exit_code != 0)
 		{
 			if (exit_code == 13)
-				all->last_exit = 126;
+				g_status= 126;
 			else if (exit_code == 14)
-				all->last_exit = 127;
+				g_status = 127;
 			else
-				all->last_exit = exit_code;
+				g_status = exit_code;
 		}
 //		else
-//			all->last_exit = 0;
+//			g_status = 0;
 	}
 }
 

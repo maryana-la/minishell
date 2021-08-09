@@ -89,7 +89,7 @@ void	heredoc_stdin_read(t_all *all, char *stop)
 	all->cmnd[all->pip_count].fd_in = open(heredoc_file, O_CREAT | O_RDWR | O_TRUNC, S_IRWXU);
 	if (all->cmnd[all->pip_count].fd_in < 0 || read(all->cmnd[all->pip_count].fd_in, 0, 0) < 0)
 	{
-		all->last_exit = errno;
+		g_status = errno;
 		printf("minishell: %s: %s\n", heredoc_file, strerror(errno));
 		unlink(heredoc_file);
 		ft_memdel(heredoc_file);
@@ -113,7 +113,7 @@ void	heredoc_stdin_read(t_all *all, char *stop)
 	all->cmnd[all->pip_count].fd_in = open(heredoc_file, O_RDONLY);
 	if (all->cmnd[all->pip_count].fd_in < 0 || read(all->cmnd[all->pip_count].fd_in, 0, 0) < 0)
 	{
-		all->last_exit = errno;
+		g_status = errno;
 		printf("minishell: %s: %s\n", heredoc_file, strerror(errno));
 		unlink(heredoc_file);
 		ft_memdel(heredoc_file);
@@ -135,7 +135,7 @@ void	ft_handle_redirect(char *str, int *i, t_all *all)
 		file_name = get_file_name(str, i, 1, all);
 		if (!file_name)
 		{
-			all->last_exit = 1;
+			g_status = 1;
 			printf("minishell: ambiguous redirect\n");
 			all->cmnd[all->pip_count].fd_out = -2;
 			return ;
@@ -143,7 +143,7 @@ void	ft_handle_redirect(char *str, int *i, t_all *all)
 		all->cmnd[all->pip_count].fd_out = open(file_name, O_CREAT | O_RDWR | O_TRUNC, S_IRWXU);
 		if (all->cmnd[all->pip_count].fd_out < 0 || read(all->cmnd[all->pip_count].fd_out, NULL, 0) < 0)
 		{
-			all->last_exit = errno;
+			g_status = errno;
 			printf("minishell: %s: %s\n", file_name, strerror(errno));
 			ft_memdel(file_name);
 			return ;//todo maybe change function to int?
@@ -156,7 +156,7 @@ void	ft_handle_redirect(char *str, int *i, t_all *all)
 		file_name = get_file_name(str, i, 1, all);
 		if (!file_name)
 		{
-			all->last_exit = 1;
+			g_status = 1;
 			printf("minishell: ambiguous redirect\n");
 			all->cmnd[all->pip_count].fd_out = -2;
 			return ;
@@ -164,7 +164,7 @@ void	ft_handle_redirect(char *str, int *i, t_all *all)
 		all->cmnd[all->pip_count].fd_out = open(file_name, O_CREAT | O_RDWR | O_APPEND, S_IRWXU);
 		if (all->cmnd[all->pip_count].fd_out < 0 || read(all->cmnd[all->pip_count].fd_out, NULL, 0) < 0)
 		{
-			all->last_exit = errno;
+			g_status = errno;
 			printf("minishell: %s: %s\n", file_name, strerror(errno));
 			ft_memdel(file_name);
 			return ;//todo maybe change function to int?
@@ -176,7 +176,7 @@ void	ft_handle_redirect(char *str, int *i, t_all *all)
 		file_name = get_file_name(str, i, 1, all);
 		if (!file_name)
 		{
-			all->last_exit = 1;
+			g_status = 1;
 			printf("minishell: ambiguous redirect\n");
 			all->cmnd[all->pip_count].fd_in = -2;
 			return ;
@@ -184,7 +184,7 @@ void	ft_handle_redirect(char *str, int *i, t_all *all)
 		all->cmnd[all->pip_count].fd_in = open(file_name, O_RDONLY);
 		if (all->cmnd[all->pip_count].fd_in < 0 || read(all->cmnd[all->pip_count].fd_in, NULL, 0) < 0)
 		{
-			all->last_exit = errno;
+			g_status = errno;
 			printf("minishell: %s: %s\n", file_name, strerror(errno));
 			ft_memdel(file_name);
 			return ;//todo maybe change function to int?
