@@ -14,6 +14,7 @@
 # define LIBFT_H
 # include <stdlib.h>
 # include <unistd.h>
+# define BUFFER_SIZE 42
 
 typedef struct		s_list
 {
@@ -68,4 +69,6 @@ void				ft_putnbr_fd(int n, int fd);
 char				**ft_split(char const *s, char c);
 char				*ft_strtrim(char const *s1, char const *set);
 int					ft_strcmp(char *s1, char *s2);
+char				*ft_strcpy(char *dest, char *src);
+int					get_next_line(int fd, char **line);
 #endif
