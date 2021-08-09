@@ -471,7 +471,6 @@ if (signal(SIGINT, sig_handler) == SIG_ERR)
 if (signal(SIGQUIT, sig_handler) == SIG_ERR)
 	printf("Signal init error\n");
 
-//global_pid = getpid();
 
 	char *str;
 	while (1)
