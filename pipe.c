@@ -5,24 +5,22 @@ void 	launch_commands(t_all *all)
 	pid_t *pid;
 
 	all->i = 0;
-	all->last_exit = 0;
+	g_status = 0;
 
 	if (all->pip_count == 0)
 	{
-		if (all->cmnd[all->i].fd_in > 0)
+		if (all->cmnd[all->i].fd_in < 0 || all->cmnd[all->i].fd_out < 0)
 		{
-			dup2(all->cmnd[all->i].fd_in, 0);
-			close(all->cmnd[all->i].fd_in);
+			g_status = 1;
+			return ;
 		}
-		if (all->cmnd[all->i].fd_out > 1)
-			dup2(all->cmnd[all->i].fd_out, 1);
-
 		start_commands(all);
 	}
+
 	else
 	{
 		all->i = 0;
-		all->fd_tmp = 0;
+//		all->fd_tmp = 0;
 		pid = malloc(sizeof(pid_t) * (all->num_of_pipes + 1));
 		while (all->i < all->pip_count + 1)
 		{
@@ -32,19 +30,21 @@ void 	launch_commands(t_all *all)
 				exit(-11); //todo errno push
 			else if (pid[all->i] == 0) //child starts here
 			{
+				if (all->cmnd[all->i].fd_in < 0 || all->cmnd[all->i].fd_out < 0)
+					exit (1);
+
 				if (all->cmnd[all->i].fd_in > STDIN_FILENO)
 				{
-					dup2(all->cmnd[all->i].fd_in, 0);
+					dup2(all->cmnd[all->i].fd_in, STDIN_FILENO);
 					close(all->cmnd[all->i].fd_in);
 				}
-				else
+				else if (all->i != 0)
 				{
-					dup2(all->fd_tmp, 0);
+					dup2(all->fd_tmp, STDIN_FILENO);
 					close (all->fd_tmp);
 				}
 				close(all->fd[0]);
-//				if (all->i != 0)
-//					close (all->fd_tmp); //todo if not first command
+
 
 
 				if (all->cmnd[all->i].fd_out > STDOUT_FILENO)
@@ -73,18 +73,22 @@ void 	launch_commands(t_all *all)
 					exit_command(all);
 				else
 					cmd_exec1(all);
-				exit(all->last_exit); //todo check return value from builtin-s
+				exit(g_status); //todo check return value from builtin-s
 			}
 			close(all->fd[1]);
-			all->fd_tmp = all->fd[0];
-//			close(all->fd[0]);
+			if (all->i != 0)
+				close(all->fd_tmp);
+			all->fd_tmp = dup(all->fd[0]);
+			close(all->fd[0]);
 			all->i++;
-			//todo close all fds
 		}
-//		wait(NULL);
+//		close(all->fd[1]);
+//		close(all->fd[0]);
+//		close(all->fd_tmp);
+
 		int wstat;
 		int i = -1;
-		while (++i < all->pip_count)
+		while (++i < all->pip_count + 1)
 		{
 			waitpid(pid[i], &wstat, 0);
 //			printf("wstat = %d; %d\n", wstat, (wstat % 256));
@@ -94,14 +98,15 @@ void 	launch_commands(t_all *all)
 				if (exit_code != 0)
 				{
 					if (exit_code == 13)
-						all->last_exit = 126;
+						g_status = 126;
 					else if (exit_code == 14)
-						all->last_exit = 127;
+						g_status = 127;
 					else
-						all->last_exit = exit_code;
-				} else
+						g_status = exit_code;
+				}
+				else
 //					printf("Success\n");
-					all->last_exit = 0;
+					g_status = 0;
 			}
 			else // WIFSIGNALED
 			{
@@ -109,20 +114,15 @@ void 	launch_commands(t_all *all)
 				temp = WTERMSIG(wstat);
 //				printf("WTERMSIG %d\n", temp);
 				if (wstat == SIGINT)
-					all->last_exit = 130;
+					g_status = 130;
 				else if (wstat == SIGQUIT)
 				{
-					all->last_exit = 131;
+					g_status = 131;
 					printf("Quit: 3\n");
 				}
 			}
 		}
-
-//		int i = -1;
-//		while (++i < all->pip_count)
-//			kill(pid[i], SIGKILL);
 	}
-	//todo close all fds
 	dup2(all->fd_std[0], 0);
 	dup2(all->fd_std[1], 1);
 }

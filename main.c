@@ -40,7 +40,8 @@ char	*ft_dollar(char *str, int *i, t_all *all) //done leaks
 
 	if (!(ft_strncmp(var, "?", 2)))
 	{
-		value = ft_itoa(all->last_exit);
+//		value = ft_itoa(all->last_exit);
+		value = ft_itoa(g_status);
 		begin_of_str = ft_substr(str, 0, pos_of_dollar);
 		end_of_line = ft_substr(str, *i, (ft_strlen(str) - *i + 1));
 		tmp = ft_strjoin(begin_of_str, value);
@@ -90,15 +91,14 @@ char	*ft_dollar(char *str, int *i, t_all *all) //done leaks
 	return (str);
 }
 
-char	*replace_env_with_value(char *str, t_all *all) //no leaks
+char	*replace_env_with_value(char *str, int i, t_all *all)
 {
 	int flag;
-	int i;
 
 	flag = 0;
-	i = -1;
+
 // заменяем переменные только до следующей команды
-	while(str[++i] && !(check_set(str[i], "|;><")))
+	while(str[i] && !(check_set(str[i], "|><")))
 	{
 		if(str[i] == '\'')
 		{
@@ -107,8 +107,10 @@ char	*replace_env_with_value(char *str, t_all *all) //no leaks
 			else
 				flag = 0;
 		}
-		else if(str[i] == '$' && str[i - 1] != '\\' && flag == 0)
+		else if(str[i] == '$' && flag == 0)
+//		&& str[i - 1] != '\\'
 			str = ft_dollar(str, &i, all);
+		i++;
 	}
 	return(str);
 }
@@ -218,7 +220,7 @@ void ft_parser(char *str, t_all *all)
 		all->cmnd[i].fd_out = STDOUT_FILENO;
 	}
 	all->pip_count = 0;
-	str = replace_env_with_value(str, all); // заменяем в строке переменные окружения
+//	str = replace_env_with_value(str, all); // заменяем в строке переменные окружения
 	i = 0;
 
 	while(str[i])
@@ -233,7 +235,8 @@ void ft_parser(char *str, t_all *all)
 	    }
 	    else
 	    {
-	        len = get_arg_len(str, i);
+			str = replace_env_with_value(str, i, all); //todo new!
+	    	len = get_arg_len(str, i);
 	        tmp = ft_calloc((len + 2), sizeof(char));
 	        j = 0;
 	        while (str[i] && !check_set(str[i], " \t|;<>"))
@@ -251,17 +254,17 @@ void ft_parser(char *str, t_all *all)
 	            {
 	                while (str[++i] && str[i] != '\"')
 	                {
-	                    if (str[i] == '\\' &&
-	                    (str[i + 1] == '$' || str[i + 1] == '\'' || str[i + 1] == '\"' || str[i + 1] == '\\'))
-	                        tmp[j] = str[++i];
-	                    else
-	                        tmp[j] = str[i];
+//	                    if (str[i] == '\\' &&
+//	                    (str[i + 1] == '$' || str[i + 1] == '\'' || str[i + 1] == '\"' || str[i + 1] == '\\'))
+//	                        tmp[j] = str[++i];
+//	                    else
+						tmp[j] = str[i];
 	                    j++;
 	                }
 	                j--;
 	            }
-	            else if (str[i] == '\\')
-	                tmp[j] = str[++i];
+//	            else if (str[i] == '\\')
+//	                tmp[j] = str[++i];
 	            else
 	                tmp[j] = str[i];
 	            i++;
@@ -467,10 +470,10 @@ int main(int argc, char **argv, char **env)
 	all.fd_std[0] = dup(0);
 	all.fd_std[1] = dup(1);
 
-if (signal(SIGINT, sig_handler) == SIG_ERR)
-	printf("Signal init error\n");
-if (signal(SIGQUIT, sig_handler) == SIG_ERR)
-	printf("Signal init error\n");
+	if (signal(SIGINT, sig_handler) == SIG_ERR)
+		printf("Signal init error\n");
+	if (signal(SIGQUIT, sig_handler) == SIG_ERR)
+		printf("Signal init error\n");
 
 
 	char *str;

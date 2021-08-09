@@ -13,10 +13,14 @@ void cmd_exec1(t_all *all) //for multi pipes
 				ft_putstr_fd("minishell: ", 2);
 				ft_putstr_fd(all->cmnd[all->i].args[0], 2);
 				ft_putstr_fd(" : command not found\n", 2);
-				perror(all->cmnd[all->i].args[1]);
 			}
 			else
-				printf("%s\n", strerror(errno));
+			{
+				ft_putstr_fd("minishell: ", 2);
+				ft_putstr_fd(all->cmnd[all->i].args[0], 2);
+				ft_putstr_fd(strerror(errno), 2);
+				ft_putstr_fd("\n", 2);
+			}
 			exit (errno);
 		}
 		exit(0);
@@ -38,13 +42,13 @@ void cmd_exec(t_all *all)// for no pipes
 	{
 		if (all->cmnd[all->i].fd_in > STDIN_FILENO)
 		{
-			dup2(all->cmnd[all->i].fd_in, 0);
+			dup2(all->cmnd[all->i].fd_in, STDIN_FILENO);
 			close(all->cmnd[all->i].fd_in);
 		}
 		close(all->fd[0]);
 
-		if (all->cmnd[all->i].fd_out > 1)
-			dup2(all->cmnd[all->i].fd_out, 1);
+		if (all->cmnd[all->i].fd_out > STDOUT_FILENO)
+			dup2(all->cmnd[all->i].fd_out, STDOUT_FILENO);
 		close(all->fd[1]);
 
 		path = get_data_path(all);
@@ -59,7 +63,12 @@ void cmd_exec(t_all *all)// for no pipes
 				ft_putstr_fd(" : command not found\n", 2);
 			}
 			else
-				perror(all->cmnd[all->i].args[0]);
+			{
+				ft_putstr_fd("minishell: ", 2);
+				ft_putstr_fd(all->cmnd[all->i].args[0], 2);
+				ft_putstr_fd(strerror(errno), 2);
+				ft_putstr_fd("\n", 2);
+			}
 			exit (errno);
 		}
 		exit(0);
@@ -67,39 +76,35 @@ void cmd_exec(t_all *all)// for no pipes
 	close(all->fd[1]);
 	close(all->fd[0]);
 	int wstat;
+
 	waitpid(pid, &wstat, 0);
-//	printf("wstat = %d; %d\n", wstat, (wstat % 256));
-	if (WIFSIGNALED(wstat))
-	{
-//		printf("ifsignaled\n");
-		int temp;
-		temp = WTERMSIG(wstat);
-//		printf("WIFSIGNALLED %d\n", temp);
-		if (temp == SIGINT)
-			all->last_exit = 130;
-		else if (temp == SIGQUIT)
-		{
-			all->last_exit = 131;
-			printf("Quit: 3\n");
-		}
-	}
+//	if (WIFSIGNALED(wstat))
+//	{
+//		int temp;
+//		temp = WTERMSIG(wstat);
+//		if (temp == SIGINT)
+//			g_status = 130;
+//		else if (temp == SIGQUIT)
+//		{
+//			g_status = 131;
+//			printf("Quit: 3\n");
+//		}
+//	}
 
-	else if (WIFEXITED(wstat))
+	if (WIFEXITED(wstat))
 	{
-
-//		printf("ifexited\n");
 		int exit_code = WEXITSTATUS(wstat);
 		if (exit_code != 0)
 		{
 			if (exit_code == 13)
-				all->last_exit = 126;
+				g_status= 126;
 			else if (exit_code == 14)
-				all->last_exit = 127;
+				g_status = 127;
 			else
-				all->last_exit = exit_code;
+				g_status = exit_code;
 		}
 //		else
-//			all->last_exit = 0;
+//			g_status = 0;
 	}
 }
 
