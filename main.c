@@ -1,18 +1,6 @@
 #include "minishell.h"
 
-char *ft_slash(char *str, int *i)
-{
-	char *tmp;
-	char *tmp2;
-
-	tmp = ft_substr(str, 0, *i);
-	tmp2 = ft_strdup(str + *i + 1);
-	tmp = ft_strjoin(tmp, tmp2);
-	*i = *i + 2;
-	return(tmp);
-}
-
-int check_set(char c, char *set)
+int	check_set(char c, char *set)
 {
 	int i;
 
@@ -23,60 +11,61 @@ int check_set(char c, char *set)
 	return 0;
 }
 
-void skip_spaces(char *str, int *i)
+void	skip_spaces(char *str, int *i)
 {
 	while (str[*i] && (str[*i] == ' ' || str[*i] == '\t'))
 		(*i)++;
 }
 
-char *ft_dollar(char *str, int *i, t_all *all)
+char	*ft_dollar(char *str, int *i, t_all *all) //done leaks
 {
 	char	*var;
 	int		pos_of_dollar;
 	int		end_of_var;
-	char	*tmp1;
-	char	*tmp2;
+	char	*begin_of_str;
+	char	*end_of_line;
+	char	*tmp;
 	char	*value;
 
 	pos_of_dollar = *i;
 	while(str[++*i]) //find end of variable
-		if(check_set(str[*i], " \t\'\"\\$;|><"))
+		if(check_set(str[*i], " \t\'\"\\$;|></"))
 			break;
 	end_of_var = *i;
 
 	if (end_of_var - pos_of_dollar == 1)
 		return(str);
-
 //cut variable
 	var = ft_substr(str, pos_of_dollar + 1, (end_of_var - pos_of_dollar -1));
-	// printf("var = %s\n", var);
 
 	if (!(ft_strncmp(var, "?", 2)))
 	{
-		value = ft_itoa(all->last_exit);
-		tmp1 = ft_substr(str, 0, pos_of_dollar);
-		tmp2 = ft_substr(str, *i, (ft_strlen(str) - *i + 1));
-		tmp1 = ft_strjoin(tmp1, value);
-		tmp1 = ft_strjoin(tmp1, tmp2);
+//		value = ft_itoa(all->last_exit);
+		value = ft_itoa(g_status);
+		begin_of_str = ft_substr(str, 0, pos_of_dollar);
+		end_of_line = ft_substr(str, *i, (ft_strlen(str) - *i + 1));
+		tmp = ft_strjoin(begin_of_str, value);
+		str = ft_strjoin(tmp, end_of_line);
 		*i = pos_of_dollar + (int)ft_strlen(value) - 1;
-		return(tmp1);
+		ft_memdel(tmp);
+		ft_memdel(begin_of_str);
+		ft_memdel(value);
+		ft_memdel(end_of_line);
+		ft_memdel(var);
+		return(str);
 	}
-	else if (ft_isdigit(var[0]) != 0) // check all ascii symbols
+	else if (ft_isdigit(var[0]) != 0) // if numeric
 	{
 		if(ft_strlen(var) == 1)
-		{
-			tmp1 = ft_substr(str, 0, pos_of_dollar);
-			tmp2 = ft_substr(str, *i, (ft_strlen(str) - *i + 1));
-			tmp1 = ft_strjoin(tmp1, tmp2);
-			return (tmp1);
-		}
+			end_of_line = ft_substr(str, *i, (ft_strlen(str) - *i + 1));
 		else
-		{
-			tmp1 = ft_substr(str, 0, pos_of_dollar);
-			tmp2 = ft_substr(str, pos_of_dollar + 2, (ft_strlen(str) - pos_of_dollar - 1));
-			tmp1 = ft_strjoin(tmp1, tmp2);
-			return (tmp1);
-		}
+			end_of_line = ft_substr(str, pos_of_dollar + 2, (ft_strlen(str) - pos_of_dollar - 1));
+		begin_of_str = ft_substr(str, 0, pos_of_dollar);
+		str = ft_strjoin(begin_of_str, end_of_line);
+		ft_memdel(begin_of_str);
+		ft_memdel(end_of_line);
+		ft_memdel(var);
+		return (str);
 	}
 
 //find variable in the lists
@@ -88,24 +77,28 @@ char *ft_dollar(char *str, int *i, t_all *all)
 	if (all->env_vars[j].key) //если долистал до конца или вылетел из цикла
 		value = ft_strdup(all->env_vars[j].value);
 	else
-		value = "\0";
-	tmp1 = ft_substr(str, 0, pos_of_dollar); // cut till $
-	tmp2 = ft_substr(str, *i, (ft_strlen(str) - *i + 1)); // cut after variable
-	tmp1 = ft_strjoin(tmp1, value);
-	tmp1 = ft_strjoin(tmp1, tmp2);
+		value = ft_strdup("\0");
+	begin_of_str = ft_substr(str, 0, pos_of_dollar); // cut till $
+	end_of_line = ft_substr(str, *i, (ft_strlen(str) - *i + 1)); // cut after variable
+	tmp = ft_strjoin(begin_of_str, value);
+	str = ft_strjoin(tmp, end_of_line); //todo if $bla
 	*i = pos_of_dollar + (int)ft_strlen(value) - 1;
-	return (tmp1);
+	ft_memdel(tmp);
+	ft_memdel(begin_of_str);
+	ft_memdel(value);
+	ft_memdel(end_of_line);
+	ft_memdel(var);
+	return (str);
 }
 
-char	*replace_env_with_value(char *str, t_all *all)
+char	*replace_env_with_value(char *str, int i, t_all *all)
 {
 	int flag;
-	int i;
 
 	flag = 0;
-	i = -1;
+
 // заменяем переменные только до следующей команды
-	while(str[++i] && !(check_set(str[i], "|;><")))
+	while(str[i] && !(check_set(str[i], "|><")))
 	{
 		if(str[i] == '\'')
 		{
@@ -114,20 +107,18 @@ char	*replace_env_with_value(char *str, t_all *all)
 			else
 				flag = 0;
 		}
-			// else if (str[i] == '\\' && flag == 0)
-			//  	str = ft_slash(str, &i);
-		else if(str[i] == '$' && str[i - 1] != '\\' && flag == 0)
+		else if(str[i] == '$' && flag == 0)
+//		&& str[i - 1] != '\\'
 			str = ft_dollar(str, &i, all);
+		i++;
 	}
 	return(str);
 }
 
-int get_arg_len(char *str, int i)
+int	get_arg_len(char *str, int i) //no malloc
 {
 	int len;
-	int pos;
 
-	pos = i;
 	len = 0;
 	while(str[i] && !check_set(str[i], " \t|;<>"))
 	{
@@ -160,175 +151,55 @@ int get_arg_len(char *str, int i)
 	return (len);
 }
 
-char	*check_lower_case(char *str)
+char	*check_lower_case(char *str) //done leaks
 {
 	int i;
 	char *dest;
 
 	i = 0;
-	dest = malloc(sizeof(char) * ft_strlen(str));
+	dest = malloc(sizeof(char) * (ft_strlen(str) + 1));
+	if (!dest)
+		return (NULL);
 	while (str[i] != 0)
 	{
 		dest[i] = ft_tolower(str[i]);
 		i++;
 	}
-	if (!ft_strncmp(dest, "echo", 5) || !ft_strncmp(dest, "pwd", 4) || !ft_strncmp(dest, "env", 4))
-	{
-		free(str);
-		return(dest);
-	}
-	free(dest);
-	return(str);
+	dest[i] = '\0';
+	ft_memdel(str);
+	return(dest);
 }
 
-void	ft_put_str_to_struct(char *arg, t_all *all)
+void	ft_put_str_to_struct(char *arg, t_all *all) //done leaks
 {
 	int i;
 	char **tmp;
-
-	i = 0;
 
 	if (!all->cmnd[all->pip_count].args) //if first argument
 	{
 		arg = check_lower_case(arg);
 		all->cmnd[all->pip_count].args = malloc(sizeof(char *) * 2);
 		all->cmnd[all->pip_count].args[0] = ft_strdup(arg);
-		all->cmnd[all->pip_count].args[1] = 0;
-		if (arg)
-		{
-			free(arg);
-			arg = NULL;
-		}
+		all->cmnd[all->pip_count].args[1] = 0; //maybe change to NULL?
+		ft_memdel(arg);
 	}
 	else
 	{
-		i=0;
+		i = 0;
 		while (all->cmnd[all->pip_count].args[i] != NULL)
 			i++;
 		tmp = malloc(sizeof(char *) * (i + 2));
-		i = 0;
-		while (all->cmnd[all->pip_count].args[i] != 0)
+		i = -1;
+		while (all->cmnd[all->pip_count].args[++i] != 0) //copy all to a tmp massive and free previous commands
 		{
 			tmp[i] = ft_strdup(all->cmnd[all->pip_count].args[i]);
-			i++;
+			ft_memdel(all->cmnd[all->pip_count].args[i]);
 		}
+
 		tmp[i] = ft_strdup(arg);
-		tmp[i + 1] = 0;
-
-		free(all->cmnd[all->pip_count].args);
-		if (arg)
-		{
-			free(arg);
-			arg = NULL;
-		}
+		tmp[i + 1] = 0; //maybe change to NULL?
+		ft_memdel(arg);
 		all->cmnd[all->pip_count].args = tmp;
-	}
-}
-
-char	*get_file_name(char *str, int *i, t_all *all)
-{
-	int	len;
-	char *tmp;
-	int j;
-
-	skip_spaces(str, i);
-	len = get_arg_len(str, *i);
-	tmp = malloc(sizeof(char) * (len + 1));
-	if (!tmp)
-		return (0); //malloc error
-	j = 0;
-	while (str[*i] && !check_set(str[*i], " \t|;<>"))
-	{
-		if (str[*i] == '\'')
-		{
-			while (str[++(*i)] && str[*i] != '\'')
-			{
-				tmp[j] = str[(*i)];
-				j++;
-			}
-			j--;
-		}
-		else if (str[*i] == '\"')
-		{
-			while (str[++(*i)] && str[*i] != '\"')
-			{
-				if (str[*i] == '\\' && (str[*i + 1] == '$' || str[*i + 1] == '\'' || str[*i + 1] == '\"' || str[*i + 1] == '\\'))
-					tmp[j] = str[++(*i)];
-				else
-					tmp[j] = str[*i];
-				j++;
-			}
-			j--;
-		}
-		else if (str[*i] == '\\')
-			tmp[j] = str[++(*i)];
-		else
-			tmp[j] = str[*i];
-		(*i)++;
-		j++;
-	}
-	tmp[j] = '\0';
-	return(tmp);
-}
-
-void	heredoc_stdin_read(t_all *all, char *stop)
-{
-	char	*line;
-	int		ret;
-
-	all->cmnd[all->pip_count].fd_in = open("tmp_file", O_CREAT | O_RDWR | O_TRUNC, S_IRWXU);
-//	if (pip->fd_in < 0 || read(pip->fd_in, 0, 0) < 0)
-//		ft_error_exit(argv[1], pip, FILE_ERR);
-	ret = 1;
-	while (ret)
-	{
-		write(0, "> ", 2);
-		ret = get_next_line(0, &line);
-		if (ft_strncmp(line, stop, ft_strlen(stop) + 1) == 0)
-			break ;
-		write(all->cmnd[all->pip_count].fd_in, line, ft_strlen(line));
-		write(all->cmnd[all->pip_count].fd_in, "\n", 1);
-		if (line)
-			free(line);
-	}
-	if (line)
-		free(line);
-
-
-	close (all->cmnd[all->pip_count].fd_in);
-	all->cmnd[all->pip_count].fd_in = open("tmp_file", O_RDONLY);
-//	if (all->cmnd->fd_in < 0 || read(all->cmnd->fd_in, 0, 0) < 0)
-//		ft_error_exit("tmp_file", pip, FILE_ERR);
-}
-
-
-void	ft_handle_redirect(char *str, int *i, t_all *all)
-{
-	char *file_name;
-
-	if (str[*i] == '>' && str[*i + 1] != '>')
-	{
-		(*i)++;
-		file_name = get_file_name(str, i, all);
-		all->cmnd[all->pip_count].fd_out = open(file_name, O_CREAT | O_RDWR | O_TRUNC, S_IRWXU);
-	}
-	else if (str[*i] == '>' && str[*i + 1] == '>')
-	{
-		*i = *i + 2;
-		file_name = get_file_name(str, i, all);
-		all->cmnd[all->pip_count].fd_out = open(file_name, O_CREAT | O_RDWR | O_APPEND, S_IRWXU);
-	}
-	else if (str[*i] == '<' && str[*i + 1] != '<')
-	{
-		(*i)++;
-		file_name = get_file_name(str, i, all);
-		all->cmnd[all->pip_count].fd_in = open(file_name, O_RDONLY);
-	}
-	else if (str[*i] == '<' && str[*i + 1] == '<')
-	{
-		*i = *i + 2;
-		file_name = get_file_name(str, i, all);
-		heredoc_stdin_read(all, file_name);
 	}
 }
 
@@ -340,7 +211,6 @@ void ft_parser(char *str, t_all *all)
 	char *tmp;
 	char *from_quote;
 
-
 	all->cmnd = malloc(sizeof(t_cmnd) * (all->num_of_pipes + 2)); //malloc for number of commands
 	i = -1;
 	while (++i < (all->num_of_pipes + 2))
@@ -350,76 +220,77 @@ void ft_parser(char *str, t_all *all)
 		all->cmnd[i].fd_out = STDOUT_FILENO;
 	}
 	all->pip_count = 0;
-	str = replace_env_with_value(str, all); // заменяем в строке переменные окружения
+//	str = replace_env_with_value(str, all); // заменяем в строке переменные окружения
 	i = 0;
 
 	while(str[i])
 	{
-//		while (str[i] && !(check_set(str[i], "|;")))
-//		{
-			skip_spaces(str, &i);
-			if (str[i] == '>' || str[i] == '<')
-				ft_handle_redirect(str, &i, all);
-			else if (str[i] == '|')
-			{
-				all->pip_count++;
-				i++;
-			}
-			else
-			{
-				len = get_arg_len(str, i);
-				tmp = malloc(sizeof(char) * (len + 1));
-				j = 0;
-				while (str[i] && !check_set(str[i], " \t|;<>"))
-				{
-					if (str[i] == '\'')
-					{
-						while (str[++i] && str[i] != '\'')
-						{
-							tmp[j] = str[i];
-							j++;
-						}
-						j--;
-					} else if (str[i] == '\"')
-					{
-						while (str[++i] && str[i] != '\"')
-						{
-							if (str[i] == '\\' &&
-								(str[i + 1] == '$' || str[i + 1] == '\'' || str[i + 1] == '\"' || str[i + 1] == '\\'))
-								tmp[j] = str[++i];
-							else
-								tmp[j] = str[i];
-							j++;
-						}
-						j--;
-					} else if (str[i] == '\\')
-						tmp[j] = str[++i];
-					else
+	    skip_spaces(str, &i);
+	    if (str[i] == '>' || str[i] == '<')
+	        ft_handle_redirect(str, &i, all);
+	    else if (str[i] == '|')
+	    {
+	        all->pip_count++;
+	        i++;
+	    }
+	    else
+	    {
+			str = replace_env_with_value(str, i, all); //todo new!
+	    	len = get_arg_len(str, i);
+	        tmp = ft_calloc((len + 2), sizeof(char));
+	        j = 0;
+	        while (str[i] && !check_set(str[i], " \t|;<>"))
+	        {
+	            if (str[i] == '\'')
+	            {
+	                while (str[++i] && str[i] != '\'')
+	                {
+	                    tmp[j] = str[i];
+	                    j++;
+	                }
+	                j--;
+	            }
+	            else if (str[i] == '\"')
+	            {
+	                while (str[++i] && str[i] != '\"')
+	                {
+//	                    if (str[i] == '\\' &&
+//	                    (str[i + 1] == '$' || str[i + 1] == '\'' || str[i + 1] == '\"' || str[i + 1] == '\\'))
+//	                        tmp[j] = str[++i];
+//	                    else
 						tmp[j] = str[i];
-					i++;
-					j++;
-				}
-				if (len > 0)
-				{
-					tmp[j] = '\0';
-					ft_put_str_to_struct(tmp, all);
-				}
-			}
-//		}
+	                    j++;
+	                }
+	                j--;
+	            }
+//	            else if (str[i] == '\\')
+//	                tmp[j] = str[++i];
+	            else
+	                tmp[j] = str[i];
+	            i++;
+	            j++;
+	        }
+	        if (len > 0)
+	        {
+	            tmp[j] = '\0';
+	            ft_put_str_to_struct(tmp, all);
+	        }
+//	        ft_memdel(tmp);
+	    }
 	}
-	launch_commands(all);
+	if (all->cmnd->args)
+		launch_commands(all);
 }
 
 
-void env_init(t_all *all, char **env) // env init with lists:
+void env_init(t_all *all, char **env) // env init with lists/ leaks done
 {
-	t_env	*tmp;
-	int shlvl_tmp = 0;
+	int shlvl_tmp;
 	int pwd_flag = 0;
 	int oldpwd_flag = 0;
 	int shlvl_flag = 0;
 
-	shlvl_tmp = 0;
+	char *tmp_str;
 
 	int i = -1;
 	int j;
@@ -437,7 +308,6 @@ void env_init(t_all *all, char **env) // env init with lists:
 			all->env_vars[i].key_len = ft_strlen(all->env_vars[i].key);
 			all->env_vars[i].value = getcwd(NULL, 0);
 			all->env_vars[i].value_len = ft_strlen(all->env_vars[i].value);
-//			perror("pwd path:");
 			pwd_flag = 1;
 		}
 		else if (ft_strncmp(env[i], "OLDPWD=", 7) == 0)
@@ -452,9 +322,17 @@ void env_init(t_all *all, char **env) // env init with lists:
 		{
 			all->env_vars[i].key = ft_strdup("SHLVL");
 			all->env_vars[i].key_len = ft_strlen(all->env_vars[i].key);
-			all->env_vars[i].value = ft_substr(env[i], 6, (ft_strlen(env[i]) - 6));
-			shlvl_tmp = ft_atoi(all->env_vars[i].value) + 1;
+			tmp_str = ft_substr(env[i], 6, (ft_strlen(env[i]) - 6));
+			shlvl_tmp = ft_atoi(tmp_str) + 1;
+			if (shlvl_tmp < 0)
+				shlvl_tmp = 0;
+			if (shlvl_tmp > 1000)
+			{
+				printf("minishell: warning: shell level (%d) too high, resetting to 1", shlvl_tmp);
+				shlvl_tmp = 1;
+			}
 			all->env_vars[i].value = ft_itoa(shlvl_tmp);
+			ft_memdel(tmp_str);
 			all->env_vars[i].value_len = ft_strlen(all->env_vars[i].value);
 			shlvl_flag = 1;
 		}
@@ -489,7 +367,7 @@ void env_init(t_all *all, char **env) // env init with lists:
 		tmp[i].value_len = ft_strlen(tmp[i].value);
 		tmp[i + 1].key = NULL;
 		tmp[i + 1].value = NULL;
-		free(all->env_vars);
+		ft_memdel(all->env_vars);
 		all->env_vars = tmp;
 		all->env_counter++;
 	}
@@ -503,11 +381,11 @@ void env_init(t_all *all, char **env) // env init with lists:
 			tmp[i] = all->env_vars[i];
 		tmp[i].key = ft_strdup("PWD");
 		tmp[i].key_len = ft_strlen(tmp[i].key);
-		tmp[i].value = getcwd(NULL, -1);
+		tmp[i].value = getcwd(NULL, 0);
 		tmp[i].value_len = ft_strlen(tmp[i].value);
 		tmp[i + 1].key = NULL;
 		tmp[i + 1].value = NULL;
-		free(all->env_vars);
+		ft_memdel(all->env_vars);
 		all->env_vars = tmp;
 		all->env_counter++;
 	}
@@ -525,7 +403,7 @@ void env_init(t_all *all, char **env) // env init with lists:
 		tmp[i].value_len = 0;
 		tmp[i + 1].key = NULL;
 		tmp[i + 1].value = NULL;
-		free(all->env_vars);
+		ft_memdel(all->env_vars);
 		all->env_vars = tmp;
 		all->env_counter++;
 	}
@@ -566,15 +444,14 @@ int takeInput(t_all *all, char** str)
 	char* buf;
 
 	rl_catch_signals = 0;
-	buf = readline("minishell > ");
+	buf = readline("minishell> ");
 	if (!buf)
 		print_and_exit(all, 0);
 	if (strlen(buf) != 0)
 	{
 		add_history(buf);
 		*str = ft_strdup(buf);
-		if (buf)
-			free(buf);
+		ft_memdel(buf);
 		return 0;
 	}
 	else
@@ -585,6 +462,7 @@ int main(int argc, char **argv, char **env)
 {
 	t_all  all;
 
+	rl_outstream = stderr;
 	(void)argc;
 	(void)argv;
 	init_all(&all);
@@ -592,12 +470,11 @@ int main(int argc, char **argv, char **env)
 	all.fd_std[0] = dup(0);
 	all.fd_std[1] = dup(1);
 
-if (signal(SIGINT, sig_handler) == SIG_ERR)
-	printf("Signal init error\n");
-if (signal(SIGQUIT, sig_handler) == SIG_ERR)
-	printf("Signal init error\n");
+	if (signal(SIGINT, sig_handler) == SIG_ERR)
+		printf("Signal init error\n");
+	if (signal(SIGQUIT, sig_handler) == SIG_ERR)
+		printf("Signal init error\n");
 
-//global_pid = getpid();
 
 	char *str;
 	while (1)
@@ -607,11 +484,7 @@ if (signal(SIGQUIT, sig_handler) == SIG_ERR)
 			continue;
 		if (ft_preparser(str, &all) == 0)
 			ft_parser(str, &all);
-		if (str)
-		{
-			free(str);
-			str = NULL;
-		}
+		ft_memdel(str);
 	}
 	return 0;
 }

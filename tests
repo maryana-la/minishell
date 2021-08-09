@@ -1,0 +1,19 @@
++cat /dev/random | head -n 1 | cat -e
+
+cat Makefile | grep pr | head -n 5 | cd test (mybin) # check status code
+cat Makefile | grep pr | head -n 5 | hello (NA) - обработка ()???
+
++cat < test # with non-existent test
++echo bonjour > $test потом cat $test - сега
+sleep 10 ctrl+\ echo $?
+sleep 10 ctrl+c echo $?
+ cd ~ - todo Dima
++   > a ls > b < Makefile - todo add check for open|read
++    echo > a Hello World! - if chmod 000 a
++   > a echo Hello World!
++ cat < Makefile | grep gcc > output
++ exit 0 | exit 1 - wrong error code
++ exit 1 | exit 0 - wrong error code
+
++  < makefile cat
++ cat | cat | echo heh   должны ждать два ентера и завершиться, после команды ломается ввод

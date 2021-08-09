@@ -14,7 +14,9 @@
 # include <sys/wait.h>
 # include <sys/errno.h>
 # include <signal.h>
-pid_t global_pid;
+
+int 	g_status;
+
 typedef struct s_env
 {
 	char		*key;
@@ -38,7 +40,6 @@ typedef struct s_all
 	char	cwd[1000];
 	char 	*tmp_cwd;
 	char	**envp;
-	char	**args;
 	int		arg_len;
 	int		env_counter;
 	int 	num_of_pipes;
@@ -63,19 +64,15 @@ int check_tokens(char *str, int *i, char token);
 */
 
 int takeInput(t_all *all, char** str);
-//char *ft_slash(char *str, int *i);
 int check_set(char c, char *set);
 void skip_spaces(char *str, int *i);
 char *ft_dollar(char *str, int *i, t_all *all);
-// char *ft_s_quote(char *str, int *i, int *tmp);
-//void ft_s_quote(char *str, char **arg, int *i, int *j_tmp);
-//char *ft_double_quote(char *str, int *i, int *tmp);
-//int	find_end_of_arg(char *str, int i, t_all *all);
-char	*replace_env_with_value(char *str, t_all *all);
+char	*replace_env_with_value(char *str, int i, t_all *all);
 void	ft_parser(char *str, t_all *all);
 void	env_init(t_all *all, char **env);
 void	init_all(t_all *all);
 void	start_commands(t_all *all);
+int	get_arg_len(char *str, int i);
 
 /*
  *  execve_com.c
@@ -92,7 +89,14 @@ void 	cmd_exec1(t_all *all);
 
 void 	launch_commands(t_all *all);
 
+/*
+ *  redirects
+ */
 
+char	*get_file_name(char *str, int *i, int type, t_all *all);
+void	heredoc_stdin_read(t_all *all, char *stop);
+void	ft_handle_redirect(char *str, int *i, t_all *all);
+void	*ft_memdel(void *ptr);
 
 //Maryana`s func end
 
@@ -108,6 +112,7 @@ void echo_command(t_all *all);
 void exit_command(t_all *all);
 void error_handler(char *arg, int errorcode);
 void sig_handler(int sig_id);
+
 void print_and_exit (t_all *all, int err);
 
 #endif //MINISHELL_MINISHELL_H

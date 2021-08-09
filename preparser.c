@@ -61,7 +61,7 @@ int preparser_error(t_all *all, char* token, int len)
 	write(2, "minishell: syntax error near unexpected token `", 47);
 	write(2, token, len);
 	write (2, "'\n", 2);
-	return (all->last_exit = 258);
+	return (g_status = 258);
 }
 
 int ft_preparser(char *str, t_all *all)
@@ -72,7 +72,7 @@ int ft_preparser(char *str, t_all *all)
 	all->num_of_pipes = 0;
 	len = (int)ft_strlen(str) - 1;
 	i = 0;
-	skip_spaces(str, &i);
+	skip_spaces(str, &i); //todo change len to last pinted symbols, now does'nt work with spaces at the end
 	if (str[i] == '|' || str[len] == '|')
 	{
 		if (str[i] == str[i + 1] || str[len] == str[len - 1])
@@ -80,6 +80,9 @@ int ft_preparser(char *str, t_all *all)
 		else
 			return(preparser_error(all, "|", 1));
 	}
+	if (str[len] == '<' || str[len] == '>')
+		return(preparser_error(all, "newline", 7));
+
 	i--;
 	while (str[++i])
 	{

@@ -15,7 +15,12 @@ void cmd_exec1(t_all *all) //for multi pipes
 				ft_putstr_fd(" : command not found\n", 2);
 			}
 			else
-				perror(all->cmnd[all->i].args[0]);
+			{
+				ft_putstr_fd("minishell: ", 2);
+				ft_putstr_fd(all->cmnd[all->i].args[0], 2);
+				ft_putstr_fd(strerror(errno), 2);
+				ft_putstr_fd("\n", 2);
+			}
 			exit (errno);
 		}
 		exit(0);
@@ -35,16 +40,15 @@ void cmd_exec(t_all *all)// for no pipes
 		exit(-11);
 	else if (pid == 0)
 	{
-//		global_pid = getpid();
 		if (all->cmnd[all->i].fd_in > STDIN_FILENO)
 		{
-			dup2(all->cmnd[all->i].fd_in, 0);
+			dup2(all->cmnd[all->i].fd_in, STDIN_FILENO);
 			close(all->cmnd[all->i].fd_in);
 		}
 		close(all->fd[0]);
 
-		if (all->cmnd[all->i].fd_out > 1)
-			dup2(all->cmnd[all->i].fd_out, 1);
+		if (all->cmnd[all->i].fd_out > STDOUT_FILENO)
+			dup2(all->cmnd[all->i].fd_out, STDOUT_FILENO);
 		close(all->fd[1]);
 
 		path = get_data_path(all);
@@ -59,41 +63,48 @@ void cmd_exec(t_all *all)// for no pipes
 				ft_putstr_fd(" : command not found\n", 2);
 			}
 			else
-				perror(all->cmnd[all->i].args[0]);
+			{
+				ft_putstr_fd("minishell: ", 2);
+				ft_putstr_fd(all->cmnd[all->i].args[0], 2);
+				ft_putstr_fd(strerror(errno), 2);
+				ft_putstr_fd("\n", 2);
+			}
 			exit (errno);
 		}
 		exit(0);
 	}
-//	else
-//		global_pid = pid;
 	close(all->fd[1]);
 	close(all->fd[0]);
 	int wstat;
+
 	waitpid(pid, &wstat, 0);
+//	if (WIFSIGNALED(wstat))
+//	{
+//		int temp;
+//		temp = WTERMSIG(wstat);
+//		if (temp == SIGINT)
+//			g_status = 130;
+//		else if (temp == SIGQUIT)
+//		{
+//			g_status = 131;
+//			printf("Quit: 3\n");
+//		}
+//	}
+
 	if (WIFEXITED(wstat))
 	{
 		int exit_code = WEXITSTATUS(wstat);
 		if (exit_code != 0)
 		{
 			if (exit_code == 13)
-				all->last_exit = 126;
+				g_status= 126;
 			else if (exit_code == 14)
-				all->last_exit = 127;
+				g_status = 127;
 			else
-				all->last_exit = exit_code;
+				g_status = exit_code;
 		}
-		else
-			all->last_exit = 0;
-	}
-	else //WIFSIGNALED
-	{
-		if (wstat == SIGINT)
-			all->last_exit = 130;
-		else if (wstat == SIGQUIT)
-		{
-			all->last_exit = 131;
-			printf("Quit: 3\n");
-		}
+//		else
+//			g_status = 0;
 	}
 }
 
@@ -129,13 +140,13 @@ char *get_data_path(t_all *all)
 		path_tmp = ft_strjoin(path[i], "/");
 		tmp = path_tmp;
 		path_tmp = ft_strjoin(path_tmp, all->cmnd[all->i].args[0]);
-		free(tmp);
+		ft_memdel(tmp);
 		if (access(path_tmp, F_OK | X_OK) == 0) //todo Maryana replace access with read
 		{
 //			ft_free_array(path); //todo free
 			return (path_tmp);
 		}
-		free(path_tmp);
+		ft_memdel(path_tmp);
 	}
 	return (NULL);
 }
@@ -158,8 +169,9 @@ void envs_list_to_array(t_all *all)
 			{
 				tmp = all->envp[i];
 				all->envp[i] = ft_strjoin(all->envp[i], all->env_vars[i].value);
-				free(tmp);
+				ft_memdel(tmp);
 			}
 		}
 	}
+	all->envp[i] = NULL;
 }
