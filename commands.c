@@ -1,7 +1,16 @@
 #include "minishell.h"
 
-void start_commands(t_all *all)
+void 	buitin_commands(t_all *all)
 {
+	if (all->cmnd[all->i].fd_in > STDIN_FILENO)
+	{
+		dup2(all->cmnd[all->i].fd_in, STDIN_FILENO);
+		close(all->cmnd[all->i].fd_in);
+	}
+	if (all->cmnd[all->i].fd_out > STDOUT_FILENO)
+		dup2(all->cmnd[all->i].fd_out, STDOUT_FILENO);
+
+
 	if (!ft_strncmp(all->cmnd[all->i].args[0], "pwd", 4))
 		pwd_command(all);
 	else if (!ft_strncmp(all->cmnd[all->i].args[0], "env", 4))
@@ -16,6 +25,22 @@ void start_commands(t_all *all)
 		echo_command(all);
 	else if (!ft_strncmp(all->cmnd[all->i].args[0], "exit", 5))
 		exit_command(all);
+}
+
+int	is_builtin(char *command)
+{
+	if (!ft_strncmp(command, "pwd", 4) || !ft_strncmp(command, "env", 4) || !ft_strncmp(command, "export", 7) ||
+		!ft_strncmp(command, "unset", 6) || !ft_strncmp(command, "cd", 3) || !ft_strncmp(command, "echo", 5) ||
+		!ft_strncmp(command, "exit", 5))
+		return (1);
+	return (0);
+
+}
+
+void start_commands(t_all *all)
+{
+	if (is_builtin(all->cmnd[all->i].args[0]))
+		buitin_commands(all);
 	else
 		cmd_exec(all);
 }
@@ -46,7 +71,7 @@ void exit_command(t_all *all)
 	i = -1;
 	while (all->cmnd[all->i].args[1][++i]) //check if only numbers
 	{
-		if (!ft_isdigit(all->cmnd[all->i].args[1][i]) || (all->cmnd[all->i].args[1][i] == '-' && i != 0))
+		if (!ft_isdigit(all->cmnd[all->i].args[1][i]) && (all->cmnd[all->i].args[1][i] == '-' && i != 0))
 		{
 			printf("minishell: exit: %s: numeric argument required\n", all->cmnd[all->i].args[1]);
 			exit (255);
@@ -346,7 +371,7 @@ void sig_handler(int sig_id)
 		}
 		else if (sig_id == SIGQUIT)
 		{
-			ft_putstr_fd("Quit: 3\n", 1); //todo проверить на двойной вывод  этой строки
+			ft_putstr_fd("Quit: 3\n", 2); //todo проверить на двойной вывод  этой строки
 		}
 //		g_status = 128 + sig_id;
 	}

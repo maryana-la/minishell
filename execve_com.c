@@ -13,7 +13,6 @@ void cmd_exec1(t_all *all) //for multi pipes
 				ft_putstr_fd("minishell: ", 2);
 				ft_putstr_fd(all->cmnd[all->i].args[0], 2);
 				ft_putstr_fd(" : command not found\n", 2);
-				perror(all->cmnd[all->i].args[1]);
 			}
 			else
 			{
@@ -77,27 +76,23 @@ void cmd_exec(t_all *all)// for no pipes
 	close(all->fd[1]);
 	close(all->fd[0]);
 	int wstat;
+
 	waitpid(pid, &wstat, 0);
-//	printf("wstat = %d; %d\n", wstat, (wstat % 256));
-	if (WIFSIGNALED(wstat))
-	{
-//		printf("ifsignaled\n");
-		int temp;
-		temp = WTERMSIG(wstat);
-//		printf("WIFSIGNALLED %d\n", temp);
-		if (temp == SIGINT)
-			all->last_exit = 130;
-		else if (temp == SIGQUIT)
-		{
-			all->last_exit = 131;
-			printf("Quit: 3\n");
-		}
-	}
+//	if (WIFSIGNALED(wstat))
+//	{
+//		int temp;
+//		temp = WTERMSIG(wstat);
+//		if (temp == SIGINT)
+//			all->last_exit = 130;
+//		else if (temp == SIGQUIT)
+//		{
+//			all->last_exit = 131;
+//			printf("Quit: 3\n");
+//		}
+//	}
 
-	else if (WIFEXITED(wstat))
+	if (WIFEXITED(wstat))
 	{
-
-//		printf("ifexited\n");
 		int exit_code = WEXITSTATUS(wstat);
 		if (exit_code != 0)
 		{

@@ -11,11 +11,28 @@ char	*get_file_name(char *str, int *i, int type, t_all *all)
 	skip_spaces(str, i);
 
 	str_origin = ft_strdup(str);
-	x = *i; //чтобы в конце вернуть указатель после переменной окружения
-	while (str_origin[x] && !(check_set(str_origin[x], "|><")))
-		x++;
+	x = *i; //чтобы в конце вернуть указатель после имени файла
+	while (str_origin[x] && !(check_set(str_origin[x], " \t|;<>")))
+	{
+		if (str[x] == '\'')
+		{
+			x++;
+			while (str[x] != '\'')
+				x++;
+			x++;
+		}
+		else if (str[x] == '\"')
+		{
+			x++;
+			while (str[x] != '\"')
+				x++;
+			x++;
+		}
+		else
+			x++;
+	}
 
-	j = *i;
+
 
 	if (type != 2)
 		str = replace_env_with_value(str, j, all);

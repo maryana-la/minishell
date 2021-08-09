@@ -13,24 +13,14 @@ void 	launch_commands(t_all *all)
 		{
 			all->last_exit = 1;
 			return ;
-
 		}
-
-//
-//		if (all->cmnd[all->i].fd_in > STDIN_FILENO)
-//		{
-//			dup2(all->cmnd[all->i].fd_in, STDIN_FILENO);
-//			close(all->cmnd[all->i].fd_in);
-//		}
-//		if (all->cmnd[all->i].fd_out > STDOUT_FILENO)
-//			dup2(all->cmnd[all->i].fd_out, STDOUT_FILENO);
-
 		start_commands(all);
 	}
+
 	else
 	{
 		all->i = 0;
-		all->fd_tmp = 0;
+//		all->fd_tmp = 0;
 		pid = malloc(sizeof(pid_t) * (all->num_of_pipes + 1));
 		while (all->i < all->pip_count + 1)
 		{
@@ -86,20 +76,22 @@ void 	launch_commands(t_all *all)
 				exit(all->last_exit); //todo check return value from builtin-s
 			}
 			close(all->fd[1]);
-			all->fd_tmp = all->fd[0];
+			if (all->i != 0)
+				close(all->fd_tmp);
+			all->fd_tmp = dup(all->fd[0]);
+			close(all->fd[0]);
 			all->i++;
-			//todo close all fds
 		}
-		close(all->fd[1]);
-		close(all->fd[0]);
-		close(all->fd_tmp);
+//		close(all->fd[1]);
+//		close(all->fd[0]);
+//		close(all->fd_tmp);
 
 		int wstat;
 		int i = -1;
-		while (++i < all->pip_count)
+		while (++i < all->pip_count + 1)
 		{
 			waitpid(pid[i], &wstat, 0);
-			printf("wstat = %d; %d\n", wstat, (wstat % 256));
+//			printf("wstat = %d; %d\n", wstat, (wstat % 256));
 			if (WIFEXITED(wstat))
 			{
 				int exit_code = WEXITSTATUS(wstat);
@@ -113,14 +105,14 @@ void 	launch_commands(t_all *all)
 						all->last_exit = exit_code;
 				}
 				else
-					printf("Success\n");
+//					printf("Success\n");
 					all->last_exit = 0;
 			}
 			else // WIFSIGNALED
 			{
 				int temp;
 				temp = WTERMSIG(wstat);
-				printf("WTERMSIG %d\n", temp);
+//				printf("WTERMSIG %d\n", temp);
 				if (wstat == SIGINT)
 					all->last_exit = 130;
 				else if (wstat == SIGQUIT)
