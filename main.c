@@ -405,6 +405,20 @@ void env_init(t_all *all, char **env) // env init with lists/ leaks done
 	}
 }
 
+void	ft_memdel_double(char **arr)
+{
+	int i;
+
+	i = 0;
+	while (arr[i])
+	{
+		free(arr[i]);
+		arr[i] = NULL;
+		i++;
+	}
+	free(arr);
+}
+
 void init_all(t_all *all)
 {
 	int i;
@@ -412,26 +426,17 @@ void init_all(t_all *all)
 
 	i = 0;
 	j = 0;
+
 	if (all->cmnd)
 	{
-//		while (j < all->num_of_pipes + 1)
-//		{
-//			i = 0;
-//			if (all->cmnd[j].args[i])
-//			{
-//				while (all->cmnd[j].args[i])
-//				{
-//					if (all->cmnd[j].args[i])
-//						all->cmnd[j].args[i] = NULL;
-//					i++;
-//				}
-////				all->cmnd[j].args[i] = NULL;
-//			}
-//			j++;
-//		}
+		if (all->cmnd->args)
+			ft_memdel_double(all->cmnd->args);
 		all->cmnd = NULL;
 	}
-//	all->cmnd = NULL;
+
+
+//	if (all->cmnd)
+//		all->cmnd = NULL;
 	all->num_of_pipes = 0;
 }
 

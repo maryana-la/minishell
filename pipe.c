@@ -25,8 +25,25 @@ void 	launch_commands(t_all *all)
 		{
 			pipe(all->fd); //new
 			pid[all->i] = fork();
-			if (pid[all->i] == -1)
-				exit(-11); //todo errno push
+			if (pid[all->i] == -1 || all->i > 300)
+			{
+				int i = 0;
+				while (i <= all->i)
+				{
+					kill(pid[i], SIGTERM);
+					i++;
+				}
+//
+//				i = 0;
+//				while (i <= all->i)
+//				{
+//					kill(pid[i], SIGKILL);
+//					i++;
+//				}
+				exec_error_print("fork", "Resource temporarily unavailable");
+				g_status = 1;
+				break ;
+			}
 			else if (pid[all->i] == 0) //child starts here
 			{
 				if (all->cmnd[all->i].fd_in < 0 || all->cmnd[all->i].fd_out < 0)
@@ -105,6 +122,7 @@ void 	launch_commands(t_all *all)
 			else
 				g_status = 0;
 		}
+		ft_memdel(pid);
 	}
 	dup2(all->fd_std[0], 0);
 	dup2(all->fd_std[1], 1);

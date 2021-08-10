@@ -41,7 +41,6 @@ typedef struct s_all
 	char	cwd[1000];
 	char 	*tmp_cwd;
 	char	**envp;
-	int		arg_len;
 	int		env_counter;
 	int 	num_of_pipes;
 	int		pip_count;
@@ -50,7 +49,6 @@ typedef struct s_all
 	int 	fd[2];
 	int 	fd_std[2];
 	int 	fd_tmp;
-	int 	last_exit;
 }				t_all;
 
 

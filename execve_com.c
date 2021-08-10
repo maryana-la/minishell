@@ -9,7 +9,7 @@ void cmd_exec1(t_all *all) //for multi pipes
 		if (execve(path, all->cmnd[all->i].args, all->envp) == -1)
 		{
 			if (errno == 14)
-				exec_error_print(all->cmnd[all->i].args[0], " : command not found");
+				exec_error_print(all->cmnd[all->i].args[0], "command not found");
 			else
 				exec_error_print(all->cmnd[all->i].args[0], strerror(errno));
 			exit (errno);
@@ -51,7 +51,7 @@ void cmd_exec(t_all *all)// for no pipes
 		if (execve(path, all->cmnd[all->i].args, all->envp) == -1)
 		{
 			if (errno == 14)
-				exec_error_print(all->cmnd[all->i].args[0], " : command not found");
+				exec_error_print(all->cmnd[all->i].args[0], "command not found");
 			else
 				exec_error_print(all->cmnd[all->i].args[0], strerror(errno));
 			exit (errno);

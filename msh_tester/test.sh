@@ -261,10 +261,10 @@ if [ "$1" == "redirect" ] || [ "$1" == "all" ]; then
 #  exec_test 'echo test > ls >> ls >> ls ; echo test >> ls ; cat ls'
 #  exec_test '> lol echo test lol ; cat lol'
 #  exec_test '>lol echo > test>lol>test>>lol>test mdr >lol test >test ; cat test'
-  exec_test 'cat < ls'
-#  exec_test 'rm -f ls; cat > ls < ls; rm -f ls'
-  exec_test 'ls > ls'
-  exec_test 'cat <ls'
+#  exec_test 'cat < ls'  *
+##  exec_test 'rm -f ls; cat > ls < ls; rm -f ls'
+#  exec_test 'ls > ls'  *
+#  exec_test 'cat <ls'  *
   exec_test 'cat <test.sh <ls'
   exec_test 'cat << stop'
 #  exec_test 'cat << stop\n1\EOF\nstopa\nstop'
