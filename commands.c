@@ -65,7 +65,7 @@ void exit_command(t_all *all) //no malloc
 		print_and_exit(all, 0);
 	if (i > 2)
 	{
-		printf("minishell: exit: too many arguments\n");
+		exec_error_print("exit", "too many arguments");
 		g_status = 1;
 		return ;
 	}
@@ -73,9 +73,12 @@ void exit_command(t_all *all) //no malloc
 	i = -1;
 	while (all->cmnd[all->i].args[1][++i]) //check if only numbers
 	{
-		if (!ft_isdigit(all->cmnd[all->i].args[1][i]) && (all->cmnd[all->i].args[1][i] == '-' && i != 0))
+		if (all->cmnd[all->i].args[1][i] == '-' && i == 0)
+			continue;
+		if (!ft_isdigit(all->cmnd[all->i].args[1][i]))
 		{
-			printf("minishell: exit: %s: numeric argument required\n", all->cmnd[all->i].args[1]);
+			ft_putendl_fd("exit", 2);
+			exec_error_print(all->cmnd[all->i].args[1], "numeric argument required");
 			exit (255);
 		}
 	}

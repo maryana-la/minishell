@@ -38,10 +38,16 @@ char	*get_file_name(char *str, int *i, int type, t_all *all)
 		str = replace_env_with_value(str, *i, all);
 	len = get_arg_len(str, *i);
 	if (!len)
+	{
+		*i = x;
 		return NULL;
+	}
 	tmp = malloc(sizeof(char) * (len + 1));
 	if (!tmp)
+	{
+		*i = x;
 		return (NULL); //malloc error
+	}
 	j = 0;
 	while (str[*i] && !check_set(str[*i], " \t|;<>"))
 	{

@@ -42,10 +42,10 @@ char	*ft_dollar(char *str, int *i, t_all *all) //done leaks
 	{
 		value = ft_itoa(g_status);
 		begin_of_str = ft_substr(str, 0, pos_of_dollar);
-		end_of_line = ft_substr(str, *i, (ft_strlen(str) - *i + 1));
+		end_of_line = ft_substr(str, (pos_of_dollar + 2), (ft_strlen(str) - pos_of_dollar - 1));
 		tmp = ft_strjoin(begin_of_str, value);
-		ft_memdel(begin_of_str);
-		begin_of_str = str; //to make free later
+//		ft_memdel(begin_of_str);
+//		begin_of_str = str; //to make free later
 		str = ft_strjoin(tmp, end_of_line);
 		*i = pos_of_dollar + (int)ft_strlen(value) - 1;
 		ft_memdel(tmp);
@@ -62,12 +62,12 @@ char	*ft_dollar(char *str, int *i, t_all *all) //done leaks
 		else
 			end_of_line = ft_substr(str, pos_of_dollar + 2, (ft_strlen(str) - pos_of_dollar - 1));
 		begin_of_str = ft_substr(str, 0, pos_of_dollar);
-		tmp = str;
+//		tmp = str;
 		str = ft_strjoin(begin_of_str, end_of_line);
 		ft_memdel(begin_of_str);
 		ft_memdel(end_of_line);
 		ft_memdel(var);
-		ft_memdel(tmp);
+//		ft_memdel(tmp);
 		return (str);
 	}
 
@@ -84,8 +84,8 @@ char	*ft_dollar(char *str, int *i, t_all *all) //done leaks
 	begin_of_str = ft_substr(str, 0, pos_of_dollar); // cut till $
 	end_of_line = ft_substr(str, *i, (ft_strlen(str) - *i + 1)); // cut after variable
 	tmp = ft_strjoin(begin_of_str, value);
-	ft_memdel(begin_of_str);
-	begin_of_str = str; //to make free later
+//	ft_memdel(begin_of_str);
+//	begin_of_str = str; //to make free later
 	str = ft_strjoin(tmp, end_of_line);
 	*i = pos_of_dollar + (int)ft_strlen(value) - 1;
 	ft_memdel(tmp);
