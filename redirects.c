@@ -10,9 +10,9 @@ char	*get_file_name(char *str, int *i, int type, t_all *all)
 
 	skip_spaces(str, i);
 
-	str_origin = ft_strdup(str);
+	str;
 	x = *i; //чтобы в конце вернуть указатель после имени файла
-	while (str_origin[x] && !(check_set(str_origin[x], " \t|;<>")))
+	while (str[x] && !(check_set(str[x], " \t|;<>")))
 	{
 		if (str[x] == '\'')
 		{
@@ -94,7 +94,7 @@ void	heredoc_stdin_read(t_all *all, char *stop)
 	all->cmnd[all->pip_count].fd_in = open(heredoc_file, O_CREAT | O_RDWR | O_TRUNC, S_IRWXU);
 	if (all->cmnd[all->pip_count].fd_in < 0 || read(all->cmnd[all->pip_count].fd_in, 0, 0) < 0)
 	{
-		g_status = errno;
+		g_status_exit_code = errno;
 		exec_error_print(heredoc_file, strerror(errno));
 		unlink(heredoc_file);
 		ft_memdel(heredoc_file);
@@ -117,7 +117,7 @@ void	heredoc_stdin_read(t_all *all, char *stop)
 	all->cmnd[all->pip_count].fd_in = open(heredoc_file, O_RDONLY);
 	if (all->cmnd[all->pip_count].fd_in < 0 || read(all->cmnd[all->pip_count].fd_in, 0, 0) < 0)
 	{
-		g_status = errno;
+		g_status_exit_code = errno;
 		exec_error_print(heredoc_file, strerror(errno));
 		unlink(heredoc_file);
 		ft_memdel(heredoc_file);
@@ -139,7 +139,7 @@ void	ft_handle_redirect(char *str, int *i, t_all *all)
 		file_name = get_file_name(str, i, 1, all);
 		if (!file_name)
 		{
-			g_status = 1;
+			g_status_exit_code = 1;
 			exec_error_print(" ", "ambiguous redirect");
 			all->cmnd[all->pip_count].fd_out = -2;
 			return ;
@@ -147,7 +147,7 @@ void	ft_handle_redirect(char *str, int *i, t_all *all)
 		all->cmnd[all->pip_count].fd_out = open(file_name, O_CREAT | O_RDWR | O_TRUNC, S_IRWXU);
 		if (all->cmnd[all->pip_count].fd_out < 0 || read(all->cmnd[all->pip_count].fd_out, NULL, 0) < 0)
 		{
-			g_status = errno;
+			g_status_exit_code = errno;
 			exec_error_print(file_name, strerror(errno));
 			ft_memdel(file_name);
 			return ;
@@ -160,7 +160,7 @@ void	ft_handle_redirect(char *str, int *i, t_all *all)
 		file_name = get_file_name(str, i, 1, all);
 		if (!file_name)
 		{
-			g_status = 1;
+			g_status_exit_code = 1;
 			exec_error_print(" ", "ambiguous redirect");
 			all->cmnd[all->pip_count].fd_out = -2;
 			return ;
@@ -168,7 +168,7 @@ void	ft_handle_redirect(char *str, int *i, t_all *all)
 		all->cmnd[all->pip_count].fd_out = open(file_name, O_CREAT | O_RDWR | O_APPEND, S_IRWXU);
 		if (all->cmnd[all->pip_count].fd_out < 0 || read(all->cmnd[all->pip_count].fd_out, NULL, 0) < 0)
 		{
-			g_status = errno;
+			g_status_exit_code = errno;
 			exec_error_print(file_name, strerror(errno));
 			ft_memdel(file_name);
 			return ;
@@ -180,7 +180,7 @@ void	ft_handle_redirect(char *str, int *i, t_all *all)
 		file_name = get_file_name(str, i, 1, all);
 		if (!file_name)
 		{
-			g_status = 1;
+			g_status_exit_code = 1;
 			exec_error_print(" ", "ambiguous redirect");
 			all->cmnd[all->pip_count].fd_in = -2;
 			return ;
@@ -188,7 +188,7 @@ void	ft_handle_redirect(char *str, int *i, t_all *all)
 		all->cmnd[all->pip_count].fd_in = open(file_name, O_RDONLY);
 		if (all->cmnd[all->pip_count].fd_in < 0 || read(all->cmnd[all->pip_count].fd_in, NULL, 0) < 0)
 		{
-			g_status = errno;
+			g_status_exit_code = errno;
 			exec_error_print(file_name, strerror(errno));
 			ft_memdel(file_name);
 			return ;
@@ -200,5 +200,7 @@ void	ft_handle_redirect(char *str, int *i, t_all *all)
 		stop_word = get_file_name(str, i, 2, all);
 		heredoc_stdin_read(all, stop_word);
 		ft_memdel(stop_word);
+		return ;
 	}
+	ft_memdel(file_name);
 }

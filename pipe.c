@@ -5,13 +5,13 @@ void 	launch_commands(t_all *all)
 	pid_t *pid;
 
 	all->i = 0;
-	g_status = 0;
+	g_status_exit_code = 0;
 
 	if (all->pip_count == 0)
 	{
 		if (all->cmnd[all->i].fd_in < 0 || all->cmnd[all->i].fd_out < 0)
 		{
-			g_status = 1;
+			g_status_exit_code = 1;
 			return ;
 		}
 		start_commands(all);
@@ -41,7 +41,7 @@ void 	launch_commands(t_all *all)
 //					i++;
 //				}
 				exec_error_print("fork", "Resource temporarily unavailable");
-				g_status = 1;
+				g_status_exit_code = 1;
 				break ;
 			}
 			else if (pid[all->i] == 0) //child starts here
@@ -89,7 +89,7 @@ void 	launch_commands(t_all *all)
 					exit_command(all);
 				else
 					cmd_exec1(all);
-				exit(g_status);
+				exit(g_status_exit_code);
 			}
 			close(all->fd[1]);
 			if (all->i != 0)
@@ -110,17 +110,17 @@ void 	launch_commands(t_all *all)
 				if (exit_code != 0)
 				{
 					if (exit_code == 13)
-						g_status = 126;
+						g_status_exit_code = 126;
 					else if (exit_code == 14)
-						g_status = 127;
+						g_status_exit_code = 127;
 					else
-						g_status = exit_code;
+						g_status_exit_code = exit_code;
 				}
 				else
-					g_status = 0;
+					g_status_exit_code = 0;
 			}
 			else
-				g_status = 0;
+				g_status_exit_code = 0;
 		}
 		ft_memdel(pid);
 	}

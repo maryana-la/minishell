@@ -14,9 +14,10 @@
 # include <sys/wait.h>
 # include <sys/errno.h>
 # include <sys/stat.h>
+# include <sys/types.h>
 # include <signal.h>
 
-int 	g_status;
+extern int 	g_status_exit_code;
 
 typedef struct s_env
 {
@@ -71,7 +72,8 @@ void	ft_parser(char *str, t_all *all);
 void	env_init(t_all *all, char **env);
 void	init_all(t_all *all);
 void	start_commands(t_all *all);
-int	get_arg_len(char *str, int i);
+int		get_arg_len(char *str, int i);
+void	ft_memdel_double(char **arr);
 
 /*
  *  execve_com.c
@@ -102,6 +104,7 @@ void	ft_handle_redirect(char *str, int *i, t_all *all);
 
 void	*ft_memdel(void *ptr);
 void 	exec_error_print(char *cmnd, char *error);
+void 	ft_free_env(t_env *env);
 
 
 //Maryana`s func end

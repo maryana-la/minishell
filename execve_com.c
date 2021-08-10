@@ -29,7 +29,7 @@ void cmd_exec(t_all *all)// for no pipes
 
 	if (pid == -1)
 	{
-		exec_error_print("pid", strerror(errno));
+		exec_error_print("fork", strerror(errno));
 		exit(errno);
 	}
 	else if (pid == 0)
@@ -42,8 +42,11 @@ void cmd_exec(t_all *all)// for no pipes
 		close(all->fd[0]);
 
 		if (all->cmnd[all->i].fd_out > STDOUT_FILENO)
+		{
 			dup2(all->cmnd[all->i].fd_out, STDOUT_FILENO);
-		close(all->fd[1]);
+			close(all->cmnd[all->i].fd_out);
+		}
+		close(all->fd[1]);//todo check dup2 fds!
 
 		path = get_data_path(all);
 		envs_list_to_array(all);
@@ -69,14 +72,14 @@ void cmd_exec(t_all *all)// for no pipes
 		if (exit_code != 0)
 		{
 			if (exit_code == 13)
-				g_status= 126;
+				g_status_exit_code= 126;
 			else if (exit_code == 14)
-				g_status = 127;
+				g_status_exit_code = 127;
 			else
-				g_status = exit_code;
+				g_status_exit_code = exit_code;
 		}
 //		else
-//			g_status = 0;
+//			g_status_exit_code = 0;
 	}
 }
 
@@ -115,9 +118,13 @@ char *get_data_path(t_all *all)
 		ft_memdel(tmp);
 		stat(path_tmp, &buff);
 		if (buff.st_mode == 33261)
+		{
+			ft_memdel_double(path);
 			return (path_tmp);
+		}
 		ft_memdel(path_tmp);
 	}
+	ft_memdel_double(path);
 	return (NULL);
 }
 

@@ -1,5 +1,7 @@
 #include "minishell.h"
 
+int g_status_exit_code = 0;
+
 int	check_set(char c, char *set)
 {
 	int i;
@@ -40,12 +42,12 @@ char	*ft_dollar(char *str, int *i, t_all *all) //done leaks
 
 	if (!(ft_strncmp(var, "?", 1)))
 	{
-		value = ft_itoa(g_status);
+		value = ft_itoa(g_status_exit_code);
 		begin_of_str = ft_substr(str, 0, pos_of_dollar);
 		end_of_line = ft_substr(str, (pos_of_dollar + 2), (ft_strlen(str) - pos_of_dollar - 1));
 		tmp = ft_strjoin(begin_of_str, value);
-//		ft_memdel(begin_of_str);
-//		begin_of_str = str; //to make free later
+		ft_memdel(begin_of_str);
+		begin_of_str = str; //to make free later
 		str = ft_strjoin(tmp, end_of_line);
 		*i = pos_of_dollar + (int)ft_strlen(value) - 1;
 		ft_memdel(tmp);
@@ -62,12 +64,12 @@ char	*ft_dollar(char *str, int *i, t_all *all) //done leaks
 		else
 			end_of_line = ft_substr(str, pos_of_dollar + 2, (ft_strlen(str) - pos_of_dollar - 1));
 		begin_of_str = ft_substr(str, 0, pos_of_dollar);
-//		tmp = str;
+		tmp = str;
 		str = ft_strjoin(begin_of_str, end_of_line);
 		ft_memdel(begin_of_str);
 		ft_memdel(end_of_line);
 		ft_memdel(var);
-//		ft_memdel(tmp);
+		ft_memdel(tmp);
 		return (str);
 	}
 
@@ -84,8 +86,8 @@ char	*ft_dollar(char *str, int *i, t_all *all) //done leaks
 	begin_of_str = ft_substr(str, 0, pos_of_dollar); // cut till $
 	end_of_line = ft_substr(str, *i, (ft_strlen(str) - *i + 1)); // cut after variable
 	tmp = ft_strjoin(begin_of_str, value);
-//	ft_memdel(begin_of_str);
-//	begin_of_str = str; //to make free later
+	ft_memdel(begin_of_str);
+	begin_of_str = str; //to make free later
 	str = ft_strjoin(tmp, end_of_line);
 	*i = pos_of_dollar + (int)ft_strlen(value) - 1;
 	ft_memdel(tmp);
@@ -181,11 +183,11 @@ void	ft_put_str_to_struct(char *arg, t_all *all) //done leaks
 
 	if (!all->cmnd[all->pip_count].args) //if first argument
 	{
-		arg = check_lower_case(arg);
+//		arg = check_lower_case(arg);
 		all->cmnd[all->pip_count].args = malloc(sizeof(char *) * 2);
 		all->cmnd[all->pip_count].args[0] = ft_strdup(arg);
 		all->cmnd[all->pip_count].args[1] = NULL; //todo maybe change to NULL?
-		ft_memdel(arg);
+//		ft_memdel(arg);
 	}
 	else
 	{
@@ -197,12 +199,13 @@ void	ft_put_str_to_struct(char *arg, t_all *all) //done leaks
 		while (all->cmnd[all->pip_count].args[++i] != 0) //copy all to a tmp massive and free previous commands
 		{
 			tmp[i] = ft_strdup(all->cmnd[all->pip_count].args[i]);
-			ft_memdel(all->cmnd[all->pip_count].args[i]);
+//			ft_memdel(all->cmnd[all->pip_count].args[i]);
 		}
 
 		tmp[i] = ft_strdup(arg);
 		tmp[i + 1] = NULL; //maybe change to NULL?
-		ft_memdel(arg);
+//		ft_memdel(arg);
+		ft_memdel_double(all->cmnd[all->pip_count].args);
 		all->cmnd[all->pip_count].args = tmp;
 	}
 }
@@ -271,7 +274,7 @@ void ft_parser(char *str, t_all *all)
 	            tmp[j] = '\0';
 	            ft_put_str_to_struct(tmp, all);
 	        }
-//	        ft_memdel(tmp);
+	        ft_memdel(tmp);
 	    }
 	}
 	if (all->cmnd->args)
@@ -357,8 +360,8 @@ void env_init(t_all *all, char **env) // env init with lists/ leaks done
 		tmp = malloc(sizeof (t_env) * (all->env_counter + 2));
 		while (all->env_vars[++i].key)
 			tmp[i] = all->env_vars[i];
-		tmp[i].key = "SHLVL";
-		tmp[i].value = "1";
+		tmp[i].key = ft_strdup("SHLVL");
+		tmp[i].value = ft_strdup("1");
 		tmp[i].key_len = ft_strlen(tmp[i].key);
 		tmp[i].value_len = ft_strlen(tmp[i].value);
 		tmp[i + 1].key = NULL;
@@ -405,20 +408,6 @@ void env_init(t_all *all, char **env) // env init with lists/ leaks done
 	}
 }
 
-void	ft_memdel_double(char **arr)
-{
-	int i;
-
-	i = 0;
-	while (arr[i])
-	{
-		free(arr[i]);
-		arr[i] = NULL;
-		i++;
-	}
-	free(arr);
-}
-
 void init_all(t_all *all)
 {
 	int i;
@@ -429,8 +418,12 @@ void init_all(t_all *all)
 
 	if (all->cmnd)
 	{
-		if (all->cmnd->args)
-			ft_memdel_double(all->cmnd->args);
+		while(all->cmnd[i].args)
+		{
+			ft_memdel_double(all->cmnd[i].args);
+			i++;
+		}
+		free(all->cmnd);
 		all->cmnd = NULL;
 	}
 
@@ -466,6 +459,7 @@ int main(int argc, char **argv, char **env)
 	rl_outstream = stderr;//todo не забыть убрать перед сдачей
 	(void)argc;
 	(void)argv;
+	all.cmnd = NULL;
 	init_all(&all);
 	env_init(&all, env);
 	all.fd_std[0] = dup(0);
@@ -480,12 +474,12 @@ int main(int argc, char **argv, char **env)
 	char *str;
 	while (1)
 	{
-		init_all(&all);
 		if (take_input(&all, &str))
 			continue;
 		if (ft_preparser(str, &all) == 0)
 			ft_parser(str, &all);
-		ft_memdel(str);
+//		ft_memdel(str);
+		init_all(&all);
 	}
 	return 0;
 }

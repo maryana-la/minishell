@@ -62,11 +62,14 @@ void exit_command(t_all *all) //no malloc
 	i = -1;
 	while(all->cmnd[all->i].args[++i]);
 	if (i == 1)
+	{
+		ft_free_env(all->env_vars);
 		print_and_exit(all, 0);
+	}
 	if (i > 2)
 	{
 		exec_error_print("exit", "too many arguments");
-		g_status = 1;
+		g_status_exit_code = 1;
 		return ;
 	}
 
@@ -79,16 +82,26 @@ void exit_command(t_all *all) //no malloc
 		{
 			ft_putendl_fd("exit", 2);
 			exec_error_print(all->cmnd[all->i].args[1], "numeric argument required");
+			ft_free_env(all->env_vars);
 			exit (255);
 		}
 	}
 	error_code = ft_atoi(all->cmnd[all->i].args[1]);
 	if (error_code < 0)
+	{
+		ft_free_env(all->env_vars);
 		print_and_exit(all,256 + error_code % 256);
+	}
 	else if (error_code < 256)
+	{
+		ft_free_env(all->env_vars);
 		print_and_exit(all, error_code);
+	}
 	else
-		print_and_exit(all,error_code % 256);
+	{
+		ft_free_env(all->env_vars);
+		print_and_exit(all, error_code % 256);
+	}
 }
 
 void echo_command(t_all *all) //no malloc
@@ -119,12 +132,18 @@ void echo_command(t_all *all) //no malloc
 	while (all->cmnd[all->i].args[++i])
 	{
 		if (all->cmnd[all->i].args[i+1])
-			printf("%s ", all->cmnd[all->i].args[i]);
+		{
+			ft_putstr_fd(all->cmnd[all->i].args[i], 1);
+			ft_putstr_fd(" ", 1);
+		}
+//			printf("%s ", all->cmnd[all->i].args[i]);
 		else
-			printf("%s", all->cmnd[all->i].args[i]);
+			ft_putstr_fd(all->cmnd[all->i].args[i], 1);
+//			printf("%s", all->cmnd[all->i].args[i]);
 	}
 	if (!flag)
-		printf("\n");
+		ft_putstr_fd("\n", 1);
+//		printf("\n");
 }
 
 void cd_command(t_all *all)
@@ -146,7 +165,7 @@ void cd_command(t_all *all)
 	else if (chdir(all->cmnd[all->i].args[1]) == -1) //check if no error with folder
 	{
 		printf("minishell: cd: %s: %s\n", all->cmnd[all->i].args[1], strerror(errno));
-		g_status = 1;
+		g_status_exit_code = 1;
 		return ;
 	}
 
@@ -186,6 +205,7 @@ void export_command(t_all *all)
 	{
 		sort_envs(all);
 		print_env_list(all->env_sorted, 1, all->env_counter);
+		ft_free_env(all->env_sorted);
 		return ;
 	}
 
@@ -208,7 +228,7 @@ void add_new_variable(t_all *all)
 	if (!ft_isalpha(all->cmnd[all->i].args[all->arg_pos][0]) && (all->cmnd[all->i].args[all->arg_pos][0] != '_'))
 	{
 		error_handler(all->cmnd[all->i].args[all->arg_pos], 1);
-		g_status = 1;
+		g_status_exit_code = 1;
 		return ;
 	}
 
@@ -222,7 +242,7 @@ void add_new_variable(t_all *all)
 		else if (!ft_isalnum(all->cmnd[all->i].args[all->arg_pos][j]) &&(all->cmnd[all->i].args[all->arg_pos][0] != '_'))
 		{
 			error_handler(all->cmnd[all->i].args[all->arg_pos], 1);
-			g_status = 1;
+			g_status_exit_code = 1;
 			return ;
 		}
 	}
@@ -234,16 +254,19 @@ void add_new_variable(t_all *all)
 
 	if (i != all->env_counter && temp_value[0] == '\0' && !ravno)
 	{
-		g_status = 0;
+		g_status_exit_code = 0;
+		ft_memdel(temp_key);
 		return ;
 	}
-
 	if (i != all->env_counter)
 	{
 		all->env_vars[i].value = temp_value;
-		g_status = 0;
+		ft_memdel(temp_key);
+		g_status_exit_code = 0;
 		return ;
 	}
+
+
 
 	i=-1;
 	j=-1;
@@ -261,8 +284,14 @@ void add_new_variable(t_all *all)
 	}
 	tmp[i].key = ft_substr(all->cmnd[all->i].args[all->arg_pos], 0, j);
 	tmp[i].value = ft_substr(all->cmnd[all->i].args[all->arg_pos], j + 1, ft_strlen(all->cmnd[all->i].args[all->arg_pos]) - j + 1);
+
+//	tmp[i].key = ft_strdup(temp_key);
+//	tmp[i].value = ft_strdup(temp_value);
 	if ((!tmp[i].value) || (tmp[i].value[0] == '\0' && !ravno))
+	{
+		ft_memdel(tmp[i].value);
 		tmp[i].value = ft_strdup("nullvalue");
+	}
 	tmp[i].key_len = ft_strlen(tmp[i].key);
 	tmp[i].value_len = ft_strlen(tmp[i].value);
 	tmp[i + 1].key = NULL;
@@ -270,7 +299,9 @@ void add_new_variable(t_all *all)
 	ft_memdel(all->env_vars);
 	all->env_vars = tmp;
 	all->env_counter++;
-	g_status = 0;
+	ft_memdel(temp_key);
+	ft_memdel(temp_value);
+	g_status_exit_code = 0;
 }
 
 void sort_envs(t_all *all)
@@ -348,7 +379,7 @@ void unset_command(t_all *all)
 		{
 			error_handler(all->cmnd[all->i].args[j], 2);
 			all->arg_pos = j;
-			g_status = 1;
+			g_status_exit_code = 1;
 			return ;
 		}
 
@@ -386,7 +417,7 @@ void sig_handler(int sig_id)
 		{
 			ft_putstr_fd("Quit: 3\n", 2);
 		}
-		g_status = 128 + sig_id;
+		g_status_exit_code = 128 + sig_id;
 	}
 	else if (sig_id == SIGINT)
 	{
@@ -394,7 +425,7 @@ void sig_handler(int sig_id)
 		rl_on_new_line();
 		rl_replace_line("", 0);
 		rl_redisplay();
-		g_status = 1;
+		g_status_exit_code = 1;
 	}
 }
 
