@@ -32,4 +32,12 @@ void	*ft_memdel(void *ptr)
 	return (NULL);
 }
 
+void 	exec_error_print(char *cmnd, char *error)
+{
+	ft_putstr_fd("minishell: ", 2);
+	ft_putstr_fd(cmnd, 2);
+	ft_putstr_fd(": ", 2);
+	ft_putendl_fd(error, 2);
+}
+
 

@@ -13,6 +13,7 @@
 # include <sys/types.h>
 # include <sys/wait.h>
 # include <sys/errno.h>
+# include <sys/stat.h>
 # include <signal.h>
 
 int 	g_status;
@@ -96,7 +97,14 @@ void 	launch_commands(t_all *all);
 char	*get_file_name(char *str, int *i, int type, t_all *all);
 void	heredoc_stdin_read(t_all *all, char *stop);
 void	ft_handle_redirect(char *str, int *i, t_all *all);
+
+/*
+ * 	errors.c
+ */
+
 void	*ft_memdel(void *ptr);
+void 	exec_error_print(char *cmnd, char *error);
+
 
 //Maryana`s func end
 

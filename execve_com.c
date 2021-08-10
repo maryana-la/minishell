@@ -5,22 +5,13 @@ void cmd_exec1(t_all *all) //for multi pipes
 	char *path;
 
 		path = get_data_path(all);
-		envs_list_to_array(all);
+		envs_list_to_array(all); //todo free
 		if (execve(path, all->cmnd[all->i].args, all->envp) == -1)
 		{
 			if (errno == 14)
-			{
-				ft_putstr_fd("minishell: ", 2);
-				ft_putstr_fd(all->cmnd[all->i].args[0], 2);
-				ft_putstr_fd(" : command not found\n", 2);
-			}
+				exec_error_print(all->cmnd[all->i].args[0], " : command not found");
 			else
-			{
-				ft_putstr_fd("minishell: ", 2);
-				ft_putstr_fd(all->cmnd[all->i].args[0], 2);
-				ft_putstr_fd(strerror(errno), 2);
-				ft_putstr_fd("\n", 2);
-			}
+				exec_error_print(all->cmnd[all->i].args[0], strerror(errno));
 			exit (errno);
 		}
 		exit(0);
@@ -33,11 +24,14 @@ void cmd_exec(t_all *all)// for no pipes
 
 	pid_t	pid;
 
-	pipe(all->fd); //new
+	pipe(all->fd);
 	pid = fork();
 
 	if (pid == -1)
-		exit(-11);
+	{
+		exec_error_print("pid", strerror(errno));
+		exit(errno);
+	}
 	else if (pid == 0)
 	{
 		if (all->cmnd[all->i].fd_in > STDIN_FILENO)
@@ -57,18 +51,9 @@ void cmd_exec(t_all *all)// for no pipes
 		if (execve(path, all->cmnd[all->i].args, all->envp) == -1)
 		{
 			if (errno == 14)
-			{
-				ft_putstr_fd("minishell: ", 2);
-				ft_putstr_fd(all->cmnd[all->i].args[0], 2);
-				ft_putstr_fd(" : command not found\n", 2);
-			}
+				exec_error_print(all->cmnd[all->i].args[0], " : command not found");
 			else
-			{
-				ft_putstr_fd("minishell: ", 2);
-				ft_putstr_fd(all->cmnd[all->i].args[0], 2);
-				ft_putstr_fd(strerror(errno), 2);
-				ft_putstr_fd("\n", 2);
-			}
+				exec_error_print(all->cmnd[all->i].args[0], strerror(errno));
 			exit (errno);
 		}
 		exit(0);
@@ -78,19 +63,6 @@ void cmd_exec(t_all *all)// for no pipes
 	int wstat;
 
 	waitpid(pid, &wstat, 0);
-//	if (WIFSIGNALED(wstat))
-//	{
-//		int temp;
-//		temp = WTERMSIG(wstat);
-//		if (temp == SIGINT)
-//			g_status = 130;
-//		else if (temp == SIGQUIT)
-//		{
-//			g_status = 131;
-//			printf("Quit: 3\n");
-//		}
-//	}
-
 	if (WIFEXITED(wstat))
 	{
 		int exit_code = WEXITSTATUS(wstat);
@@ -116,6 +88,7 @@ char *get_data_path(t_all *all)
 	char *path_tmp;
 	char *tmp;
 	int i;
+	struct stat	buff;
 
 	if (ft_strchr(all->cmnd[all->i].args[0], '/'))
 		return (ft_strdup(all->cmnd[all->i].args[0]));
@@ -126,26 +99,23 @@ char *get_data_path(t_all *all)
 		if (ft_strncmp(all->env_vars[i].key, "PATH", 5) == 0)
 			break;
 	}
-	path = ft_split(all->env_vars[i].value, ':');
+	if (i == all->env_counter)
+		return(all->cmnd[all->i].args[0]);
 
+	path = ft_split(all->env_vars[i].value, ':');
 	if (!path)
-	{
-//		ft_free_array(*arg_data); todo Maryana free all
-		exit(-1);
-	}
+		return(NULL);
+
 	i = -1;
 	path_tmp = NULL;
 	while (path[++i])
 	{
-		path_tmp = ft_strjoin(path[i], "/");
-		tmp = path_tmp;
-		path_tmp = ft_strjoin(path_tmp, all->cmnd[all->i].args[0]);
+		tmp = ft_strjoin(path[i], "/");
+		path_tmp = ft_strjoin(tmp, all->cmnd[all->i].args[0]);
 		ft_memdel(tmp);
-		if (access(path_tmp, F_OK | X_OK) == 0) //todo Maryana replace access with read
-		{
-//			ft_free_array(path); //todo free
+		stat(path_tmp, &buff);
+		if (buff.st_mode == 33261)
 			return (path_tmp);
-		}
 		ft_memdel(path_tmp);
 	}
 	return (NULL);

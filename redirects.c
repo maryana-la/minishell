@@ -35,7 +35,7 @@ char	*get_file_name(char *str, int *i, int type, t_all *all)
 
 
 	if (type != 2)
-		str = replace_env_with_value(str, j, all);
+		str = replace_env_with_value(str, *i, all);
 	len = get_arg_len(str, *i);
 	if (!len)
 		return NULL;
@@ -84,13 +84,12 @@ void	heredoc_stdin_read(t_all *all, char *stop)
 	char 	*heredoc_file;
 	int		ret;
 
-//	heredoc_file = ft_strjoin(stop, "tmp_file");
 	heredoc_file = ft_strdup("tmp_file_heredoc");
 	all->cmnd[all->pip_count].fd_in = open(heredoc_file, O_CREAT | O_RDWR | O_TRUNC, S_IRWXU);
 	if (all->cmnd[all->pip_count].fd_in < 0 || read(all->cmnd[all->pip_count].fd_in, 0, 0) < 0)
 	{
 		g_status = errno;
-		printf("minishell: %s: %s\n", heredoc_file, strerror(errno));
+		exec_error_print(heredoc_file, strerror(errno));
 		unlink(heredoc_file);
 		ft_memdel(heredoc_file);
 		return ;
@@ -108,13 +107,12 @@ void	heredoc_stdin_read(t_all *all, char *stop)
 	}
 	ft_memdel(line);
 
-
 	close (all->cmnd[all->pip_count].fd_in);
 	all->cmnd[all->pip_count].fd_in = open(heredoc_file, O_RDONLY);
 	if (all->cmnd[all->pip_count].fd_in < 0 || read(all->cmnd[all->pip_count].fd_in, 0, 0) < 0)
 	{
 		g_status = errno;
-		printf("minishell: %s: %s\n", heredoc_file, strerror(errno));
+		exec_error_print(heredoc_file, strerror(errno));
 		unlink(heredoc_file);
 		ft_memdel(heredoc_file);
 		return ;
@@ -136,7 +134,7 @@ void	ft_handle_redirect(char *str, int *i, t_all *all)
 		if (!file_name)
 		{
 			g_status = 1;
-			printf("minishell: ambiguous redirect\n");
+			exec_error_print(" ", "ambiguous redirect");
 			all->cmnd[all->pip_count].fd_out = -2;
 			return ;
 		}
@@ -144,9 +142,9 @@ void	ft_handle_redirect(char *str, int *i, t_all *all)
 		if (all->cmnd[all->pip_count].fd_out < 0 || read(all->cmnd[all->pip_count].fd_out, NULL, 0) < 0)
 		{
 			g_status = errno;
-			printf("minishell: %s: %s\n", file_name, strerror(errno));
+			exec_error_print(file_name, strerror(errno));
 			ft_memdel(file_name);
-			return ;//todo maybe change function to int?
+			return ;
 		}
 
 	}
@@ -157,7 +155,7 @@ void	ft_handle_redirect(char *str, int *i, t_all *all)
 		if (!file_name)
 		{
 			g_status = 1;
-			printf("minishell: ambiguous redirect\n");
+			exec_error_print(" ", "ambiguous redirect");
 			all->cmnd[all->pip_count].fd_out = -2;
 			return ;
 		}
@@ -165,9 +163,9 @@ void	ft_handle_redirect(char *str, int *i, t_all *all)
 		if (all->cmnd[all->pip_count].fd_out < 0 || read(all->cmnd[all->pip_count].fd_out, NULL, 0) < 0)
 		{
 			g_status = errno;
-			printf("minishell: %s: %s\n", file_name, strerror(errno));
+			exec_error_print(file_name, strerror(errno));
 			ft_memdel(file_name);
-			return ;//todo maybe change function to int?
+			return ;
 		}
 	}
 	else if (str[*i] == '<' && str[*i + 1] != '<')
@@ -177,7 +175,7 @@ void	ft_handle_redirect(char *str, int *i, t_all *all)
 		if (!file_name)
 		{
 			g_status = 1;
-			printf("minishell: ambiguous redirect\n");
+			exec_error_print(" ", "ambiguous redirect");
 			all->cmnd[all->pip_count].fd_in = -2;
 			return ;
 		}
@@ -185,9 +183,9 @@ void	ft_handle_redirect(char *str, int *i, t_all *all)
 		if (all->cmnd[all->pip_count].fd_in < 0 || read(all->cmnd[all->pip_count].fd_in, NULL, 0) < 0)
 		{
 			g_status = errno;
-			printf("minishell: %s: %s\n", file_name, strerror(errno));
+			exec_error_print(file_name, strerror(errno));
 			ft_memdel(file_name);
-			return ;//todo maybe change function to int?
+			return ;
 		}
 	}
 	else if (str[*i] == '<' && str[*i + 1] == '<')
