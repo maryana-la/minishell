@@ -458,7 +458,7 @@ int main(int argc, char **argv, char **env)
 {
 	t_all  all;
 
-	rl_outstream = stderr;
+	rl_outstream = stderr;//todo не забыть убрать перед сдачей
 	(void)argc;
 	(void)argv;
 	init_all(&all);
