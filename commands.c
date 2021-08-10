@@ -131,8 +131,15 @@ void cd_command(t_all *all)
 	i = -1;
 	all->tmp_cwd = getcwd(NULL, 0);
 	if (!all->cmnd[all->i].args[1])
-		return ;
-	if (chdir(all->cmnd[all->i].args[1]) == -1) //check if no error with folder
+	{
+		while(++i < all->env_counter && ft_strcmp(all->env_vars[i].key, "HOME"));
+		if (i != all->env_counter)
+		{
+			chdir(all->env_vars[i].value);
+		}
+	}
+
+	else if (chdir(all->cmnd[all->i].args[1]) == -1) //check if no error with folder
 	{
 		printf("minishell: cd: %s: %s\n", all->cmnd[all->i].args[1], strerror(errno));
 		g_status = 1;
@@ -140,6 +147,7 @@ void cd_command(t_all *all)
 	}
 
 //if PWD or OLDPWD unset - they don't appear
+	i = -1;
 	while(++i < all->env_counter && ft_strcmp(all->env_vars[i].key, "OLDPWD"));
 	if (i != all->env_counter)
 	{
