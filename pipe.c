@@ -20,7 +20,6 @@ void 	launch_commands(t_all *all)
 	else
 	{
 		all->i = 0;
-//		all->fd_tmp = 0;
 		pid = malloc(sizeof(pid_t) * (all->num_of_pipes + 1));
 		while (all->i < all->pip_count + 1)
 		{
@@ -73,7 +72,7 @@ void 	launch_commands(t_all *all)
 					exit_command(all);
 				else
 					cmd_exec1(all);
-				exit(g_status); //todo check return value from builtin-s
+				exit(g_status);
 			}
 			close(all->fd[1]);
 			if (all->i != 0)
@@ -82,16 +81,12 @@ void 	launch_commands(t_all *all)
 			close(all->fd[0]);
 			all->i++;
 		}
-//		close(all->fd[1]);
-//		close(all->fd[0]);
-//		close(all->fd_tmp);
 
 		int wstat;
 		int i = -1;
 		while (++i < all->pip_count + 1)
 		{
 			waitpid(pid[i], &wstat, 0);
-//			printf("wstat = %d; %d\n", wstat, (wstat % 256));
 			if (WIFEXITED(wstat))
 			{
 				int exit_code = WEXITSTATUS(wstat);
@@ -105,22 +100,10 @@ void 	launch_commands(t_all *all)
 						g_status = exit_code;
 				}
 				else
-//					printf("Success\n");
 					g_status = 0;
 			}
-			else // WIFSIGNALED
-			{
-				int temp;
-				temp = WTERMSIG(wstat);
-//				printf("WTERMSIG %d\n", temp);
-				if (wstat == SIGINT)
-					g_status = 130;
-				else if (wstat == SIGQUIT)
-				{
-					g_status = 131;
-					printf("Quit: 3\n");
-				}
-			}
+			else
+				g_status = 0;
 		}
 	}
 	dup2(all->fd_std[0], 0);

@@ -29,7 +29,7 @@ char	*ft_dollar(char *str, int *i, t_all *all) //done leaks
 
 	pos_of_dollar = *i;
 	while(str[++*i]) //find end of variable
-		if(check_set(str[*i], " \t\'\"\\$;|></"))
+		if(check_set(str[*i], " \t\'\"\\$;|></="))
 			break;
 	end_of_var = *i;
 
@@ -38,9 +38,8 @@ char	*ft_dollar(char *str, int *i, t_all *all) //done leaks
 //cut variable
 	var = ft_substr(str, pos_of_dollar + 1, (end_of_var - pos_of_dollar -1));
 
-	if (!(ft_strncmp(var, "?", 2)))
+	if (!(ft_strncmp(var, "?", 1)))
 	{
-//		value = ft_itoa(all->last_exit);
 		value = ft_itoa(g_status);
 		begin_of_str = ft_substr(str, 0, pos_of_dollar);
 		end_of_line = ft_substr(str, *i, (ft_strlen(str) - *i + 1));
@@ -81,7 +80,7 @@ char	*ft_dollar(char *str, int *i, t_all *all) //done leaks
 	begin_of_str = ft_substr(str, 0, pos_of_dollar); // cut till $
 	end_of_line = ft_substr(str, *i, (ft_strlen(str) - *i + 1)); // cut after variable
 	tmp = ft_strjoin(begin_of_str, value);
-	str = ft_strjoin(tmp, end_of_line); //todo if $bla
+	str = ft_strjoin(tmp, end_of_line);
 	*i = pos_of_dollar + (int)ft_strlen(value) - 1;
 	ft_memdel(tmp);
 	ft_memdel(begin_of_str);
@@ -108,7 +107,6 @@ char	*replace_env_with_value(char *str, int i, t_all *all)
 				flag = 0;
 		}
 		else if(str[i] == '$' && flag == 0)
-//		&& str[i - 1] != '\\'
 			str = ft_dollar(str, &i, all);
 		i++;
 	}
@@ -180,7 +178,7 @@ void	ft_put_str_to_struct(char *arg, t_all *all) //done leaks
 		arg = check_lower_case(arg);
 		all->cmnd[all->pip_count].args = malloc(sizeof(char *) * 2);
 		all->cmnd[all->pip_count].args[0] = ft_strdup(arg);
-		all->cmnd[all->pip_count].args[1] = 0; //maybe change to NULL?
+		all->cmnd[all->pip_count].args[1] = NULL; //todo maybe change to NULL?
 		ft_memdel(arg);
 	}
 	else
@@ -197,7 +195,7 @@ void	ft_put_str_to_struct(char *arg, t_all *all) //done leaks
 		}
 
 		tmp[i] = ft_strdup(arg);
-		tmp[i + 1] = 0; //maybe change to NULL?
+		tmp[i + 1] = NULL; //maybe change to NULL?
 		ft_memdel(arg);
 		all->cmnd[all->pip_count].args = tmp;
 	}
@@ -209,7 +207,6 @@ void ft_parser(char *str, t_all *all)
 	int j;
 	int len;
 	char *tmp;
-	char *from_quote;
 
 	all->cmnd = malloc(sizeof(t_cmnd) * (all->num_of_pipes + 2)); //malloc for number of commands
 	i = -1;
@@ -220,7 +217,6 @@ void ft_parser(char *str, t_all *all)
 		all->cmnd[i].fd_out = STDOUT_FILENO;
 	}
 	all->pip_count = 0;
-//	str = replace_env_with_value(str, all); // заменяем в строке переменные окружения
 	i = 0;
 
 	while(str[i])
@@ -235,7 +231,7 @@ void ft_parser(char *str, t_all *all)
 	    }
 	    else
 	    {
-			str = replace_env_with_value(str, i, all); //todo new!
+			str = replace_env_with_value(str, i, all); // заменяем в строке переменные окружения
 	    	len = get_arg_len(str, i);
 	        tmp = ft_calloc((len + 2), sizeof(char));
 	        j = 0;
@@ -254,17 +250,11 @@ void ft_parser(char *str, t_all *all)
 	            {
 	                while (str[++i] && str[i] != '\"')
 	                {
-//	                    if (str[i] == '\\' &&
-//	                    (str[i + 1] == '$' || str[i + 1] == '\'' || str[i + 1] == '\"' || str[i + 1] == '\\'))
-//	                        tmp[j] = str[++i];
-//	                    else
 						tmp[j] = str[i];
 	                    j++;
 	                }
 	                j--;
 	            }
-//	            else if (str[i] == '\\')
-//	                tmp[j] = str[++i];
 	            else
 	                tmp[j] = str[i];
 	            i++;
@@ -275,7 +265,7 @@ void ft_parser(char *str, t_all *all)
 	            tmp[j] = '\0';
 	            ft_put_str_to_struct(tmp, all);
 	        }
-//	        ft_memdel(tmp);
+	        ft_memdel(tmp);
 	    }
 	}
 	if (all->cmnd->args)
@@ -439,7 +429,7 @@ void init_all(t_all *all)
 	all->num_of_pipes = 0;
 }
 
-int takeInput(t_all *all, char** str)
+int take_input(t_all *all, char** str)
 {
 	char* buf;
 
@@ -447,7 +437,7 @@ int takeInput(t_all *all, char** str)
 	buf = readline("minishell> ");
 	if (!buf)
 		print_and_exit(all, 0);
-	if (strlen(buf) != 0)
+	if (ft_strlen(buf) != 0)
 	{
 		add_history(buf);
 		*str = ft_strdup(buf);
@@ -480,7 +470,7 @@ int main(int argc, char **argv, char **env)
 	while (1)
 	{
 		init_all(&all);
-		if (takeInput(&all, &str))
+		if (take_input(&all, &str))
 			continue;
 		if (ft_preparser(str, &all) == 0)
 			ft_parser(str, &all);

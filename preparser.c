@@ -72,7 +72,9 @@ int ft_preparser(char *str, t_all *all)
 	all->num_of_pipes = 0;
 	len = (int)ft_strlen(str) - 1;
 	i = 0;
-	skip_spaces(str, &i); //todo change len to last pinted symbols, now does'nt work with spaces at the end
+	skip_spaces(str, &i);
+	while (str[len] == ' ' || str[len] == '\t')
+		len--;
 	if (str[i] == '|' || str[len] == '|')
 	{
 		if (str[i] == str[i + 1] || str[len] == str[len - 1])

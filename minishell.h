@@ -63,7 +63,7 @@ int check_tokens(char *str, int *i, char token);
 ** main.c
 */
 
-int takeInput(t_all *all, char** str);
+int take_input(t_all *all, char** str);
 int check_set(char c, char *set);
 void skip_spaces(char *str, int *i);
 char *ft_dollar(char *str, int *i, t_all *all);

@@ -8,8 +8,10 @@ void 	buitin_commands(t_all *all)
 		close(all->cmnd[all->i].fd_in);
 	}
 	if (all->cmnd[all->i].fd_out > STDOUT_FILENO)
+	{
 		dup2(all->cmnd[all->i].fd_out, STDOUT_FILENO);
-
+		close(all->cmnd[all->i].fd_out);
+	}
 
 	if (!ft_strncmp(all->cmnd[all->i].args[0], "pwd", 4))
 		pwd_command(all);
@@ -49,11 +51,10 @@ void print_and_exit (t_all *all, int err)
 {
 	if (!all->num_of_pipes)
 		ft_putendl_fd("exit", 2);
-//		printf("exit\n");
 	exit(err);
 }
 
-void exit_command(t_all *all)
+void exit_command(t_all *all) //no malloc
 {
 	int i;
 	int error_code;
@@ -87,7 +88,7 @@ void exit_command(t_all *all)
 		print_and_exit(all,error_code % 256);
 }
 
-void echo_command(t_all *all)
+void echo_command(t_all *all) //no malloc
 {
 	int i;
 	int j;
@@ -130,7 +131,7 @@ void cd_command(t_all *all)
 
 	i = -1;
 	all->tmp_cwd = getcwd(NULL, 0);
-	if (!all->cmnd[all->i].args[1])
+	if (!all->cmnd[all->i].args[1]) //todo change to home dir
 		return ;
 	if (chdir(all->cmnd[all->i].args[1]) == -1) //check if no error with folder
 	{
@@ -372,7 +373,7 @@ void sig_handler(int sig_id)
 		}
 		else if (sig_id == SIGQUIT)
 		{
-			ft_putstr_fd("Quit: 3\n", 2); //todo проверить на двойной вывод  этой строки
+			ft_putstr_fd("Quit: 3\n", 2);
 		}
 		g_status = 128 + sig_id;
 	}
