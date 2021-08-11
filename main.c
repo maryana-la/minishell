@@ -438,7 +438,7 @@ int take_input(t_all *all, char** str)
 	char* buf;
 
 	rl_catch_signals = 0;
-	buf = readline("minishell> ");
+	buf = readline(GREEN "minishell> " RESET);
 	if (!buf)
 		print_and_exit(all, 0);
 	if (ft_strlen(buf) != 0)
