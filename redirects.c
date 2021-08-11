@@ -4,13 +4,11 @@ char	*get_file_name(char *str, int *i, int type, t_all *all)
 {
 	int	len;
 	char	*tmp;
-	char	*str_origin;
 	int j;
 	int x;
 
 	skip_spaces(str, i);
 
-	str;
 	x = *i; //чтобы в конце вернуть указатель после имени файла
 	while (str[x] && !(check_set(str[x], " \t|;<>")))
 	{

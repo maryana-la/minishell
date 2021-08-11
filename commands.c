@@ -64,6 +64,7 @@ void exit_command(t_all *all) //no malloc
 	if (i == 1)
 	{
 		ft_free_env(all->env_vars);
+		init_all(all);
 		print_and_exit(all, 0);
 	}
 	if (i > 2)
@@ -205,7 +206,7 @@ void export_command(t_all *all)
 	{
 		sort_envs(all);
 		print_env_list(all->env_sorted, 1, all->env_counter);
-		ft_free_env(all->env_sorted);
+		ft_memdel(all->env_sorted);
 		return ;
 	}
 
