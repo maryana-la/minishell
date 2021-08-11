@@ -19,108 +19,6 @@ void	skip_spaces(char *str, int *i)
 		(*i)++;
 }
 
-char	*ft_dollar(char *str, int *i, t_all *all) //done leaks
-{
-	char	*var;
-	int		pos_of_dollar;
-	int		end_of_var;
-	char	*begin_of_str;
-	char	*end_of_line;
-	char	*tmp;
-	char	*value;
-
-	pos_of_dollar = *i;
-	while(str[++*i]) //find end of variable
-		if(check_set(str[*i], " \t\'\"\\$;|></="))
-			break;
-	end_of_var = *i;
-
-	if (end_of_var - pos_of_dollar == 1)
-		return(str);
-//cut variable
-	var = ft_substr(str, pos_of_dollar + 1, (end_of_var - pos_of_dollar -1));
-
-	if (!(ft_strncmp(var, "?", 1)))
-	{
-		value = ft_itoa(g_status_exit_code);
-		begin_of_str = ft_substr(str, 0, pos_of_dollar);
-		end_of_line = ft_substr(str, (pos_of_dollar + 2), (ft_strlen(str) - pos_of_dollar - 1));
-		tmp = ft_strjoin(begin_of_str, value);
-		ft_memdel(begin_of_str);
-		begin_of_str = str; //to make free later
-		str = ft_strjoin(tmp, end_of_line);
-		*i = pos_of_dollar + (int)ft_strlen(value) - 1;
-		ft_memdel(tmp);
-		ft_memdel(begin_of_str);
-		ft_memdel(value);
-		ft_memdel(end_of_line);
-		ft_memdel(var);
-		return(str);
-	}
-	else if (ft_isdigit(var[0]) != 0) // if numeric
-	{
-		if(ft_strlen(var) == 1)
-			end_of_line = ft_substr(str, *i, (ft_strlen(str) - *i + 1));
-		else
-			end_of_line = ft_substr(str, pos_of_dollar + 2, (ft_strlen(str) - pos_of_dollar - 1));
-		begin_of_str = ft_substr(str, 0, pos_of_dollar);
-		tmp = str;
-		str = ft_strjoin(begin_of_str, end_of_line);
-		ft_memdel(begin_of_str);
-		ft_memdel(end_of_line);
-		ft_memdel(var);
-		ft_memdel(tmp);
-		return (str);
-	}
-
-//find variable in the lists
-
-	int j = -1;
-	while (all->env_vars[++j].key) //find variable in the lists
-		if (ft_strncmp(all->env_vars[j].key, var, (ft_strlen(var) + 1)) == 0)
-			break;
-	if (all->env_vars[j].key) //если долистал до конца или вылетел из цикла
-		value = ft_strdup(all->env_vars[j].value);
-	else
-		value = ft_strdup("\0");
-	begin_of_str = ft_substr(str, 0, pos_of_dollar); // cut till $
-	end_of_line = ft_substr(str, *i, (ft_strlen(str) - *i + 1)); // cut after variable
-	tmp = ft_strjoin(begin_of_str, value);
-	ft_memdel(begin_of_str);
-	begin_of_str = str; //to make free later
-	str = ft_strjoin(tmp, end_of_line);
-	*i = pos_of_dollar + (int)ft_strlen(value) - 1;
-	ft_memdel(tmp);
-	ft_memdel(begin_of_str);
-	ft_memdel(value);
-	ft_memdel(end_of_line);
-	ft_memdel(var);
-	return (str);
-}
-
-char	*replace_env_with_value(char *str, int i, t_all *all)
-{
-	int flag;
-
-	flag = 0;
-
-// заменяем переменные только до следующей команды
-	while(str[i] && !(check_set(str[i], "|><")))
-	{
-		if(str[i] == '\'')
-		{
-			if(flag == 0)
-				flag = 1;
-			else
-				flag = 0;
-		}
-		else if(str[i] == '$' && flag == 0)
-			str = ft_dollar(str, &i, all);
-		i++;
-	}
-	return(str);
-}
-
 int	get_arg_len(char *str, int i) //no malloc
 {
 	int len;
@@ -214,6 +112,7 @@ void ft_parser(char *str, t_all *all)
 	int j;
 	int len;
 	char *tmp;
+	char *old_str;
 
 	all->cmnd = malloc(sizeof(t_cmnd) * (all->num_of_pipes + 2)); //malloc for number of commands
 	i = -1;
@@ -238,7 +137,9 @@ void ft_parser(char *str, t_all *all)
 	    }
 	    else
 	    {
-			str = replace_env_with_value(str, i, all); // заменяем в строке переменные окружения
+			old_str = str;
+	    	str = replace_env_with_value(str, i, all); // заменяем в строке переменные окружения
+	    	ft_memdel(old_str);
 	    	len = get_arg_len(str, i);
 	        tmp = ft_calloc((len + 2), sizeof(char));
 	        j = 0;
@@ -274,6 +175,7 @@ void ft_parser(char *str, t_all *all)
 	        }
 	        ft_memdel(tmp);
 	    }
+//	    ft_memdel(old_str);
 	}
 	ft_memdel(str);
 	if (all->cmnd->args)
@@ -340,6 +242,8 @@ int main(int argc, char **argv, char **env)
 	all.fd_std[0] = dup(0);
 	all.fd_std[1] = dup(1);
 
+//	dup2(2, 1);
+
 	if (signal(SIGINT, sig_handler) == SIG_ERR)
 		printf("Signal init error\n");
 	if (signal(SIGQUIT, sig_handler) == SIG_ERR)
@@ -353,7 +257,8 @@ int main(int argc, char **argv, char **env)
 			continue;
 		if (ft_preparser(str, &all) == 0)
 			ft_parser(str, &all);
-//		ft_memdel(str);
+		else
+			ft_memdel(str);
 		init_all(&all);
 	}
 	return 0;

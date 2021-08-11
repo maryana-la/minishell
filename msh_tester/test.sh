@@ -99,7 +99,7 @@ if [ "$1" == "my" ] || [ "$1" == "all" ]; then
     exec_test 'echo >'
     exec_test 'echo -n -n -nnnn -nnnnm'
     exec_test 'cat /dev/random | head -n 1 | cat -e'
-    exec_test 'unset var1 # with undefined var1'
+    exec_test 'unset var1'
     exec_test 'export "" et unset ""'
     exec_test 'echo test > file test1'
     exec_test '$'
@@ -147,8 +147,8 @@ if [ "$1" == "my" ] || [ "$1" == "all" ]; then
     exec_test 'echo "\n \n \\n"'
     exec_test 'cd'
     exec_test 'cd .'
-    exec_test 'cd ~'
-    exec_test 'cd no_file'
+#    exec_test 'cd ~'
+    exec_test 'cd not_valid_file'
     exec_test 'cd a b c d'
     exec_test 'pwd a'
     exec_test 'pwd a b c d'
@@ -172,6 +172,8 @@ if [ "$1" == "my" ] || [ "$1" == "all" ]; then
     exec_test 'exit 0 | exit 1'
     exec_test 'exit 1 | exit 0'
     exec_test 'yes | head'
+
+#    ls -lAR / | cat | grep '/'
 fi
 
 
@@ -204,7 +206,6 @@ if [ "$1" == "pipe" ] || [ "$1" == "all" ]; then
 	exec_test 'echo test | cat -e | cat -e | cat -e | cat -e | cat -e | cat -e | cat -e | cat -e | cat -e | cat -e| cat -e| cat -e| cat -e| cat -e| cat -e| cat -e| cat -e| cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e|cat -e'
 	 exec_test 'cat /dev/random | head -c 100 | wc -c'
 	exec_test 'ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls'
-	exec_test 'ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls|ls'
  head -c 2000000 /dev/zero > big_file
  exec_test ' cat big_file | ls'
  exec_test ' cat big_file | echo lol'
@@ -242,15 +243,16 @@ if [ "$1" == "export" ] || [ "$1" == "all" ]; then
   exec_test 'export ='
 #  exec_test 'export 1TEST= ;' $ENV_SHOW
 #  exec_test 'export TEST ;' $EXPORT_SHOW
-#  exec_test 'export ""="" ; ' $ENV_SHOW
-#  exec_test 'export TES=T="" ; ' $ENV_SHOW
-#  exec_test 'export TE+S=T="" ; ' $ENV_SHOW
-#  exec_test 'export TEST=LOL ; echo $TEST ; ' $ENV_SHOW
-#  exec_test 'export TEST=LOL ; echo $TEST$TEST$TEST=lol$TEST'
-#  exec_test 'export TEST=LOL ; export TEST+=LOL ; echo $TEST ; ' $ENV_SHOW
+  exec_test 'export ""=""' $ENV_SHOW
+  exec_test 'export TES=T=""' $ENV_SHOW
+  exec_test 'export TE+S=T=""' $ENV_SHOW
+  exec_test 'export TEST=LOL ' $ENV_SHOW
+  exec_test 'export TEST=LOL'
+  exec_test 'echo $TEST$TEST$TEST=lol$TEST'
   exec_test $ENV_SHOW
   exec_test $EXPORT_SHOW
-  exec_test 'export TEST="ls -l - a"'
+  exec_test 'export TEST="ls -l -a"'
+  exec_test '$TEST'
 fi
 
 
@@ -261,12 +263,13 @@ if [ "$1" == "redirect" ] || [ "$1" == "all" ]; then
 #  exec_test 'echo test > ls >> ls >> ls ; echo test >> ls ; cat ls'
 #  exec_test '> lol echo test lol ; cat lol'
 #  exec_test '>lol echo > test>lol>test>>lol>test mdr >lol test >test ; cat test'
-#  exec_test 'cat < ls'  *
+  exec_test 'cat < ls'
 ##  exec_test 'rm -f ls; cat > ls < ls; rm -f ls'
-#  exec_test 'ls > ls'  *
-#  exec_test 'cat <ls'  *
+  exec_test 'ls > ls'
+  exec_test 'cat <ls'
   exec_test 'cat <test.sh <ls'
-  exec_test 'cat << stop'
+  exec_test 'cat << 123'
+  exec_test 'ls | cat -e | nl | rev |cat -e | rev >> ls'
 #  exec_test 'cat << stop\n1\EOF\nstopa\nstop'
 #  exec_test 'cat <test.sh <<stop \n1\nstop'
 #  exec_test 'cat <<stop<ls  \n1\nstop'
@@ -278,7 +281,8 @@ fi
 # MULTI TESTS
 if [ "$1" == "multi" ] || [ "$1" == "all" ]; then
   printf $BOLDMAGENTA"\n\tMULTI TESTS\n"$RESET
-#  exec_test 'echo testing multi >lol ; echo <lol <lola ; echo "test 1  | and 2" >>lol ; cat <lol ; cat ../Makefile <lol | grep minishell'
+  exec_test 'echo testing multi >lol'
+# exec_test ' echo <lol <lola ; echo "test 1  | and 2" >>lol ; cat <lol ; cat ../Makefile <lol | grep minishell'
 fi
 
 # SYNTAX 
@@ -294,7 +298,7 @@ if [ "$1" == "syntax" ] || [ "$1" == "all" ]; then
   exec_test '<'
 #  exec_test 'rm -f ls; cat < ls > ls'
   exec_test "grep -z"
-#  exec_test "ls'| 'wc -l"
+  exec_test "ls'| 'wc -l"
 fi
 
 # EXIT
@@ -318,44 +322,44 @@ fi
 
 
 
-# BONUS QUOTES
-if [ "$1" == "bonus" ] || [ "$1" == "quote" ]; then
-  Compile and set executable rights
-  make bonus -C ../ > /dev/null
-  cp ../minishell .
-  chmod 755 minishell
-
-  printf $BOLDMAGENTA"\n\tBONUS QUOTE\n"$RESET
-  exec_test "echo '"$USER"'"
-  exec_test "echo "'$USER'""
-fi
-
-
-# BONUS WILDCARD
-if [ "$1" == "bonus" ] || [ "$1" == "wildcard" ]; then
-  Compile and set executable rights
-  make bonus -C ../ > /dev/null
-  cp ../minishell .
-  chmod 755 minishell
-
-  printf $BOLDMAGENTA"\n\tBONUS WILDCARD\n"$RESET
-  exec_test "echo * | wc"
-#  exec_test "cd .. ; echo * | wc"
-  exec_test "echo .* | wc"
-  exec_test "echo M*e"
-  exec_test "echo *a*e"
-  exec_test "echo *.mp3"
-#  exec_test "mkdir empty; cd empty; pwd; echo *; cd ..; rm -rf empty"
-fi
-
-# BONUS OPERATOR && || ()
-if [ "$1" == "bonus" ] || [ "$1" == "oper" ]; then
-  Compile and set executable rights
-  make bonus -C ../ > /dev/null
-  cp ../minishell .
-  chmod 755 minishell
-
-  printf $BOLDMAGENTA"\n\tBONUS OPERATOR \$\$ || () \n"$RESET
+## BONUS QUOTES
+#if [ "$1" == "bonus" ] || [ "$1" == "quote" ]; then
+#  Compile and set executable rights
+#  make bonus -C ../ > /dev/null
+#  cp ../minishell .
+#  chmod 755 minishell
+#
+#  printf $BOLDMAGENTA"\n\tBONUS QUOTE\n"$RESET
+#  exec_test "echo '"$USER"'"
+#  exec_test "echo "'$USER'""
+#fi
+#
+#
+## BONUS WILDCARD
+#if [ "$1" == "bonus" ] || [ "$1" == "wildcard" ]; then
+#  Compile and set executable rights
+#  make bonus -C ../ > /dev/null
+#  cp ../minishell .
+#  chmod 755 minishell
+#
+#  printf $BOLDMAGENTA"\n\tBONUS WILDCARD\n"$RESET
+#  exec_test "echo * | wc"
+##  exec_test "cd .. ; echo * | wc"
+#  exec_test "echo .* | wc"
+#  exec_test "echo M*e"
+#  exec_test "echo *a*e"
+#  exec_test "echo *.mp3"
+##  exec_test "mkdir empty; cd empty; pwd; echo *; cd ..; rm -rf empty"
+#fi
+#
+## BONUS OPERATOR && || ()
+#if [ "$1" == "bonus" ] || [ "$1" == "oper" ]; then
+#  Compile and set executable rights
+#  make bonus -C ../ > /dev/null
+#  cp ../minishell .
+#  chmod 755 minishell
+#
+#  printf $BOLDMAGENTA"\n\tBONUS OPERATOR \$\$ || () \n"$RESET
 #  exec_test "true && ls"
 #  exec_test "false&&ls"
 #  exec_test "true||ls"
@@ -376,7 +380,7 @@ if [ "$1" == "bonus" ] || [ "$1" == "oper" ]; then
 #  exec_test " ls )"
 #  exec_test "( ls "
 #  exec_test "ls && (touch 1 && pwd) && "
-fi
+#fi
 
 
 if [[ "$1" != "" ]] && (( $TOTAL > 0)); then
@@ -385,7 +389,7 @@ if [[ "$1" != "" ]] && (( $TOTAL > 0)); then
     printf $GREEN
   elif (( $PROCENT <= 90 )) && (( $PROCENT > 60 )); then
     printf $YELLOW
-  else  
+  else
     printf $RED
   fi
   printf "\nPASS: $GOOD / $TOTAL (%%$PROCENT)$RESET\n"

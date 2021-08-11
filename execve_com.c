@@ -8,12 +8,16 @@ void cmd_exec1(t_all *all) //for multi pipes
 		envs_list_to_array(all); //todo free
 		if (execve(path, all->cmnd[all->i].args, all->envp) == -1)
 		{
+			ft_memdel(path);
+			ft_memdel_double(all->envp);
 			if (errno == 14)
 				exec_error_print(all->cmnd[all->i].args[0], "command not found");
 			else
 				exec_error_print(all->cmnd[all->i].args[0], strerror(errno));
 			exit (errno);
 		}
+		ft_memdel(path);
+		ft_memdel_double(all->envp);
 		exit(0);
 
 }
@@ -53,12 +57,16 @@ void cmd_exec(t_all *all)// for no pipes
 
 		if (execve(path, all->cmnd[all->i].args, all->envp) == -1)
 		{
+			ft_memdel(path);
+			ft_memdel_double(all->envp);
 			if (errno == 14)
 				exec_error_print(all->cmnd[all->i].args[0], "command not found");
 			else
 				exec_error_print(all->cmnd[all->i].args[0], strerror(errno));
 			exit (errno);
 		}
+		ft_memdel(path);
+		ft_memdel_double(all->envp);
 		exit(0);
 	}
 	close(all->fd[1]);
@@ -93,6 +101,8 @@ char *get_data_path(t_all *all)
 	int i;
 	struct stat	buff;
 
+	buff.st_mode = 0;
+
 	if (ft_strchr(all->cmnd[all->i].args[0], '/'))
 		return (ft_strdup(all->cmnd[all->i].args[0]));
 
@@ -103,7 +113,7 @@ char *get_data_path(t_all *all)
 			break;
 	}
 	if (i == all->env_counter)
-		return(all->cmnd[all->i].args[0]);
+		return(ft_strdup(all->cmnd[all->i].args[0]));
 
 	path = ft_split(all->env_vars[i].value, ':');
 	if (!path)
@@ -117,14 +127,13 @@ char *get_data_path(t_all *all)
 		path_tmp = ft_strjoin(tmp, all->cmnd[all->i].args[0]);
 		ft_memdel(tmp);
 		stat(path_tmp, &buff);
-		if (buff.st_mode == 33261)
-		{
-			ft_memdel_double(path);
-			return (path_tmp);
-		}
+		if (buff.st_mode != 0)
+			break;
 		ft_memdel(path_tmp);
 	}
 	ft_memdel_double(path);
+	if (buff.st_mode)
+		return(path_tmp);
 	return (NULL);
 }
 

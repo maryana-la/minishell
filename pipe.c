@@ -25,7 +25,7 @@ void 	launch_commands(t_all *all)
 		{
 			pipe(all->fd); //new
 			pid[all->i] = fork();
-			if (pid[all->i] == -1 || all->i > 300)
+			if (pid[all->i] == -1 || all->i > 450)
 			{
 				int i = 0;
 				while (i <= all->i)
@@ -33,13 +33,6 @@ void 	launch_commands(t_all *all)
 					kill(pid[i], SIGTERM);
 					i++;
 				}
-//
-//				i = 0;
-//				while (i <= all->i)
-//				{
-//					kill(pid[i], SIGKILL);
-//					i++;
-//				}
 				exec_error_print("fork", "Resource temporarily unavailable");
 				g_status_exit_code = 1;
 				break ;

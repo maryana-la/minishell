@@ -6,6 +6,7 @@ char	*get_file_name(char *str, int *i, int type, t_all *all)
 	char	*tmp;
 	int j;
 	int x;
+	char *str_new;
 
 	skip_spaces(str, i);
 
@@ -33,8 +34,10 @@ char	*get_file_name(char *str, int *i, int type, t_all *all)
 
 
 	if (type != 2)
-		str = replace_env_with_value(str, *i, all);
-	len = get_arg_len(str, *i);
+		str_new = replace_env_with_value(str, *i, all);//todo keep original function
+	else
+		str_new = ft_strdup(str);
+	len = get_arg_len(str_new, *i);
 	if (!len)
 	{
 		*i = x;
@@ -47,37 +50,38 @@ char	*get_file_name(char *str, int *i, int type, t_all *all)
 		return (NULL); //malloc error
 	}
 	j = 0;
-	while (str[*i] && !check_set(str[*i], " \t|;<>"))
+	while (str_new[*i] && !check_set(str_new[*i], " \t|;<>"))
 	{
-		if (str[*i] == '\'')
+		if (str_new[*i] == '\'')
 		{
-			while (str[++(*i)] && str[*i] != '\'')
+			while (str_new[++(*i)] && str_new[*i] != '\'')
 			{
-				tmp[j] = str[(*i)];
+				tmp[j] = str_new[(*i)];
 				j++;
 			}
 			j--;
 		}
-		else if (str[*i] == '\"')
+		else if (str_new[*i] == '\"')
 		{
-			while (str[++(*i)] && str[*i] != '\"')
+			while (str_new[++(*i)] && str_new[*i] != '\"')
 			{
-				if (str[*i] == '\\' && (str[*i + 1] == '$' || str[*i + 1] == '\'' || str[*i + 1] == '\"' || str[*i + 1] == '\\'))
-					tmp[j] = str[++(*i)];
+				if (str_new[*i] == '\\' && (str_new[*i + 1] == '$' || str_new[*i + 1] == '\'' || str_new[*i + 1] == '\"' || str_new[*i + 1] == '\\'))
+					tmp[j] = str_new[++(*i)];
 				else
-					tmp[j] = str[*i];
+					tmp[j] = str_new[*i];
 				j++;
 			}
 			j--;
 		}
-		else if (str[*i] == '\\')
-			tmp[j] = str[++(*i)];
+		else if (str_new[*i] == '\\')
+			tmp[j] = str_new[++(*i)];
 		else
-			tmp[j] = str[*i];
+			tmp[j] = str_new[*i];
 		(*i)++;
 		j++;
 	}
 	tmp[j] = '\0';
+	ft_memdel(str_new);
 	*i = x;
 	return(tmp);
 }
