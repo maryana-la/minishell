@@ -77,6 +77,7 @@ void	init_all(t_all *all);
 void	start_commands(t_all *all);
 int		get_arg_len(char *str, int i);
 void	ft_memdel_double(char **arr);
+void 	ft_free_commands(t_all *all);
 
 /*
  *  execve_com.c
@@ -98,8 +99,8 @@ void 	launch_commands(t_all *all);
  */
 
 char	*get_file_name(char *str, int *i, int type, t_all *all);
-void	heredoc_stdin_read(t_all *all, char *stop);
-void	ft_handle_redirect(char *str, int *i, t_all *all);
+int	heredoc_stdin_read(t_all *all, char *stop);
+int	ft_handle_redirect(char *str, int *i, t_all *all);
 
 /*
  * 	errors.c

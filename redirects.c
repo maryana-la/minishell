@@ -41,12 +41,14 @@ char	*get_file_name(char *str, int *i, int type, t_all *all)
 	if (!len)
 	{
 		*i = x;
+		ft_memdel(str_new);
 		return NULL;
 	}
 	tmp = malloc(sizeof(char) * (len + 1));
 	if (!tmp)
 	{
 		*i = x;
+		ft_memdel(str_new);
 		return (NULL); //malloc error
 	}
 	j = 0;
@@ -86,7 +88,7 @@ char	*get_file_name(char *str, int *i, int type, t_all *all)
 	return(tmp);
 }
 
-void	heredoc_stdin_read(t_all *all, char *stop)
+int	heredoc_stdin_read(t_all *all, char *stop)
 {
 	char	*line;
 	char 	*heredoc_file;
@@ -100,7 +102,7 @@ void	heredoc_stdin_read(t_all *all, char *stop)
 		exec_error_print(heredoc_file, strerror(errno));
 		unlink(heredoc_file);
 		ft_memdel(heredoc_file);
-		return ;
+		return (1);
 	}
 	ret = 1;
 	while (ret)
@@ -123,17 +125,17 @@ void	heredoc_stdin_read(t_all *all, char *stop)
 		exec_error_print(heredoc_file, strerror(errno));
 		unlink(heredoc_file);
 		ft_memdel(heredoc_file);
-		return ;
+		return (1);
 	}
 	unlink(heredoc_file);
 	ft_memdel(heredoc_file);
+	return (0);
 }
 
 
-void	ft_handle_redirect(char *str, int *i, t_all *all)
+int	ft_handle_redirect(char *str, int *i, t_all *all)
 {
 	char *file_name;
-	char *stop_word;
 
 	if (str[*i] == '>' && str[*i + 1] != '>')
 	{
@@ -144,7 +146,7 @@ void	ft_handle_redirect(char *str, int *i, t_all *all)
 			g_status_exit_code = 1;
 			exec_error_print(" ", "ambiguous redirect");
 			all->cmnd[all->pip_count].fd_out = -2;
-			return ;
+			return (1);
 		}
 		all->cmnd[all->pip_count].fd_out = open(file_name, O_CREAT | O_RDWR | O_TRUNC, S_IRWXU);
 		if (all->cmnd[all->pip_count].fd_out < 0 || read(all->cmnd[all->pip_count].fd_out, NULL, 0) < 0)
@@ -152,7 +154,7 @@ void	ft_handle_redirect(char *str, int *i, t_all *all)
 			g_status_exit_code = errno;
 			exec_error_print(file_name, strerror(errno));
 			ft_memdel(file_name);
-			return ;
+			return (1);
 		}
 
 	}
@@ -165,7 +167,7 @@ void	ft_handle_redirect(char *str, int *i, t_all *all)
 			g_status_exit_code = 1;
 			exec_error_print(" ", "ambiguous redirect");
 			all->cmnd[all->pip_count].fd_out = -2;
-			return ;
+			return (1);
 		}
 		all->cmnd[all->pip_count].fd_out = open(file_name, O_CREAT | O_RDWR | O_APPEND, S_IRWXU);
 		if (all->cmnd[all->pip_count].fd_out < 0 || read(all->cmnd[all->pip_count].fd_out, NULL, 0) < 0)
@@ -173,7 +175,7 @@ void	ft_handle_redirect(char *str, int *i, t_all *all)
 			g_status_exit_code = errno;
 			exec_error_print(file_name, strerror(errno));
 			ft_memdel(file_name);
-			return ;
+			return (1);
 		}
 	}
 	else if (str[*i] == '<' && str[*i + 1] != '<')
@@ -185,7 +187,7 @@ void	ft_handle_redirect(char *str, int *i, t_all *all)
 			g_status_exit_code = 1;
 			exec_error_print(" ", "ambiguous redirect");
 			all->cmnd[all->pip_count].fd_in = -2;
-			return ;
+			return (1);
 		}
 		all->cmnd[all->pip_count].fd_in = open(file_name, O_RDONLY);
 		if (all->cmnd[all->pip_count].fd_in < 0 || read(all->cmnd[all->pip_count].fd_in, NULL, 0) < 0)
@@ -193,16 +195,19 @@ void	ft_handle_redirect(char *str, int *i, t_all *all)
 			g_status_exit_code = errno;
 			exec_error_print(file_name, strerror(errno));
 			ft_memdel(file_name);
-			return ;
+			return (1);
 		}
 	}
 	else if (str[*i] == '<' && str[*i + 1] == '<')
 	{
 		*i = *i + 2;
-		stop_word = get_file_name(str, i, 2, all);
-		heredoc_stdin_read(all, stop_word);
-		ft_memdel(stop_word);
-		return ;
+		file_name = get_file_name(str, i, 2, all);
+		if (heredoc_stdin_read(all, file_name))
+		{
+			ft_memdel(file_name);
+			return (1);
+		}
 	}
 	ft_memdel(file_name);
+	return(0);
 }

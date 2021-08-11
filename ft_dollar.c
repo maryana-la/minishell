@@ -4,9 +4,11 @@ char	*replace_env_with_value(char *str, int i, t_all *all)
 {
 	int flag;
 	int env;
+	char *tmp;
 
 	flag = 0;
 	env = 0;
+	tmp = NULL;
 	// заменяем переменные только до следующей команды
 	while(str[i] && !(check_set(str[i], "|><")))
 	{
@@ -19,8 +21,15 @@ char	*replace_env_with_value(char *str, int i, t_all *all)
 		}
 		else if(str[i] == '$' && flag == 0)
 		{
-			str = ft_dollar(str, &i, all);
-			env = 1;
+			env++;
+			if (env == 1)
+				str = ft_dollar(str, &i, all);
+			else //to avoid leaks if not first $
+			{
+				tmp = str;
+				str = ft_dollar(str, &i, all);
+				ft_memdel(tmp);
+			}
 		}
 		i++;
 	}

@@ -106,6 +106,12 @@ void	ft_put_str_to_struct(char *arg, t_all *all) //done leaks
 	}
 }
 
+void find_next_cmnd(char *str, int *i)
+{
+	while (str[*i] && str[*i] != '|')
+		(*i)++;
+}
+
 void ft_parser(char *str, t_all *all)
 {
 	int i;
@@ -129,7 +135,10 @@ void ft_parser(char *str, t_all *all)
 	{
 	    skip_spaces(str, &i);
 	    if (str[i] == '>' || str[i] == '<')
-	        ft_handle_redirect(str, &i, all);
+	    {
+	    	if(ft_handle_redirect(str, &i, all))
+	    		find_next_cmnd(str, &i);
+	    }
 	    else if (str[i] == '|')
 	    {
 	        all->pip_count++;
@@ -175,21 +184,17 @@ void ft_parser(char *str, t_all *all)
 	        }
 	        ft_memdel(tmp);
 	    }
-//	    ft_memdel(old_str);
 	}
 	ft_memdel(str);
 	if (all->cmnd->args)
 		launch_commands(all);
 }
 
-void init_all(t_all *all)
+void 	ft_free_commands(t_all *all)
 {
 	int i;
-	int	j;
 
 	i = 0;
-	j = 0;
-
 	if (all->cmnd)
 	{
 		while(all->cmnd[i].args)
@@ -200,10 +205,11 @@ void init_all(t_all *all)
 		free(all->cmnd);
 		all->cmnd = NULL;
 	}
+}
 
-
-//	if (all->cmnd)
-//		all->cmnd = NULL;
+void init_all(t_all *all)
+{
+	ft_free_commands(all);
 	all->num_of_pipes = 0;
 }
 

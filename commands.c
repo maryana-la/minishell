@@ -49,7 +49,7 @@ void start_commands(t_all *all)
 
 void print_and_exit (t_all *all, int err)
 {
-	if (!all->num_of_pipes)
+	if (all->num_of_pipes == 0)
 		ft_putendl_fd("exit", 2);
 	exit(err);
 }
@@ -64,7 +64,7 @@ void exit_command(t_all *all) //no malloc
 	if (i == 1)
 	{
 		ft_free_env(all->env_vars);
-		init_all(all);
+		ft_free_commands(all);
 		print_and_exit(all, 0);
 	}
 	if (i > 2)
@@ -91,16 +91,19 @@ void exit_command(t_all *all) //no malloc
 	if (error_code < 0)
 	{
 		ft_free_env(all->env_vars);
+		ft_free_commands(all);
 		print_and_exit(all,256 + error_code % 256);
 	}
 	else if (error_code < 256)
 	{
 		ft_free_env(all->env_vars);
+		ft_free_commands(all);
 		print_and_exit(all, error_code);
 	}
 	else
 	{
 		ft_free_env(all->env_vars);
+		ft_free_commands(all);
 		print_and_exit(all, error_code % 256);
 	}
 }
@@ -166,6 +169,7 @@ void cd_command(t_all *all)
 	else if (chdir(all->cmnd[all->i].args[1]) == -1) //check if no error with folder
 	{
 		printf("minishell: cd: %s: %s\n", all->cmnd[all->i].args[1], strerror(errno));
+		ft_memdel(all->tmp_cwd);
 		g_status_exit_code = 1;
 		return ;
 	}
@@ -179,7 +183,7 @@ void cd_command(t_all *all)
 		all->env_vars[i].value = ft_strdup(all->tmp_cwd);
 		ft_memdel (tmp);
 	}
-
+	ft_memdel(all->tmp_cwd);
 	getcwd(all->cwd, sizeof(all->cwd));
 	i = -1;
 	while(++i < all->env_counter && ft_strcmp(all->env_vars[i].key, "PWD"));
@@ -189,6 +193,7 @@ void cd_command(t_all *all)
 		all->env_vars[i].value = ft_strdup(all->cwd);
 		ft_memdel (tmp);
 	}
+
 }
 
 void pwd_command (t_all *all)
@@ -223,8 +228,10 @@ void add_new_variable(t_all *all)
 	t_env *tmp;
 	char *temp_key;
 	char *temp_value;
+	char *to_free;
 	int ravno = 0;
 
+	temp_value = NULL;
 
 	if (!ft_isalpha(all->cmnd[all->i].args[all->arg_pos][0]) && (all->cmnd[all->i].args[all->arg_pos][0] != '_'))
 	{
@@ -248,12 +255,13 @@ void add_new_variable(t_all *all)
 		}
 	}
 	temp_key = ft_substr(all->cmnd[all->i].args[all->arg_pos], 0, j);
-	temp_value = ft_substr(all->cmnd[all->i].args[all->arg_pos], j + 1, ft_strlen(all->cmnd[all->i].args[all->arg_pos]) - j + 1);
+	if (ravno != 0)
+		temp_value = ft_substr(all->cmnd[all->i].args[all->arg_pos], j + 1, ft_strlen(all->cmnd[all->i].args[all->arg_pos]) - j + 1);
 
 	i=-1;
 	while(++i < all->env_counter && ft_strcmp(all->env_vars[i].key, temp_key));
 
-	if (i != all->env_counter && temp_value[0] == '\0' && !ravno)
+	if (i != all->env_counter && (ravno == 0))
 	{
 		g_status_exit_code = 0;
 		ft_memdel(temp_key);
@@ -261,8 +269,11 @@ void add_new_variable(t_all *all)
 	}
 	if (i != all->env_counter)
 	{
-		all->env_vars[i].value = temp_value;
+		to_free = all->env_vars[i].value;
+		all->env_vars[i].value = ft_strdup(temp_value);
 		ft_memdel(temp_key);
+		ft_memdel(temp_value);
+		ft_memdel(to_free);
 		g_status_exit_code = 0;
 		return ;
 	}
@@ -278,23 +289,21 @@ void add_new_variable(t_all *all)
 	/*
 	 * повторяется код с тем, что на стр 175, можно сократить
 	 */
-	while (all->cmnd[all->i].args[all->arg_pos][++j])
-	{
-		if (all->cmnd[all->i].args[all->arg_pos][j] == '=')
-			break;
-	}
-	tmp[i].key = ft_substr(all->cmnd[all->i].args[all->arg_pos], 0, j);
-	tmp[i].value = ft_substr(all->cmnd[all->i].args[all->arg_pos], j + 1, ft_strlen(all->cmnd[all->i].args[all->arg_pos]) - j + 1);
+//	while (all->cmnd[all->i].args[all->arg_pos][++j])
+//	{
+//		if (all->cmnd[all->i].args[all->arg_pos][j] == '=')
+//			break;
+//	}
+//	tmp[i].key = ft_substr(all->cmnd[all->i].args[all->arg_pos], 0, j);
+//	tmp[i].value = ft_substr(all->cmnd[all->i].args[all->arg_pos], j + 1, ft_strlen(all->cmnd[all->i].args[all->arg_pos]) - j + 1);
 
-//	tmp[i].key = ft_strdup(temp_key);
-//	tmp[i].value = ft_strdup(temp_value);
-	if ((!tmp[i].value) || (tmp[i].value[0] == '\0' && !ravno))
-	{
-		ft_memdel(tmp[i].value);
+	tmp[i].key = ft_strdup(temp_key);
+	if ((!temp_value) && !ravno)
 		tmp[i].value = ft_strdup("nullvalue");
-	}
-	tmp[i].key_len = ft_strlen(tmp[i].key);
-	tmp[i].value_len = ft_strlen(tmp[i].value);
+	else
+		tmp[i].value = ft_strdup(temp_value);
+//	tmp[i].key_len = ft_strlen(tmp[i].key);
+//	tmp[i].value_len = ft_strlen(tmp[i].value);
 	tmp[i + 1].key = NULL;
 	tmp[i + 1].value = NULL;
 	ft_memdel(all->env_vars);
