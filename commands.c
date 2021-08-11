@@ -53,10 +53,9 @@ void	print_and_exit(t_all *all, int err)
 	exit(err);
 }
 
-void exit_command(t_all *all)
+void	exit_command(t_all *all)
 {
 	int	i;
-	int	error_code;
 
 	i = -1;
 	while (all->cmnd[all->i].args[++i])
@@ -73,6 +72,14 @@ void exit_command(t_all *all)
 		g_status_exit_code = 1;
 		return ;
 	}
+	exit_command_1(all);
+	exit_command_2(all);
+}
+
+void	exit_command_1(t_all *all)
+{
+	int	i;
+
 	i = -1;
 	while (all->cmnd[all->i].args[1][++i])
 	{
@@ -87,6 +94,12 @@ void exit_command(t_all *all)
 			exit (255);
 		}
 	}
+}
+
+void	exit_command_2(t_all *all)
+{
+	int	error_code;
+
 	error_code = ft_atoi(all->cmnd[all->i].args[1]);
 	if (error_code < 0)
 	{
@@ -108,7 +121,7 @@ void exit_command(t_all *all)
 	}
 }
 
-void echo_command(t_all *all) //no malloc
+void echo_command(t_all *all)
 {
 	int	i;
 	int	j;
@@ -132,6 +145,13 @@ void echo_command(t_all *all) //no malloc
 			break ;
 	}
 	i--;
+	echo_command_1(all, i);
+	if (!flag)
+		ft_putstr_fd("\n", 1);
+}
+
+void echo_command_1(t_all *all, int i)
+{
 	while (all->cmnd[all->i].args[++i])
 	{
 		if (all->cmnd[all->i].args[i + 1])
@@ -142,8 +162,11 @@ void echo_command(t_all *all) //no malloc
 		else
 			ft_putstr_fd(all->cmnd[all->i].args[i], 1);
 	}
-	if (!flag)
-		ft_putstr_fd("\n", 1);
+}
+
+void cd_command_1(t_all *all)
+{
+	
 }
 
 void cd_command(t_all *all)

@@ -110,7 +110,7 @@ if [ "$1" == "my" ] || [ "$1" == "all" ]; then
     exec_test 'cat Makefile | grep pr | head -n 5 | hello'
     exec_test 'echo bonjour >>> test'
     exec_test 'echo bonjour > > out'
-    exec_test 'echo bonjour > > out'
+    exec_test 'echo 2 >> out1 > out2'
     exec_test 'echo 2 > out1 >> out2'
     exec_test 'cat < test'
     exec_test 'echo bonjour > $test'
