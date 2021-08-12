@@ -26,8 +26,6 @@ typedef struct s_env
 {
 	char		*key;
 	char		*value;
-	size_t 		key_len;
-	size_t		value_len;
 }				t_env;
 
 typedef struct s_cmnd
