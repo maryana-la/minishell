@@ -1,6 +1,6 @@
 #include "minishell.h"
 
-int	g_status_exit_code = 0;
+int	g_status_exit_code = 0; //todo delete
 
 int	check_set(char c, const char *set)
 {

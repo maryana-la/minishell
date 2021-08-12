@@ -84,7 +84,9 @@ void 	ft_free_commands(t_all *all);
 void	cmd_exec(t_all *all);
 char	*get_data_path(t_all *all);
 void	envs_list_to_array(t_all *all);
-void 	cmd_exec1(t_all *all);
+void 	cmd_exec_child(t_all *all);
+void 	get_exit_status(int wstat);
+void	dup2_if_redirect(t_all *all);
 
 /*
  * 	pipe.c
