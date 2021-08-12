@@ -17,7 +17,7 @@
 #define GREEN "\001\033[32m\002"
 #define RESET   "\001\033[0m\002"
 
-int 	rl_catch_signals;
+extern int 	rl_catch_signals;
 int 	g_status_exit_code;
 
 typedef struct s_env

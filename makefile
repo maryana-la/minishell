@@ -1,15 +1,39 @@
-all:
-#	make -C libft/
-#	rm -rf libft/*.o
+NAME = minishell
 
-#	gcc libft/libft.a -g commands.c errors.c redirects.c main.c preparser.c execve_com.c pipe.c  -lreadline -ominishell -L ~/.brew/Cellar/readline/8.1/lib/ -I ~/.brew/Cellar/readline/8.1/include -L /usr/local/Cellar/readline/8.0.4/lib/ -I /usr/local/Cellar/readline/8.0.4/include
-	gcc -Wall -Wextra -Werror -g commands.c errors.c main.c preparser.c execve_com.c pipe.c redirects.c env_init.c ft_dollar.c libft/libft.a \
-		-lreadline -ominishell -L ~/.brew/Cellar/readline/8.1/lib/ \
-		-I ~/.brew/Cellar/readline/8.1/include
+CC = gcc
+
+CFLAGS = -Wall -Wextra -Werror
+
+SRC :=	commands.c errors.c main.c preparser.c execve_com.c pipe.c redirects.c env_init.c ft_dollar.c
+
+OBJ := ${SRC:.c=.o}
+
+HEADERS = libft/libft.h minishell.h
+
+LIBS = libft/libft.a -lreadline -L ~/.brew/Cellar/readline/8.1/lib/ -I ~/.brew/Cellar/readline/8.1/include
+
+LIBFT = libft/libft.a
+
+%.o : %.c $(HEADERS)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+all: $(NAME)
+
+$(NAME): $(LIBFT) $(OBJ)
+	$(CC) $(CFLAGS) $(LIBS) $(OBJ) -o $(NAME)
+
+$(LIBFT):
+	$(MAKE) -C libft
+
+bonus: all
+
 clean:
-	rm -rf minishell.o
+	rm -fr $(OBJ)
 
 fclean: clean
-	rm -rf minishell
+	make clean -C libft/
+	rm -f $(NAME)
 
 re: fclean all
+
+.PHONY:	all clean fclean re
