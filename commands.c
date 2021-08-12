@@ -150,7 +150,7 @@ void echo_command(t_all *all)
 			j = 0;
 			while (all->cmnd[all->i].args[i][++j] == 'n')
 				;
-			if (j == ft_strlen(all->cmnd[all->i].args[i]))
+			if (j == (int)ft_strlen(all->cmnd[all->i].args[i]))
 				flag = 1;
 			else
 				break ;
