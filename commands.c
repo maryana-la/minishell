@@ -162,10 +162,9 @@ void echo_command(t_all *all)
 		ft_putstr_fd("\n", 1);
 }
 
-
 void cd_command_1(t_all *all)
 {
-	int i;
+	int		i;
 	char	*tmp;
 
 	i = -1;
@@ -240,92 +239,126 @@ void export_command(t_all *all)
 		add_new_variable(all);
 	}
 }
-void add_new_variable(t_all *all)
+
+void add_new_variable_3(t_all *all, char *temp_key, char *temp_value)
 {
 	int		i;
-	int		j;
 	t_env	*tmp;
-	char	*temp_key;
-	char	*temp_value;
-	char	*to_free;
-	int		ravno;
 
-	temp_value = NULL;
-	j = -1;
-	ravno = 0;
+	i = -1;
+	tmp = malloc(sizeof (t_env) * (all->env_counter + 2));
+	while (all->env_vars[++i].key)
+		tmp[i] = all->env_vars[i];
+	tmp[i].key = ft_strdup(temp_key);
+	if ((!temp_value) && !all->ravno)
+		tmp[i].value = ft_strdup("nullvalue");
+	else
+		tmp[i].value = ft_strdup(temp_value);
+	tmp[i + 1].key = NULL;
+	tmp[i + 1].value = NULL;
+	ft_memdel(all->env_vars);
+	all->env_vars = tmp;
+	all->env_counter++;
+	ft_memdel(temp_key);
+	ft_memdel(temp_value);
+	g_status_exit_code = 0;
+}
+
+int add_new_variable_2(t_all *all, char *temp_key, char *temp_value)
+{
+	char	*to_free;
+	int		i;
+
+	i = -1;
+	while (++i < all->env_counter && ft_strcmp(all->env_vars[i].key, temp_key))
+		;
+	if (i != all->env_counter && (all->ravno == 0))
+	{
+		g_status_exit_code = 0;
+		ft_memdel(temp_key);
+		return (-1);
+	}
+	if (i != all->env_counter)
+	{
+		to_free = all->env_vars[i].value;
+		all->env_vars[i].value = ft_strdup(temp_value);
+		ft_memdel(temp_key);
+		ft_memdel(temp_value);
+		ft_memdel(to_free);
+		g_status_exit_code = 0;
+		return (-1);
+	}
+	return (1);
+}
+
+int add_new_variable_1(t_all *all)
+{
 	if (!ft_isalpha(all->cmnd[all->i].args[all->arg_pos][0]) && \
 	(all->cmnd[all->i].args[all->arg_pos][0] != '_'))
 	{
 		error_handler(all->cmnd[all->i].args[all->arg_pos], 1);
 		g_status_exit_code = 1;
-		return ;
+		return (-1);
 	}
-	while (all->cmnd[all->i].args[all->arg_pos][++j])
+	return (1);
+}
+
+int add_new_variable_4(t_all *all, int *i)
+{
+	*i = -1;
+	while (all->cmnd[all->i].args[all->arg_pos][++(*i)])
 	{
-		if (all->cmnd[all->i].args[all->arg_pos][j] == '=')
+		if (all->cmnd[all->i].args[all->arg_pos][*i] == '=')
 		{
-			ravno = 1;
+			all->ravno = 1;
 			break ;
 		}
-		else if (!ft_isalnum(all->cmnd[all->i].args[all->arg_pos][j]) \
+		else if (!ft_isalnum(all->cmnd[all->i].args[all->arg_pos][*i]) \
 		&& (all->cmnd[all->i].args[all->arg_pos][0] != '_'))
 		{
 			error_handler(all->cmnd[all->i].args[all->arg_pos], 1);
 			g_status_exit_code = 1;
-			return ;
+			return (-1);
 		}
 	}
-	temp_key = ft_substr(all->cmnd[all->i].args[all->arg_pos], 0, j);
-	if (ravno != 0)
-		temp_value = ft_substr(all->cmnd[all->i].args[all->arg_pos], j + 1, \
-		ft_strlen(all->cmnd[all->i].args[all->arg_pos]) - j + 1);
-							   i = -1;
-		while (++i < all->env_counter && ft_strcmp(all->env_vars[i].key, temp_key))
-		{
-		}
-		if (i != all->env_counter && (ravno == 0))
-		{
-			g_status_exit_code = 0;
-			ft_memdel(temp_key);
-			return ;
-		}
-		if (i != all->env_counter)
-		{
-			to_free = all->env_vars[i].value;
-			all->env_vars[i].value = ft_strdup(temp_value);
-			ft_memdel(temp_key);
-			ft_memdel(temp_value);
-			ft_memdel(to_free);
-			g_status_exit_code = 0;
-			return ;
-		}
-		i = -1;
-		j = -1;
-		tmp = malloc(sizeof (t_env) * (all->env_counter + 2));
-		while (all->env_vars[++i].key)
-			tmp[i] = all->env_vars[i];
-		tmp[i].key = ft_strdup(temp_key);
-		if ((!temp_value) && !ravno)
-			tmp[i].value = ft_strdup("nullvalue");
-		else
-			tmp[i].value = ft_strdup(temp_value);
-		tmp[i + 1].key = NULL;
-		tmp[i + 1].value = NULL;
-		ft_memdel(all->env_vars);
-		all->env_vars = tmp;
-		all->env_counter++;
-		ft_memdel(temp_key);
-		ft_memdel(temp_value);
-		g_status_exit_code = 0;
+	return (1);
 }
 
+void add_new_variable(t_all *all)
+{
+	int		i;
+	char	*temp_key;
+	char	*temp_value;
+
+	if (add_new_variable_1(all) == -1)
+		return ;
+	all->ravno = 0;
+	if (add_new_variable_4(all, &i) == -1)
+		return ;
+	temp_key = ft_substr(all->cmnd[all->i].args[all->arg_pos], 0, i);
+	temp_value = NULL;
+	if (all->ravno != 0)
+		temp_value = ft_substr(all->cmnd[all->i].args[all->arg_pos], i + 1, \
+		ft_strlen(all->cmnd[all->i].args[all->arg_pos]) - i + 1);
+	if (add_new_variable_2(all, temp_key, temp_value) == -1)
+		return ;
+	add_new_variable_3(all, temp_key, temp_value);
+}
+
+void sort_envs_1(t_all *all, int i)
+{
+	t_env	tmp;
+
+	tmp = all->env_sorted[i];
+	all->env_sorted[i] = all->env_sorted[i + 1];
+	all->env_sorted[i + 1] = tmp;
+}
 
 void sort_envs(t_all *all)
 {
 	int		i;
 	int		z;
 	int		j;
-	t_env	tmp;
 
 	i = -1;
 	z = -1;
@@ -341,13 +374,23 @@ void sort_envs(t_all *all)
 			while (all->env_sorted[i].key[j] == all->env_sorted[i + 1].key[j])
 				j++;
 			if (all->env_sorted[i].key[j] > all->env_sorted[i + 1].key[j])
-			{
-				tmp = all->env_sorted[i];
-				all->env_sorted[i] = all->env_sorted[i + 1];
-				all->env_sorted[i + 1] = tmp;
-			}
+				sort_envs_1(all, i);
 		}
 	}
+}
+
+void print_env_list_1(t_env *for_print, int i)
+{
+	write (1, "declare -x ", 11);
+	write(1, for_print[i].key, ft_strlen(for_print[i].key));
+	if (ft_strcmp(for_print[i].value, "nullvalue"))
+	{
+		write(1, "=", 1);
+		write(1, "\"", 1);
+		write(1, for_print[i].value, ft_strlen(for_print[i].value));
+		write(1, "\"", 1);
+	}
+	write(1, "\n", 1);
 }
 
 void print_env_list(t_env *for_print, int declare, int num_of_vars)
@@ -358,18 +401,7 @@ void print_env_list(t_env *for_print, int declare, int num_of_vars)
 	while (i < num_of_vars && for_print[i].key && for_print[i].key[0] != '\0')
 	{
 		if (declare)
-		{
-			write (1, "declare -x ", 11);
-			write(1, for_print[i].key, ft_strlen(for_print[i].key));
-			if (ft_strcmp(for_print[i].value, "nullvalue"))
-			{
-				write(1, "=", 1);
-				write(1, "\"", 1);
-				write(1, for_print[i].value, ft_strlen(for_print[i].value));
-				write(1, "\"", 1);
-			}
-			write(1, "\n", 1);
-		}
+			print_env_list_1(for_print, i);
 		else
 		{
 			if (ft_strcmp(for_print[i].value, "nullvalue"))
@@ -384,6 +416,30 @@ void print_env_list(t_env *for_print, int declare, int num_of_vars)
 	}
 }
 
+int unset_command_1(t_all *all, int j)
+{
+	if (!ft_isalpha(all->cmnd[all->i].args[j][0]) && \
+	(all->cmnd[all->i].args[j][0] != '_'))
+	{
+		error_handler(all->cmnd[all->i].args[j], 2);
+		all->arg_pos = j;
+		g_status_exit_code = 1;
+		return (-1);
+	}
+	return (1);
+}
+
+void unset_command_2(t_all *all, int i)
+{
+	ft_memdel(all->env_vars[i].key);
+	ft_memdel(all->env_vars[i].value);
+	while (i < all->env_counter)
+	{
+		all->env_vars[i] = all->env_vars[i + 1];
+		i++;
+	}
+}
+
 void unset_command(t_all *all)
 {
 	int	i;
@@ -393,24 +449,14 @@ void unset_command(t_all *all)
 	while (all->cmnd[all->i].args[++j])
 	{
 		i = -1;
-		if (!ft_isalpha(all->cmnd[all->i].args[j][0]) && \
-			(all->cmnd[all->i].args[j][0] != '_'))
-		{
-			error_handler(all->cmnd[all->i].args[j], 2);
-			all->arg_pos = j;
-			g_status_exit_code = 1;
+		if (unset_command_1(all, j) == -1)
 			return ;
-		}
 		while (++i < all->env_counter && \
 			ft_strcmp(all->env_vars[i].key, all->cmnd[all->i].args[j]))
 			;
 		if (i != all->env_counter)
 		{
-			while (i < all->env_counter)
-			{
-				all->env_vars[i] = all->env_vars[i + 1];
-				i++;
-			}
+			unset_command_2(all, i);
 			--all->env_counter;
 			continue ;
 		}

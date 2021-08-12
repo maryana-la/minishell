@@ -51,6 +51,7 @@ typedef struct s_all
 	int 	fd[2];
 	int 	fd_std[2];
 	int 	fd_tmp;
+	int 	ravno;
 }				t_all;
 
 
@@ -125,6 +126,8 @@ void echo_command(t_all *all);
 void exit_command(t_all *all);
 void error_handler(char *arg, int errorcode);
 void sig_handler(int sig_id);
+void	exit_command_1(t_all *all);
+void	exit_command_2(t_all *all);
 
 void print_and_exit (t_all *all, int err);
 
