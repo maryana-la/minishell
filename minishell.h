@@ -51,6 +51,7 @@ typedef struct s_all
 	int 	fd[2];
 	int 	fd_std[2];
 	int 	fd_tmp;
+	int 	ravno;
 }				t_all;
 
 
