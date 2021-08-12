@@ -65,11 +65,11 @@ int check_tokens(char *str, int *i, char token);
 */
 
 int take_input(t_all *all, char** str);
-int check_set(char c, char *set);
-void skip_spaces(char *str, int *i);
+int check_set(char c, const char *set);
+void skip_spaces(const char *str, int *i);
 char *ft_dollar(char *str, int *i, t_all *all);
 char	*replace_env_with_value(char *str, int i, t_all *all);
-void	ft_parser(char *str, t_all *all);
+void	parse_and_exec(char *str, t_all *all);
 void	env_init(t_all *all, char **env);
 void	init_all(t_all *all);
 void	start_commands(t_all *all);
