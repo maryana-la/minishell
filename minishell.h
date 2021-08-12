@@ -77,6 +77,7 @@ void	start_commands(t_all *all);
 int		get_arg_len(char *str, int i);
 void	ft_memdel_double(char **arr);
 void 	ft_free_commands(t_all *all);
+void	get_argument(const char *str, int *i, char *tmp, int *j);
 
 /*
  *  execve_com.c
