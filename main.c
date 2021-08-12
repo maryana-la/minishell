@@ -248,13 +248,10 @@ int main(int argc, char **argv, char **env)
 	all.fd_std[0] = dup(0);
 	all.fd_std[1] = dup(1);
 
-//	dup2(2, 1);
-
 	if (signal(SIGINT, sig_handler) == SIG_ERR)
 		printf("Signal init error\n");
 	if (signal(SIGQUIT, sig_handler) == SIG_ERR)
 		printf("Signal init error\n");
-
 
 	char *str;
 	while (1)

@@ -154,6 +154,7 @@ if [ "$1" == "my" ] || [ "$1" == "all" ]; then
     exec_test 'pwd a b c d'
     exec_test 'export LOL=lala ROR=rara'
     exec_test 'unset LOL ROR'
+    exec_test 'unset PWD OLDPWD'
     exec_test 'export "HI= hi"'
     exec_test 'export "HI =hi"'
     exec_test '/bin/ls'
