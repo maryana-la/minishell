@@ -1,39 +1,16 @@
-#include "minishell.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   minishell                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jjacquel <jjacquel@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/11/02 23:20:33 by jjacquel          #+#    #+#             */
+/*   Updated: 2021/07/07 23:39:40 by quadify          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-void	get_exit_status(int wstat)
-{
-	int	exit_code;
-
-	if (WIFEXITED(wstat))
-	{
-		exit_code = WEXITSTATUS(wstat);
-		if (exit_code != 0)
-		{
-			if (exit_code == 13)
-				g_status_exit_code = 126;
-			else if (exit_code == 14)
-				g_status_exit_code = 127;
-			else
-				g_status_exit_code = exit_code;
-		}
-		else
-			g_status_exit_code = 0;
-	}
-}
-
-void	dup2_if_redirect(t_all *all)
-{
-	if (all->cmnd[all->i].fd_in > STDIN_FILENO)
-	{
-		dup2(all->cmnd[all->i].fd_in, STDIN_FILENO);
-		close(all->cmnd[all->i].fd_in);
-	}
-	if (all->cmnd[all->i].fd_out > STDOUT_FILENO)
-	{
-		dup2(all->cmnd[all->i].fd_out, STDOUT_FILENO);
-		close(all->cmnd[all->i].fd_out);
-	}
-}
+#include "../minishell.h"
 
 /*
  * 	execution for multi pipes

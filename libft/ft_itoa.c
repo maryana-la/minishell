@@ -25,7 +25,7 @@ static int	ft_lenght(unsigned int n)
 	return (i + 1);
 }
 
-int	znak	(int n)
+int	znak(int n)
 {
 	int	num;
 
@@ -36,7 +36,7 @@ int	znak	(int n)
 	return (num);
 }
 
-char	*malloc_chr (unsigned int dlina, int n)
+char	*malloc_chr(unsigned int dlina, int n)
 {
 	char	*chr;
 
