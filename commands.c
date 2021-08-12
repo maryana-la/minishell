@@ -2,16 +2,8 @@
 
 void	buitin_commands(t_all *all)
 {
-	if (all->cmnd[all->i].fd_in > STDIN_FILENO)
-	{
-		dup2(all->cmnd[all->i].fd_in, STDIN_FILENO);
-		close(all->cmnd[all->i].fd_in);
-	}
-	if (all->cmnd[all->i].fd_out > STDOUT_FILENO)
-	{
-		dup2(all->cmnd[all->i].fd_out, STDOUT_FILENO);
-		close(all->cmnd[all->i].fd_out);
-	}
+	if (all->pip_count == 0)
+		dup2_if_redirect(all);
 	if (!ft_strncmp(all->cmnd[all->i].args[0], "pwd", 4))
 		pwd_command(all);
 	else if (!ft_strncmp(all->cmnd[all->i].args[0], "env", 4))
@@ -43,7 +35,13 @@ void	start_commands(t_all *all)
 	if (is_builtin(all->cmnd[all->i].args[0]))
 		buitin_commands(all);
 	else
-		cmd_exec(all);
+	{
+		if (all->pip_count == 0)
+			cmd_exec(all);
+		else
+			cmd_exec_child(all);
+	}
+
 }
 
 void	print_and_exit(t_all *all, int err)
