@@ -121,6 +121,8 @@ void	get_all_args(t_all *all, char *str, int *i)
 
 	len = get_arg_len(str, *i);
 	tmp = ft_calloc((len + 2), sizeof (char));
+	if (!tmp)
+		return ;
 	j = 0;
 	while (str[*i] && !check_set(str[*i], " \t|;<>"))
 	{
