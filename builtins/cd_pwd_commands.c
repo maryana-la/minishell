@@ -12,6 +12,12 @@
 
 #include "../minishell.h"
 
+void	cd_command_2(t_all *all)
+{
+	ft_memdel(all->tmp_cwd);
+	getcwd(all->cwd, sizeof(all->cwd));
+}
+
 void	cd_command_1(t_all *all)
 {
 	int		i;
@@ -19,16 +25,17 @@ void	cd_command_1(t_all *all)
 
 	i = -1;
 	while (++i < all->env_counter && ft_strcmp(all->env_vars[i].key, "OLDPWD"))
-	{
-	}
+		;
 	if (i != all->env_counter)
 	{
 		tmp = all->env_vars[i].value;
-		all->env_vars[i].value = ft_strdup(all->tmp_cwd);
-		ft_memdel (tmp);
+		if (all->tmp_cwd)
+		{
+			all->env_vars[i].value = ft_strdup(all->tmp_cwd);
+			ft_memdel (tmp);
+		}
 	}
-	ft_memdel(all->tmp_cwd);
-	getcwd(all->cwd, sizeof(all->cwd));
+	cd_command_2(all);
 	i = -1;
 	while (++i < all->env_counter && ft_strcmp(all->env_vars[i].key, "PWD"))
 		;
@@ -56,7 +63,7 @@ void	cd_command(t_all *all)
 			chdir(all->env_vars[i].value);
 		}
 	}
-	else if (chdir(all->cmnd[all->i].args[1]) == -1)
+	else if ((chdir(all->cmnd[all->i].args[1])) == -1)
 	{
 		printf("minishell: cd: %s: %s\n", \
 			all->cmnd[all->i].args[1], strerror(errno));
