@@ -41,28 +41,6 @@ int	main(int argc, char **argv, char **env)
 	return (0);
 }
 
-int	take_input(t_all *all, char **str)
-{
-	char	*buf;
-
-	rl_catch_signals = 0;
-	buf = readline(GREEN "minishell> " RESET);
-	if (!buf)
-		print_and_exit(all, 0);
-	if (ft_strlen(buf) != 0)
-	{
-		add_history(buf);
-		*str = ft_strdup(buf);
-		buf = ft_memdel(buf);
-		return (0);
-	}
-	else
-	{
-		buf = ft_memdel(buf);
-		return (1);
-	}
-}
-
 void	ft_free_commands(t_all *all)
 {
 	int	i;
@@ -84,4 +62,40 @@ void	init_all(t_all *all)
 {
 	ft_free_commands(all);
 	all->num_of_pipes = 0;
+}
+
+int	not_empty_line(char *str)
+{
+	size_t	i;
+
+	i = 0;
+	if (!str)
+		return (0);
+	while (str[i] && (str[i] == ' ' || str[i] == '\t'))
+		i++;
+	if (i < ft_strlen(str))
+		return (1);
+	return (0);
+}
+
+int	take_input(t_all *all, char **str)
+{
+	char	*buf;
+
+	rl_catch_signals = 0;
+	buf = readline(GREEN "minishell> " RESET);
+	if (!buf)
+		print_and_exit(all, 0);
+	if (ft_strlen(buf) != 0 && not_empty_line(buf))
+	{
+		add_history(buf);
+		*str = ft_strdup(buf);
+		buf = ft_memdel(buf);
+		return (0);
+	}
+	else
+	{
+		buf = ft_memdel(buf);
+		return (1);
+	}
 }
