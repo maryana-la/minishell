@@ -6,7 +6,7 @@
 /*   By: jjacquel <jjacquel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/13 16:09:07 by jjacquel          #+#    #+#             */
-/*   Updated: 2020/11/13 16:21:37 by jjacquel         ###   ########.fr       */
+/*   Updated: 2021/07/07 23:39:40 by quadify          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,8 @@ t_list	*ft_lstmap(t_list *lst, void *(*f)(void *), void (*del)(void *))
 	t_list	*l;
 	t_list	*st;
 
-	if (!lst || !(l = ft_lstnew(f(lst->content))))
+	l = ft_lstnew(f(lst->content));
+	if (!lst || !l)
 		return (NULL);
 	st = l;
 	while (lst->next)

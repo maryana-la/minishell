@@ -6,7 +6,7 @@
 /*   By: jjacquel <jjacquel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/07 20:27:19 by jjacquel          #+#    #+#             */
-/*   Updated: 2020/11/10 15:44:48 by jjacquel         ###   ########.fr       */
+/*   Updated: 2021/07/07 23:39:40 by quadify          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 void	ft_putnbr_fd(int n, int fd)
 {
-	unsigned	t;
+	unsigned int	t;
 
 	t = 0;
 	if (n < 0)

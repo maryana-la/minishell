@@ -6,7 +6,7 @@
 /*   By: jjacquel <jjacquel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/07 17:44:26 by jjacquel          #+#    #+#             */
-/*   Updated: 2020/11/10 12:23:50 by jjacquel         ###   ########.fr       */
+/*   Updated: 2021/07/07 23:39:40 by quadify          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ char	*ft_strmapi(char const *s, char (*f)(unsigned int, char))
 
 	if (!s)
 		return (NULL);
-	temp = (char*)malloc(sizeof(char) * (ft_strlen(s) + 1));
+	temp = (char *)malloc(sizeof(char) * (ft_strlen(s) + 1));
 	if (temp == NULL)
 		return (NULL);
 	i = 0;

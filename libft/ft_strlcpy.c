@@ -6,7 +6,7 @@
 /*   By: jjacquel <jjacquel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/29 13:17:30 by jjacquel          #+#    #+#             */
-/*   Updated: 2020/11/06 15:08:23 by jjacquel         ###   ########.fr       */
+/*   Updated: 2021/07/07 23:39:40 by quadify          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,9 @@
 
 size_t	ft_strlcpy(char *dst, const char *src, size_t size)
 {
-	unsigned	i;
+	unsigned int	i;
 
-	if (dst[0] == '\0' || src[0] == '\0')
+	if (dst == '\0' || src == '\0')
 		return (0);
 	i = 0;
 	while (src[i])

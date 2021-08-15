@@ -6,7 +6,7 @@
 /*   By: jjacquel <jjacquel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/07 16:07:40 by jjacquel          #+#    #+#             */
-/*   Updated: 2020/11/22 19:04:32 by jjacquel         ###   ########.fr       */
+/*   Updated: 2021/07/07 23:39:40 by quadify          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,28 @@ static int	ft_lenght(unsigned int n)
 	return (i + 1);
 }
 
+int	znak(int n)
+{
+	int	num;
+
+	if (n < 0)
+		num = -n;
+	else
+		num = n;
+	return (num);
+}
+
+char	*malloc_chr(unsigned int dlina, int n)
+{
+	char	*chr;
+
+	if (n < 0)
+		chr = (char *)malloc(sizeof(char) * dlina + 2);
+	else
+		chr = (char *)malloc(sizeof(char) * dlina + 1);
+	return (chr);
+}
+
 char	*ft_itoa(int n)
 {
 	char			*chr;
@@ -32,11 +54,10 @@ char	*ft_itoa(int n)
 	unsigned int	num;
 	unsigned int	i;
 
-	num = (n < 0 ? -n : n);
+	num = znak(n);
 	dlina = ft_lenght(num);
+	chr = malloc_chr(dlina, n);
 	i = 0;
-	if (!(chr = (char *)malloc(sizeof(char) * dlina + 1 + (n < 0 ? 1 : 0))))
-		return (NULL);
 	if (n < 0)
 	{
 		chr[i] = '-';
@@ -53,5 +74,3 @@ char	*ft_itoa(int n)
 	chr[dlina] = '\0';
 	return (chr);
 }
-
-

@@ -6,7 +6,7 @@
 /*   By: jjacquel <jjacquel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/06 19:21:41 by jjacquel          #+#    #+#             */
-/*   Updated: 2020/11/13 14:06:49 by jjacquel         ###   ########.fr       */
+/*   Updated: 2021/07/07 23:39:40 by quadify          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ char	*ft_substr(char const *s, unsigned int start, size_t len)
 	size_t		dlina;
 	char		*temp;
 
-	if (s[0] == '\0')
+	if (s == '\0')
 		return (NULL);
 	i = 0;
 	temp = (char *)malloc((len + 1) * sizeof(char));
