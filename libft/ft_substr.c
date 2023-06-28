@@ -18,7 +18,7 @@ char	*ft_substr(char const *s, unsigned int start, size_t len)
 	size_t		dlina;
 	char		*temp;
 
-	if (s == '\0')
+	if (s == NULL)
 		return (NULL);
 	i = 0;
 	temp = (char *)malloc((len + 1) * sizeof(char));

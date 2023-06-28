@@ -1,19 +1,11 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    Makefile                                           :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: jjacquel <jjacquel@student.42.fr>          +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2020/11/11 10:35:24 by jjacquel          #+#    #+#              #
-#    Updated: 2021/07/07 23:39:40 by quadify          ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
-
-
 NAME	= libft.a
-CFLAGS  = -g
+
+CC = gcc  
+
+CFLAGS  = -Wall -Wextra -Werror -g
+
 RM		= rm -f
+
 SRCS	=	ft_isalnum.c ft_isprint.c ft_memcmp.c  ft_putchar_fd.c ft_split.c \
 					ft_strlcat.c ft_strncmp.c ft_substr.c ft_atoi.c ft_isalpha.c \
 					ft_itoa.c ft_memcpy.c  ft_putendl_fd.c ft_strchr.c  ft_strlcpy.c \
@@ -25,7 +17,6 @@ SRCS	=	ft_isalnum.c ft_isprint.c ft_memcmp.c  ft_putchar_fd.c ft_split.c \
 OBJ	= $(SRCS:.c=.o)
 
 BONUS	=  ft_lstmap.c ft_lstiter.c	ft_lstclear.c   ft_lstdelone.c  ft_lstadd_back.c  ft_lstlast.c ft_lstnew.c ft_lstadd_front.c ft_lstsize.c
-
 BONUS_OBJS	= $(BONUS:.c=.o)
 
 %.o : %.c libft.h
@@ -34,18 +25,18 @@ BONUS_OBJS	= $(BONUS:.c=.o)
 all:	$(NAME)
 
 $(NAME):$(OBJ)
-		ar rc $(NAME) $(OBJ) libft.h
+		@ar rc $(NAME) $(OBJ)
 
 clean:
 		@$(RM) $(OBJ) $(BONUS_OBJS)
 
 fclean:	clean
-		$(RM) $(NAME)
+		@$(RM) $(NAME)
 
 re:		fclean $(NAME)
 
 bonus:	$(OBJ) $(BONUS_OBJS)
-		ar rc $(NAME) $(OBJ) $(BONUS_OBJS) libft.h
+		@ar rc $(NAME) $(OBJ) $(BONUS_OBJS)
 
 .PHONY:	all clean fclean re bonus
 

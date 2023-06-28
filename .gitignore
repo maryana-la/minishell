@@ -1,8 +1,0 @@
-minishell.dSYM/
-.idea/
-minishell
-libft/libft.a
-msh_tester/msh_log
-msh_tester/README.md
-msh_tester/test.sh
-msh_tester/test.shtmp_file
